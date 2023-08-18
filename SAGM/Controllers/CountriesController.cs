@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using SAGM.Data;
 using SAGM.Data.Entities;
+using SAGM.Models;
 
 namespace SAGM.Controllers
 {
@@ -22,9 +23,10 @@ namespace SAGM.Controllers
         // GET: Countries
         public async Task<IActionResult> Index()
         {
-              return _context.Countries != null ? 
-                          View(await _context.Countries.ToListAsync()) :
-                          Problem("Entity set 'SAGMContext.Countries'  is null.");
+            
+            return View(await _context.Countries
+                .Include(c => c.States.OrderBy(s => s.StateName))
+                .ToListAsync());
         }
 
         // GET: Countries/Details/5
@@ -36,6 +38,7 @@ namespace SAGM.Controllers
             }
 
             var country = await _context.Countries
+                .Include(c => c.States)
                 .FirstOrDefaultAsync(m => m.CountryId == id);
             if (country == null)
             {
@@ -45,19 +48,19 @@ namespace SAGM.Controllers
             return View(country);
         }
 
-        // GET: Countries/Create
         public IActionResult Create()
         {
+            Country country = new() { States = new List<State>() };
             return View();
         }
 
-        // POST: Countries/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(Country country)
         {
+            
+            
             if (ModelState.IsValid)
             {
                 try
@@ -83,8 +86,67 @@ namespace SAGM.Controllers
             }
             return View(country);
         }
+        public async Task<IActionResult> AddState(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
 
-        // GET: Countries/Edit/5
+            Country country = await _context.Countries.FindAsync(id);
+            if (country == null)
+            {
+                return NotFound();
+            }
+            StateViewModel statemodel = new()
+            {
+                CountryId = country.CountryId
+            };
+
+            return View(statemodel);
+        }
+
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AddState(StateViewModel statemodel)
+        {
+
+
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    State state = new()
+                    {
+                        Cities = new List<City>(),
+                        Country = await _context.Countries.FindAsync(statemodel.CountryId),
+                        StateName = statemodel.StateName,
+
+                    };
+                    _context.Add(state);
+                    await _context.SaveChangesAsync();
+                    return RedirectToAction(nameof(Details), new { Id = statemodel.CountryId });
+                }
+                catch (DbUpdateException dbUpdateException)
+                {
+                    if (dbUpdateException.InnerException.Message.Contains("duplicate"))
+                    {
+                        ModelState.AddModelError(string.Empty, "Ya existe un estado con el mismo nombre en este país");
+                    }
+                    else
+                    {
+                        ModelState.AddModelError(string.Empty, dbUpdateException.InnerException.Message);
+                    }
+                }
+                catch (Exception exception)
+                {
+                    ModelState.AddModelError(string.Empty, exception.Message);
+                }
+            }
+            return View(statemodel);
+        }
+
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null || _context.Countries == null)
@@ -100,12 +162,10 @@ namespace SAGM.Controllers
             return View(country);
         }
 
-        // POST: Countries/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("CountryId,CountryName")] Country country)
+        public async Task<IActionResult> Edit(int id,  Country country)
         {
             if (id != country.CountryId)
             {
@@ -154,6 +214,87 @@ namespace SAGM.Controllers
             return View(country);
         }
 
+        public async Task<IActionResult> EditState(int? id)
+        {
+            if (id == null )
+            {
+                return NotFound();
+            }
+
+            var state = await _context.States
+                .Include(s => s.Country)  
+                .FirstOrDefaultAsync(s => s.StateId == id);
+            if (state == null)
+            {
+                return NotFound();
+            }
+
+            StateViewModel stateViewModel = new()
+            {
+                CountryId = state.Country.CountryId,
+                StateId = state.StateId,
+                StateName = state.StateName,
+            };
+            return View(stateViewModel);
+        }
+
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> EditState(int id, StateViewModel model)
+        {
+            if (id != model.StateId )
+            {
+                return NotFound();
+            }
+
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    try
+                    {
+                        State state = new()
+                        {
+                            StateId = model.StateId,
+                            StateName = model.StateName
+                        };
+                        _context.Update(state);
+                        await _context.SaveChangesAsync();
+                        return RedirectToAction(nameof(Index));
+                    }
+                    catch (DbUpdateException dbUpdateException)
+                    {
+                        if (dbUpdateException.InnerException.Message.Contains("duplicate"))
+                        {
+                            ModelState.AddModelError(string.Empty, "Ya existe un estado con el mismo nombre");
+                        }
+                        else
+                        {
+                            ModelState.AddModelError(string.Empty, dbUpdateException.InnerException.Message);
+                        }
+                    }
+                    catch (Exception exception)
+                    {
+                        ModelState.AddModelError(string.Empty, exception.Message);
+                    }
+                }
+                catch (DbUpdateConcurrencyException)
+                {
+                    if (!StateExists(model.StateId))
+                    {
+                        return NotFound();
+                    }
+                    else
+                    {
+                        throw;
+                    }
+                }
+
+            }
+            return View(model);
+        }
+
         // GET: Countries/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
@@ -163,6 +304,7 @@ namespace SAGM.Controllers
             }
 
             var country = await _context.Countries
+                .Include(c => c.States)  
                 .FirstOrDefaultAsync(m => m.CountryId == id);
             if (country == null)
             {
@@ -194,6 +336,11 @@ namespace SAGM.Controllers
         private bool CountryExists(int id)
         {
           return (_context.Countries?.Any(e => e.CountryId == id)).GetValueOrDefault();
+        }
+
+        private bool StateExists(int id)
+        {
+            return (_context.States?.Any(e => e.StateId == id)).GetValueOrDefault();
         }
     }
 }

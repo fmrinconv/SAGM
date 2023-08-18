@@ -1,0 +1,44 @@
+﻿@model SAGM.Models.StateViewModel
+
+@{
+    ViewData["Title"] = "Editar Estado";
+}
+
+<h1>Editar</h1>
+
+<h4>Estado</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="EditState">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input type="hidden" asp-for="CountryId" />
+            <input type="hidden" asp-for="StateId" />
+            <div class="form-group">
+                <label asp-for="StateName" class="control-label"></label>
+                <input asp-for="StateName" class="form-control" id="statename" />
+                <span asp-validation-for="StateName" class="text-danger"></span>
+            </div>
+            <div class="form-group mt-2">
+                <input type="submit" value="Guardar" class="btn btn-outline-warning" />
+                <a asp-action="Details" asp-route-id="@Model.CountryId" class="btn btn-outline-success">Regresar</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script>
+        //script para tener el foco sobre el campo inicial
+        $(document).ready(function () {
+            $("#statename").focus();
+            var tmpStr = $("#statename").val();
+            $("#statename").val('');
+            $("#statename").val(tmpStr);
+        })
+    </script>
+}

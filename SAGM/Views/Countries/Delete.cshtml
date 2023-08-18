@@ -17,11 +17,26 @@
         <dd class = "col-sm-10">
             @Html.DisplayFor(model => model.CountryName)
         </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.StatesNumber)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.StatesNumber)
+        </dd>
     </dl>
     
     <form asp-action="Delete">
         <input type="hidden" asp-for="CountryId" />
         <input type="submit" value="Eliminar" class="btn btn-outline-danger" />
-        <a asp-action="Index" class="btn btn-outline-success">Regresar</a>
+        <a asp-action="Index" class="btn btn-outline-success" id="btnRegresar">Regresar</a>
     </form>
 </div>
+
+@section Scripts {
+    <script>
+        //script para tener el foco sobre el campo inicial
+        $(document).ready(function () {
+            $("#btnRegresar").focus();
+        })
+    </script>
+}
