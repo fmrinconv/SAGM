@@ -61,7 +61,7 @@ namespace SAGM.Helpers
 
         public async Task<SignInResult> LoginAsync(LoginViewModel model)
         {
-            return await _signInManager.PasswordSignInAsync(model.Username, model.Password, model.RememberMe, false)
+            return await _signInManager.PasswordSignInAsync(model.Username, model.Password, model.RememberMe, false);
         }
 
         public async Task LogoutAsync()
