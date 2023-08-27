@@ -1,9 +1,11 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using SAGM.Data.Entities;
 
 namespace SAGM.Data
 {
-    public class SAGMContext : DbContext
+    public class SAGMContext : IdentityDbContext<User>
     {
         public SAGMContext(DbContextOptions<SAGMContext> options) : base(options) 
         { 

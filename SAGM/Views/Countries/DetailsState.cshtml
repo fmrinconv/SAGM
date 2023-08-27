@@ -1,0 +1,113 @@
+﻿@model SAGM.Data.Entities.State
+
+@{
+    ViewData["Title"] = "Details";
+}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.0/css/bootstrap.min.css" />
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css" />
+<link rel="stylesheet" href="https://cdn.datatables.net/responsive/2.5.0/css/responsive.bootstrap5.min.css" />
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css" />
+<link href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" />
+<style>
+
+    a.firstlevel {
+        width: 80px;
+    }
+</style>
+<h1>Detalles</h1>
+
+<div>
+    <h4>Estado</h4>
+    <hr />
+    <dl class="row">
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.StateName)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.StateName)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.CitiesNumber)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.CitiesNumber)
+        </dd>
+    </dl>
+</div>
+<div>
+    <a asp-action="AddCity" asp-route-id="@Model.StateId" class="btn btn-outline-primary firstlevel">+Ciudad</a>
+    <a asp-action="EditState" asp-route-id="@Model?.StateId" class="btn btn-outline-warning firstlevel">Editar</a>
+    <a asp-action="Details" asp-route-id="@Model.Country.CountryId" class="btn btn-outline-success firstlevel">Regresar</a>
+</div>
+<div>
+    <hr />
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h3 class="panel-title">Ciudades</h3>
+            </div>
+            <div class="panel-body">
+                <table class="table-hover table-responsive compact row-border" id="TableStates" style="font-size:small;">
+
+                    <thead>
+                        <tr>
+                            <th>
+                                @Html.DisplayNameFor(model => model.Cities.FirstOrDefault().CityName)
+                            </th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model.Cities)
+                        {
+                            <tr>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.CityName)
+                                </td>
+                                <td>
+                                    <a asp-action="EditCity" asp-route-id="@item.CityId" class="btn btn-sm btn-outline-warning" data-toggle='tooltip' title='Editar'><i class="fa fa-pencil"></i></a>
+                                    <a asp-action="DetailsCity" asp-route-id="@item.CityId" class="btn btn-sm btn-outline-info" data-toggle='tooltip' title='Detalles'><i class="fa fa-info-circle"></i></a>
+                                    <a asp-action="DeleteCity" asp-route-id="@item.CityId" class="btn btn-sm btn-outline-danger" data-toggle='tooltip' title='Eliminar'><i class="fa fa-trash"></i></a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts{
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script src="//code.jquery.com/jquery-3.7.0.js"></script>
+    <script src="//cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <script src="//cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+    <script src="//cdn.datatables.net/responsive/2.5.0/js/dataTables.responsive.min.js"></script>
+    <script src="//cdn.datatables.net/responsive/2.5.0/js/responsive.bootstrap5.min.js"></script>
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $('#TableStates').DataTable(
+                {
+                    "language": {
+                        "url": "//cdn.datatables.net/plug-ins/9dcbecd42ad/i18n/Spanish.json"
+                    },
+                    "aLengthMenu": [
+                        [10, 25, 50, 100, 200, -1],
+                        [10, 25, 50, 100, 200, "Todos"]
+                    ],
+                    "columnDefs": [{
+                        "targets": 0,
+                        "orderable": true,
+                        className: 'dt-body-left'
+                    }]
+                });
+
+        });
+    </script>
+           }

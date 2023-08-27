@@ -48,6 +48,43 @@ namespace SAGM.Controllers
             return View(country);
         }
 
+        public async Task<IActionResult> DetailsState(int? id)
+        {
+            if (id == null || _context.Countries == null)
+            {
+                return NotFound();
+            }
+
+            var state = await _context.States
+                .Include(s => s.Cities)
+                .Include(s => s.Country)
+                .FirstOrDefaultAsync(m => m.StateId == id);
+            if (state == null)
+            {
+                return NotFound();
+            }
+
+            return View(state);
+        }
+
+        public async Task<IActionResult> DetailsCity(int? id)
+        {
+            if (id == null || _context.Cities == null)
+            {
+                return NotFound();
+            }
+
+            var city = await _context.Cities
+                .Include(c => c.State)
+                .FirstOrDefaultAsync(c => c.CityId == id);
+            if (city == null)
+            {
+                return NotFound();
+            }
+
+            return View(city);
+        }
+
         public IActionResult Create()
         {
             Country country = new() { States = new List<State>() };
@@ -147,6 +184,67 @@ namespace SAGM.Controllers
             return View(statemodel);
         }
 
+
+        public async Task<IActionResult> AddCity(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            State state = await _context.States.FindAsync(id);
+            if (state == null)
+            {
+                return NotFound();
+            }
+            CityViewModel citymodel = new()
+            {
+                StateId = state.StateId
+            };
+
+            return View(citymodel);
+        }
+
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AddCity(CityViewModel citymodel)
+        {
+
+
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    City city = new()
+                    {
+                        State = await _context.States.FindAsync(citymodel.StateId),
+                        CityName = citymodel.CityName,
+
+                    };
+                    _context.Add(city);
+                    await _context.SaveChangesAsync();
+                    return RedirectToAction(nameof(DetailsState), new { Id = citymodel.StateId });
+                }
+                catch (DbUpdateException dbUpdateException)
+                {
+                    if (dbUpdateException.InnerException.Message.Contains("duplicate"))
+                    {
+                        ModelState.AddModelError(string.Empty, "Ya existe una ciudad con el mismo nombre en este estado");
+                    }
+                    else
+                    {
+                        ModelState.AddModelError(string.Empty, dbUpdateException.InnerException.Message);
+                    }
+                }
+                catch (Exception exception)
+                {
+                    ModelState.AddModelError(string.Empty, exception.Message);
+                }
+            }
+            return View(citymodel);
+        }
+
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null || _context.Countries == null)
@@ -154,7 +252,9 @@ namespace SAGM.Controllers
                 return NotFound();
             }
 
-            var country = await _context.Countries.FindAsync(id);
+            var country = await _context.Countries
+                .Include(c => c.States)
+                .FirstOrDefaultAsync(c => c.CountryId == id);
             if (country == null)
             {
                 return NotFound();
@@ -261,7 +361,7 @@ namespace SAGM.Controllers
                         };
                         _context.Update(state);
                         await _context.SaveChangesAsync();
-                        return RedirectToAction(nameof(Index));
+                        return RedirectToAction(nameof(Details), new { Id = model.CountryId });
                     }
                     catch (DbUpdateException dbUpdateException)
                     {
@@ -295,6 +395,86 @@ namespace SAGM.Controllers
             return View(model);
         }
 
+        public async Task<IActionResult> EditCity(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var city = await _context.Cities
+                .Include(c => c.State)
+                .FirstOrDefaultAsync(c => c.CityId == id);
+            if (city == null)
+            {
+                return NotFound();
+            }
+
+            CityViewModel cityViewModel = new()
+            {
+                CityId = city.CityId,   
+                StateId = city.State.StateId,
+                CityName = city.CityName
+            };
+            return View(cityViewModel);
+        }
+
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> EditCity(int id, CityViewModel model)
+        {
+            if (id != model.CityId)
+            {
+                return NotFound();
+            }
+
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    try
+                    {
+                        City city = new()
+                        {
+                            CityId = model.CityId,
+                            CityName = model.CityName
+                        };
+                        _context.Update(city);
+                        await _context.SaveChangesAsync();
+                        return RedirectToAction(nameof(DetailsState), new { Id = model.StateId });
+                    }
+                    catch (DbUpdateException dbUpdateException)
+                    {
+                        if (dbUpdateException.InnerException.Message.Contains("duplicate"))
+                        {
+                            ModelState.AddModelError(string.Empty, "Ya existe una ciudad con el mismo nombre para el estado");
+                        }
+                        else
+                        {
+                            ModelState.AddModelError(string.Empty, dbUpdateException.InnerException.Message);
+                        }
+                    }
+                    catch (Exception exception)
+                    {
+                        ModelState.AddModelError(string.Empty, exception.Message);
+                    }
+                }
+                catch (DbUpdateConcurrencyException)
+                {
+                    if (!StateExists(model.CityId))
+                    {
+                        return NotFound();
+                    }
+                    else
+                    {
+                        throw;
+                    }
+                }
+
+            }
+            return View(model);
+        }
         // GET: Countries/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
@@ -331,6 +511,45 @@ namespace SAGM.Controllers
             
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
+        }
+
+        public async Task<IActionResult> DeleteState(int? id)
+        {
+            if (id == null || _context.States == null)
+            {
+                return NotFound();
+            }
+
+            var state = await _context.States
+                .Include(s => s.Cities)
+                .Include(s => s.Country)
+                .FirstOrDefaultAsync(m => m.StateId == id);
+            if (state == null)
+            {
+                return NotFound();
+            }
+
+            return View(state);
+        }
+
+        [HttpPost, ActionName("DeleteState")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteStateConfirmed(int id)
+        {
+            if (_context.States == null)
+            {
+                return Problem("Entity set 'SAGMContext.Countries'  is null.");
+            }
+            var state = await _context.States
+                .Include (s => s.Country)
+                .FirstOrDefaultAsync(s => s.StateId == id);
+            if (state != null)
+            {
+                _context.States.Remove(state);
+            }
+
+            await _context.SaveChangesAsync();
+            return RedirectToAction(nameof(Details), new { Id = state.Country.CountryId });
         }
 
         private bool CountryExists(int id)
