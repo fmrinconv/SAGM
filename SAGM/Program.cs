@@ -27,6 +27,12 @@ internal class Program
             cfg.Password.RequireNonAlphanumeric = false;
         }).AddEntityFrameworkStores<SAGMContext>();
 
+        builder.Services.ConfigureApplicationCookie(options =>
+        {
+            options.LoginPath = "/Account/NotAuthorized";
+            options.AccessDeniedPath = "/Account/NotAuthorized";
+        });
+
         //Inyeccion para la inicialización de la base de datos
         builder.Services.AddTransient<SeedDb>();
         builder.Services.AddScoped<IUserHelper, UserHelper>();
@@ -50,7 +56,7 @@ internal class Program
             app.UseExceptionHandler("/Home/Error");
             app.UseHsts();
         }
-
+        app.UseStatusCodePagesWithReExecute("/error/{0}");
         app.UseHttpsRedirection();
         app.UseStaticFiles();
         app.UseRouting();

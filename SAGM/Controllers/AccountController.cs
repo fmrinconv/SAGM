@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using SAGM.Helpers;
 using SAGM.Models;
 
@@ -44,6 +45,12 @@ namespace SAGM.Controllers
         {
             await _userHelper.LogoutAsync();
             return RedirectToAction("Index", "Home");
+        }
+
+        public  IActionResult NotAuthorized()
+        {
+
+            return View();
         }
 
     }

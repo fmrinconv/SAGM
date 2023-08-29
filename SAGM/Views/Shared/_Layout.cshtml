@@ -25,9 +25,30 @@
                         <li class="nav-item" style="margin-right:3px;">
                             <a class="btn btn-sm btn-outline-secondary" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
                         </li>
-                        <li class="nav-item" style="margin-right:3px;">
-                            <a class="btn btn-sm btn-outline-secondary" asp-area="" asp-controller="Countries" asp-action="Index">Paises</a>
-                        </li>
+                        @if (User.Identity.IsAuthenticated && User.IsInRole("Admin"))
+                        {
+                            <li class="nav-item" style="margin-right:3px;">
+                                <a class="btn btn-sm btn-outline-secondary" asp-area="" asp-controller="Countries" asp-action="Index">Paises</a>
+                            </li>
+                        }
+                     
+                    </ul>
+                    <ul class="nav navbar-nav navbar-right">
+                        @if (User.Identity.IsAuthenticated)
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Account" asp-action="ChangeUser">@User.Identity.Name</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Account" asp-action="Logout">Cerrar sesión</a>
+                            </li>
+                        }
+                        else
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Account" asp-action="Login">Iniciar sesión</a>
+                            </li>
+                        }
                     </ul>
                 </div>
 
