@@ -16,7 +16,7 @@
 </style>
 
 <div>
-    <h4>Detalle de País</h4>
+    <h4>Detalle de país</h4>
     <hr />
     <dl class="row">
         <dt class = "col-sm-2">
@@ -30,6 +30,18 @@
         </dt>
         <dd class="col-sm-10">
             @Html.DisplayFor(model => model.StatesNumber)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.CitiesNumber)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.CitiesNumber)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Active)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Active)
         </dd>
     </dl>
 </div>
@@ -53,14 +65,17 @@
 
                     <thead>
                         <tr>
-                            <th></th>
+                            <th style="text-align:center;">&nbsp;&emsp;#</th>
                             <th>
                                 @Html.DisplayNameFor(model => model.States.FirstOrDefault().StateName)
                             </th>
                             <th style="text-align:center;">
                                 @Html.DisplayNameFor(model => model.States.FirstOrDefault().CitiesNumber)
                             </th>
-                            <th>Acción</th>
+                            <th style="text-align: center;">
+                                @Html.DisplayNameFor(model => model.Active)
+                            </th>
+                            <th>Acciones</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -73,6 +88,9 @@
                                 </td>
                                 <td>
                                     @Html.DisplayFor(modelItem => item.CitiesNumber)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.Active)
                                 </td>
                                 <td>
                                     <a asp-action="EditState" asp-route-id="@item.StateId" class="btn btn-sm btn-outline-warning" data-toggle='tooltip' title='Editar'><i class="fa fa-pencil"></i></a>
@@ -111,11 +129,15 @@
                     ],
                     "columnDefs": [
                         {
-                            "targets": 2,
+                            "targets": 0,
                             className: 'dt-body-center'
                         },
                         {
-                            "targets": 3,
+                            "targets": [2,3],
+                            className: 'dt-body-center'
+                        },
+                        {
+                            "targets": 4,
                             "orderable": false,
                             className: 'dt-body-left'
                         }
@@ -124,6 +146,7 @@
                         { "data": "StateId", "render" : function (data) {count = count + 1; return count.toString() ;}},
                         { "data": "StateName" },
                         { "data": "CitiesNumber" },
+                        { "data": "Active" },
                         { "data": "StateId" }
                     ]
                 });

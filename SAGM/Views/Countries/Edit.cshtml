@@ -4,9 +4,7 @@
     ViewData["Title"] = "Edit";
 }
 
-<h1>Editar</h1>
-
-<h4>País</h4>
+<h4>Editar País</h4>
 <hr />
 <div class="row">
     <div class="col-md-4">
@@ -19,6 +17,13 @@
                 <input asp-for="CountryName" class="form-control" id="countryname" />
                 <span asp-validation-for="CountryName" class="text-danger"></span>
             </div>
+            <br />
+            <div class="form-group">
+                <label asp-for="Active" class="control-label"></label>
+                <input type="checkbox" asp-for="Active"  id="Active" />
+                <span asp-validation-for="Active" class="text-danger"></span>
+            </div>
+            <br />
             <div class="form-group mt-2">
                 <input type="submit" value="Guardar" class="btn btn-outline-warning" />
                 <a asp-action="Index" class="btn btn-outline-success">Regresar</a>

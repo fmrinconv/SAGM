@@ -29,6 +29,7 @@ namespace SAGM.Controllers
             
             return View(await _context.Countries
                 .Include(c => c.States.OrderBy(s => s.StateName))
+                .ThenInclude(s => s.Cities)
                 .ToListAsync());
         }
 
@@ -42,6 +43,7 @@ namespace SAGM.Controllers
 
             var country = await _context.Countries
                 .Include(c => c.States)
+                .ThenInclude(s  => s.Cities)
                 .FirstOrDefaultAsync(m => m.CountryId == id);
             if (country == null)
             {
@@ -59,8 +61,8 @@ namespace SAGM.Controllers
             }
 
             var state = await _context.States
-                .Include(s => s.Cities)
                 .Include(s => s.Country)
+                .Include(s => s.Cities)
                 .FirstOrDefaultAsync(m => m.StateId == id);
             if (state == null)
             {
@@ -140,7 +142,7 @@ namespace SAGM.Controllers
             }
             StateViewModel statemodel = new()
             {
-                CountryId = country.CountryId
+                CountryId = country.CountryId,
             };
 
             return View(statemodel);
@@ -162,6 +164,7 @@ namespace SAGM.Controllers
                         Cities = new List<City>(),
                         Country = await _context.Countries.FindAsync(statemodel.CountryId),
                         StateName = statemodel.StateName,
+                        Active = statemodel.Active
 
                     };
                     _context.Add(state);
@@ -202,7 +205,8 @@ namespace SAGM.Controllers
             }
             CityViewModel citymodel = new()
             {
-                StateId = state.StateId
+                StateId = state.StateId,
+                Active = state.Active
             };
 
             return View(citymodel);
@@ -223,6 +227,7 @@ namespace SAGM.Controllers
                     {
                         State = await _context.States.FindAsync(citymodel.StateId),
                         CityName = citymodel.CityName,
+                        Active = citymodel.Active
 
                     };
                     _context.Add(city);
@@ -337,6 +342,7 @@ namespace SAGM.Controllers
                 CountryId = state.Country.CountryId,
                 StateId = state.StateId,
                 StateName = state.StateName,
+                Active = state.Active
             };
             return View(stateViewModel);
         }
@@ -360,7 +366,8 @@ namespace SAGM.Controllers
                         State state = new()
                         {
                             StateId = model.StateId,
-                            StateName = model.StateName
+                            StateName = model.StateName,
+                            Active = model.Active
                         };
                         _context.Update(state);
                         await _context.SaveChangesAsync();
@@ -417,7 +424,8 @@ namespace SAGM.Controllers
             {
                 CityId = city.CityId,   
                 StateId = city.State.StateId,
-                CityName = city.CityName
+                CityName = city.CityName,
+                Active = city.Active
             };
             return View(cityViewModel);
         }
@@ -441,7 +449,8 @@ namespace SAGM.Controllers
                         City city = new()
                         {
                             CityId = model.CityId,
-                            CityName = model.CityName
+                            CityName = model.CityName,
+                            Active = model.Active
                         };
                         _context.Update(city);
                         await _context.SaveChangesAsync();

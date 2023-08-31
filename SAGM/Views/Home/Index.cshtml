@@ -2,19 +2,40 @@
     ViewData["Title"] = "Home Page";
 }
 
+<style>
+    .g1 {
+        background-color: #F9F9F9;
+        margin: 15px 15px 15px 15px;
+        border: 1px solid silver;
+        border-radius: 12px;
+        box-shadow: 5px 5px 5px #555;
+        background-color: orange;
+    }
+</style>
+
 <div class="text-center">
    
     @if (User.Identity.IsAuthenticated)
     {
-        <h1 class="display-4">Bienvenido</h1>
-        <div style="border-radius:15%; background-color:silver;" class="col-4 offset-4">
-            <img src="~/images/200w.gif" style="border-radius:15%; width:90%; height:90%; " class="m-3 px-3" />
-        </div>
-        
+    <div class="row">
+    <div class="col-md-3"></div>
+    <div class="col-md-4 g1">
+
+         <h3 style="color:dimgray; text-align:center;">Bienvenido</h3>
+        <img src="~/images/Logo Animado.gif" class="m-3 px-3" width="250px" height="250px" />
+
+     <div class="col-md-3"></div>
+    </div>
+    </div>
     }
     else
     {
-        <label>Incie sesión para trabajar con SAGM</label>
+        <div class="container">
+            <br/>
+            <label>Inicie sesión para trabajar con SAGM</label>
+            <br/>
+            <br />
+        </div>
     }
 
    

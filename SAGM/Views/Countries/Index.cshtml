@@ -30,13 +30,21 @@
 
                     <thead>
                         <tr>
-                            <th>#</th>
+                            <th style="text-align:center;">&nbsp;&emsp;#</th>
                             <th>
                                 @Html.DisplayNameFor(model => model.CountryName)
                             </th>
                             <th style="text-align: center;">
                                 @Html.DisplayNameFor(model => model.StatesNumber)
                             </th>
+                            <th style="text-align: center;">
+                                @Html.DisplayNameFor(model => model.CitiesNumber)
+                            </th>
+                            <th style="text-align: center;">
+                                @Html.DisplayNameFor(model => model.Active)
+                            </th>
+
+
                             <th>Acciones</th>
                         </tr>
                     </thead>
@@ -50,6 +58,12 @@
                                 </td>
                                 <td>
                                     @Html.DisplayFor(modelItem => item.StatesNumber)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.CitiesNumber)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.Active)
                                 </td>
                                 <td>
                                     <a asp-action="Edit" asp-route-id="@item.CountryId" class="btn btn-sm btn-outline-warning" data-toggle='tooltip' title='Editar'><i class="fa fa-pencil"></i></a>
@@ -86,13 +100,18 @@
                         [10, 25, 50, 100, 200, -1],
                         [10, 25, 50, 100, 200, "Todos"]
                     ],
-                    "columnDefs": [{
-                        "targets": 2,
+                    "columnDefs": [
+                    {
+                        "targets": 0,
+                        className: 'dt-body-center'
+                    },
+                    {
+                        "targets": [2,3,4],
                         "orderable": true,
                         className: 'dt-body-center'
                     },
                     {
-                        "targets": 3,
+                        "targets": 5,
                         "orderable": false,
                         className: 'dt-body-left'
                     }],
@@ -100,6 +119,8 @@
                         { "data": "CountryId", "render": function (data) { count = count + 1; return count.toString(); } },
                         { "data": "CountryName" },
                         { "data": "StatesNumber" },
+                        { "data": "CitiesNumber" },
+                        { "data": "Active" },
                         { "data": "CountryId" }
                     ]
                 });

@@ -8,7 +8,7 @@ namespace SAGM.Models
     {
 
       
-        [Display(Name = "Direccion de Correo")]
+        [Display(Name = "Direccion de correo")]
         [Required(ErrorMessage = "El campo {0} es obligatorio.")]
         [EmailAddress(ErrorMessage = "Debes ingresar un correo valido.")]
         public string Username { get; set; }

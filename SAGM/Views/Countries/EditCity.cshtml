@@ -19,6 +19,13 @@
                 <input asp-for="CityName" class="form-control" id="cityname" />
                 <span asp-validation-for="CityName" class="text-danger"></span>
             </div>
+            <br />
+            <div class="form-group">
+                <label asp-for="Active" class="control-label"></label>
+                <input type="checkbox" asp-for="Active" id="Active" />
+                <span asp-validation-for="Active" class="text-danger"></span>
+            </div>
+            <br />
             <div class="form-group mt-2">
                 <input type="submit" value="Guardar" class="btn btn-outline-warning" />
                 <a asp-action="DetailsState" asp-route-id="@Model.StateId" class="btn btn-outline-success">Regresar</a>

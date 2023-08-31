@@ -14,10 +14,9 @@
         width: 80px;
     }
 </style>
-<h1>Detalles</h1>
 
 <div>
-    <h4>Estado</h4>
+    <h4>Detalles de estado</h4>
     <hr />
     <dl class="row">
         <dt class="col-sm-2">
@@ -31,6 +30,12 @@
         </dt>
         <dd class="col-sm-10">
             @Html.DisplayFor(model => model.CitiesNumber)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Active)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Active)
         </dd>
     </dl>
 </div>
@@ -54,18 +59,26 @@
 
                     <thead>
                         <tr>
+                            <th style="text-align:center;">&nbsp;&emsp;#</th>
                             <th>
                                 @Html.DisplayNameFor(model => model.Cities.FirstOrDefault().CityName)
                             </th>
-                            <th></th>
+                            <th style="text-align: center;">
+                                @Html.DisplayNameFor(model => model.Active)
+                            </th>
+                            <th>Acciones</th>
                         </tr>
                     </thead>
                     <tbody>
                         @foreach (var item in Model.Cities)
                         {
                             <tr>
+                                <td></td>
                                 <td>
                                     @Html.DisplayFor(modelItem => item.CityName)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.Active)
                                 </td>
                                 <td>
                                     <a asp-action="EditCity" asp-route-id="@item.CityId" class="btn btn-sm btn-outline-warning" data-toggle='tooltip' title='Editar'><i class="fa fa-pencil"></i></a>
@@ -91,6 +104,7 @@
     <script src="//cdn.datatables.net/responsive/2.5.0/js/dataTables.responsive.min.js"></script>
     <script src="//cdn.datatables.net/responsive/2.5.0/js/responsive.bootstrap5.min.js"></script>
     <script type="text/javascript">
+        var count = 0;
         $(document).ready(function () {
             $('#TableStates').DataTable(
                 {
@@ -102,10 +116,25 @@
                         [10, 25, 50, 100, 200, "Todos"]
                     ],
                     "columnDefs": [{
-                        "targets": 0,
+                        "targets": [0,2],
                         "orderable": true,
+                        className: 'dt-body-center'
+                    },
+                    {
+                        "targets": 1,
                         className: 'dt-body-left'
-                    }]
+                    },
+                    {
+                        "targets": 3,
+                        "orderable": false,
+                        className: 'dt-body-left'
+                    }],
+                    "columns": [
+                        { "data": "CityId", "render": function (data) { count = count + 1; return count.toString(); } },
+                        { "data": "CityName" },
+                        { "data": "Active" },
+                        { "data": "CityId" }
+                    ]
                 });
 
         });

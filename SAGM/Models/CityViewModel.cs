@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
 
 namespace SAGM.Models
 {
@@ -9,6 +10,10 @@ namespace SAGM.Models
         [MaxLength(100, ErrorMessage = "El campo {0} debe tener máximo {1} caractéres.")]
         [Required(ErrorMessage = "El campo {0} es obligatorio.")]
         public string CityName { get; set; }
+
+        [Display(Name = "Activo")]
+        [DefaultValue(true)]
+        public Boolean Active { get; set; }
 
         public int StateId { get; set; }
     }
