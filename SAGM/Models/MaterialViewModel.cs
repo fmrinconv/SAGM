@@ -1,12 +1,11 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel;
 using System.Xml.Linq;
 
-namespace SAGM.Data.Entities
+namespace SAGM.Models
 {
-    public class Material
+    public class MaterialViewModel
     {
-
-        [Key]
         public int MaterialId { get; set; }
 
         [Display(Name = "Material")]
@@ -14,9 +13,10 @@ namespace SAGM.Data.Entities
         [Required(ErrorMessage = "El campo {0} es obligatorio.")]
         public string MaterialName { get; set; }
 
+        [Display(Name = "Activo")]
+        [DefaultValue(true)]
         public Boolean Active { get; set; }
-        public MaterialType MaterialType { get; set; }
 
-       
+        public int MaterialTypeId { get; set; }
     }
 }

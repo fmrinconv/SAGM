@@ -1,0 +1,49 @@
+﻿@model SAGM.Data.Entities.Category
+
+@{
+    ViewData["Title"] = "Edit";
+}
+
+<h4>Editar categoría</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="Edit">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input type="hidden" asp-for="CategoryId" />
+            <input type="hidden" asp-for="MaterialTypes" />
+            <div class="form-group">
+                <label asp-for="CategoryName" class="control-label"></label>
+                <input asp-for="CategoryName" class="form-control" id="categoryName" />
+                <span asp-validation-for="CategoryName" class="text-danger"></span>
+            </div>
+            <br />
+            <div class="form-group">
+                <label asp-for="Active" class="control-label"></label>
+                <input type="checkbox" asp-for="Active" id="Active" />
+                <span asp-validation-for="Active" class="text-danger"></span>
+            </div>
+            <br />
+            <div class="form-group mt-2">
+                <input type="submit" value="Guardar" class="btn btn-outline-warning" />
+                <a asp-action="Index" class="btn btn-outline-success">Regresar</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script>
+        //script para tener el foco sobre el campo inicial
+        $(document).ready(function () {
+            $("#categoryName").focus();
+            var tmpStr = $("#categoryName").val();
+            $("#categoryName").val('');
+            $("#categoryName").val(tmpStr);
+        })
+    </script>
+}

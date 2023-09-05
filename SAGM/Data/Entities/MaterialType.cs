@@ -13,6 +13,8 @@ namespace SAGM.Data.Entities
         [Required(ErrorMessage = "El campo {0} es requerido")]
         public string MaterialTypeName { get; set; }
 
+        public Boolean Active { get; set; }
+
         public Category Category { get; set; }
 
         public ICollection<Material> Materials { get; set; }
@@ -20,6 +22,6 @@ namespace SAGM.Data.Entities
         [Display(Name = "Materiales")]
         public int MaterialsNumber => Materials == null ? 0 : Materials.Count;
 
-        public Boolean Active { get; set; }
+       
     }
 }

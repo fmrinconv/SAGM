@@ -36,6 +36,8 @@ internal class Program
         //Inyeccion para la inicialización de la base de datos
         builder.Services.AddTransient<SeedDb>();
         builder.Services.AddScoped<IUserHelper, UserHelper>();
+        builder.Services.AddScoped<IComboHelper, ComboHelper>();
+        builder.Services.AddScoped<IBlobHelper, BlobHelper>();
         builder.Services.AddRazorPages().AddRazorRuntimeCompilation();
         var app = builder.Build();
 

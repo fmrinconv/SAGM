@@ -1,0 +1,130 @@
+﻿@model IEnumerable<SAGM.Data.Entities.Category>
+
+@{
+    ViewData["Title"] = "Index";
+}
+<style>
+
+    a.firstlevel {
+        width: 99px;
+    }
+</style>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.0/css/bootstrap.min.css" />
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css" />
+<link rel="stylesheet" href="https://cdn.datatables.net/responsive/2.5.0/css/responsive.bootstrap5.min.css" />
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css" />
+
+<link href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" />
+
+<p>
+    <a asp-action="Create" class="btn btn-sm btn btn-outline-primary firstlevel">+ Categoría</a>
+</p>
+<div class="row">
+    <div class="col-md-12">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h3 class="panel-title">Categorías</h3>
+            </div>
+            <div class="panel-body">
+                <table class="table-hover table-responsive compact row-border" id="TableCategories" style="font-size:small;">
+
+                    <thead>
+                        <tr>
+                            <th style="text-align:center;">&nbsp;&emsp;#</th>
+                            <th>
+                                @Html.DisplayNameFor(model => model.CategoryName)
+                            </th>
+                            <th style="text-align: center;">
+                                @Html.DisplayNameFor(model => model.MaterialTypesNumber)
+                            </th>
+                            <th style="text-align: center;">
+                                @Html.DisplayNameFor(model => model.MaterialesNumber)
+                            </th>
+                            <th style="text-align: center;">
+                                @Html.DisplayNameFor(model => model.Active)
+                            </th>
+
+
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                <td></td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.CategoryName)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.MaterialTypesNumber)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.MaterialesNumber)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.Active)
+                                </td>
+                                <td>
+                                    <a asp-action="Edit" asp-route-id="@item.CategoryId" class="btn btn-sm btn-outline-warning" data-toggle='tooltip' title='Editar'><i class="fa fa-pencil"></i></a>
+                                    <a asp-action="Details" asp-route-id="@item.CategoryId" class="btn btn-sm btn-outline-info" data-toggle='tooltip' title='Detalles'><i class="fa fa-info-circle"></i></a>
+                                    <a asp-action="Delete" asp-route-id="@item.CategoryId" class="btn btn-sm btn-outline-danger" data-toggle='tooltip' title='Eliminar'><i class="fa fa-trash"></i></a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts{
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script src="//code.jquery.com/jquery-3.7.0.js"></script>
+    <script src="//cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <script src="//cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+    <script src="//cdn.datatables.net/responsive/2.5.0/js/dataTables.responsive.min.js"></script>
+    <script src="//cdn.datatables.net/responsive/2.5.0/js/responsive.bootstrap5.min.js"></script>
+    <script type="text/javascript">
+        var count = 0;
+        $(document).ready(function () {
+            $('#TableCategories').DataTable(
+                {
+                    "language": {
+                        "url": "//cdn.datatables.net/plug-ins/9dcbecd42ad/i18n/Spanish.json"
+                    },
+                    "aLengthMenu": [
+                        [10, 25, 50, 100, 200, -1],
+                        [10, 25, 50, 100, 200, "Todos"]
+                    ],
+                    "columnDefs": [
+                        {
+                            "targets": 0,
+                            className: 'dt-body-center'
+                        },
+                        {
+                            "targets": [2, 3, 4],
+                            "orderable": true,
+                            className: 'dt-body-center'
+                        },
+                        {
+                            "targets": 5,
+                            "orderable": false,
+                            className: 'dt-body-left'
+                        }],
+                    "columns": [
+                        { "data": "CategoryId", "render": function (data) { count = count + 1; return count.toString(); } },
+                        { "data": "CategoryName" },
+                        { "data": "MaterialTypesNumber" },
+                        { "data": "MaterialesNumber" },
+                        { "data": "Active" },
+                        { "data": "CategoryId" }
+                    ]
+                });
+
+        });
+    </script>
+           }

@@ -1,0 +1,142 @@
+﻿@model SAGM.Data.Entities.MaterialType
+
+@{
+    ViewData["Title"] = "Details";
+}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.0/css/bootstrap.min.css" />
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css" />
+<link rel="stylesheet" href="https://cdn.datatables.net/responsive/2.5.0/css/responsive.bootstrap5.min.css" />
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css" />
+<link href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" />
+<style>
+
+    a.firstlevel {
+        width: 90px;
+    }
+</style>
+
+<div>
+    <h4>Detalles de tipos de materiales</h4>
+    <hr />
+    <dl class="row">
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.MaterialTypeName)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.MaterialTypeName)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.MaterialsNumber)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.MaterialsNumber)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Active)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Active)
+        </dd>
+    </dl>
+</div>
+<div>
+    <a asp-action="AddMaterial" asp-route-id="@Model.MaterialTypeId" class="btn btn-outline-primary firstlevel">+Material</a>
+    <a asp-action="EditMaterialType" asp-route-id="@Model?.MaterialTypeId" class="btn btn-outline-warning firstlevel">Editar</a>
+    <a asp-action="Details" asp-route-id="@Model.Category.CategoryId" class="btn btn-outline-success firstlevel">Regresar</a>
+</div>
+<div>
+    <hr />
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h3 class="panel-title">Materiales</h3>
+            </div>
+            <div class="panel-body">
+                <table class="table-hover table-responsive compact row-border" id="TableStates" style="font-size:small;">
+
+                    <thead>
+                        <tr>
+                            <th style="text-align:center;">&nbsp;&emsp;#</th>
+                            <th>
+                                @Html.DisplayNameFor(model => model.Materials.FirstOrDefault().MaterialName)
+                            </th>
+                            <th style="text-align: center;">
+                                @Html.DisplayNameFor(model => model.Active)
+                            </th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model.Materials)
+                        {
+                            <tr>
+                                <td></td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.MaterialName)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.Active)
+                                </td>
+                                <td>
+                                    <a asp-action="EditMaterial" asp-route-id="@item.MaterialId" class="btn btn-sm btn-outline-warning" data-toggle='tooltip' title='Editar'><i class="fa fa-pencil"></i></a>
+                                    <a asp-action="DetailsMaterial" asp-route-id="@item.MaterialId" class="btn btn-sm btn-outline-info" data-toggle='tooltip' title='Detalles'><i class="fa fa-info-circle"></i></a>
+                                    <a asp-action="DeleteMaterial" asp-route-id="@item.MaterialId" class="btn btn-sm btn-outline-danger" data-toggle='tooltip' title='Eliminar'><i class="fa fa-trash"></i></a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts{
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script src="//code.jquery.com/jquery-3.7.0.js"></script>
+    <script src="//cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <script src="//cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+    <script src="//cdn.datatables.net/responsive/2.5.0/js/dataTables.responsive.min.js"></script>
+    <script src="//cdn.datatables.net/responsive/2.5.0/js/responsive.bootstrap5.min.js"></script>
+    <script type="text/javascript">
+        var count = 0;
+        $(document).ready(function () {
+            $('#TableStates').DataTable(
+                {
+                    "language": {
+                        "url": "//cdn.datatables.net/plug-ins/9dcbecd42ad/i18n/Spanish.json"
+                    },
+                    "aLengthMenu": [
+                        [10, 25, 50, 100, 200, -1],
+                        [10, 25, 50, 100, 200, "Todos"]
+                    ],
+                    "columnDefs": [{
+                        "targets": [0, 2],
+                        "orderable": true,
+                        className: 'dt-body-center'
+                    },
+                    {
+                        "targets": 1,
+                        className: 'dt-body-left'
+                    },
+                    {
+                        "targets": 3,
+                        "orderable": false,
+                        className: 'dt-body-left'
+                    }],
+                    "columns": [
+                        { "data": "MaterialId", "render": function (data) { count = count + 1; return count.toString(); } },
+                        { "data": "MaterialName" },
+                        { "data": "Active" },
+                        { "data": "MaterialId" }
+                    ]
+                });
+
+        });
+    </script>
+           }

@@ -1,0 +1,51 @@
+﻿@model SAGM.Models.MaterialTypeViewModel
+
+@{
+    ViewData["Title"] = "Editar Tipo de Material";
+}
+
+<h1>Editar</h1>
+
+<h4>Estado</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="EditMaterialType">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input type="hidden" asp-for="CategoryId" />
+            <input type="hidden" asp-for="MaterialTypeId" />
+            <div class="form-group">
+                <label asp-for="MaterialTypeName" class="control-label"></label>
+                <input asp-for="MaterialTypeName" class="form-control" id="materialTypeName" />
+                <span asp-validation-for="MaterialTypeName" class="text-danger"></span>
+            </div>
+            <br />
+            <div class="form-group">
+                <label asp-for="Active" class="control-label"></label>
+                <input type="checkbox" asp-for="Active" id="Active" />
+                <span asp-validation-for="Active" class="text-danger"></span>
+            </div>
+            <br />
+            <div class="form-group mt-2">
+                <input type="submit" value="Guardar" class="btn btn-outline-warning" />
+                <a asp-action="Details" asp-route-id="@Model.CategoryId" class="btn btn-outline-success">Regresar</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script>
+        //script para tener el foco sobre el campo inicial
+        $(document).ready(function () {
+            $("#materialTypeName").focus();
+            var tmpStr = $("#materialTypeName").val();
+            $("#materialTypeName").val('');
+            $("#materialTypeName").val(tmpStr);
+        })
+    </script>
+}

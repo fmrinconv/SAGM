@@ -13,14 +13,15 @@ namespace SAGM.Data.Entities
         [Required(ErrorMessage = "El campo {0} es requerido")]
         public string CategoryName { get; set; }
 
+        public Boolean Active { get; set; }
         public ICollection<MaterialType> MaterialTypes { get; set; }
 
         [Display(Name = "Tipos de Material")]
         public int MaterialTypesNumber => MaterialTypes == null ? 0 : MaterialTypes.Count;
 
         [Display(Name = "Materiales")]
-        public int MaterialesNumber => MaterialTypes == null ? 0 : MaterialTypes.Sum(t => t.Materials.Count);
+        public int MaterialesNumber => MaterialTypes == null ? 0 : MaterialTypes.Sum(t => t.MaterialsNumber);
 
-        public Boolean Active { get; set; }
+        
     }
 }
