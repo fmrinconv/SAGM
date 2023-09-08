@@ -65,7 +65,7 @@ namespace SAGM.Models
         [Display(Name = "Foto")]
         public string ImageFullPath => ImageId == Guid.Empty
             ? $"https://localhost:7057/images/noimage.png"
-            : $"https://almacenamientomanolorin1.blob.core.windows.net/users{ImageId}";
+            : $"https://almacenamientomanolorin1.blob.core.windows.net/users/{ImageId}";
 
         [Display(Name = "Image")]
         public IFormFile? ImageFile { get; set; }

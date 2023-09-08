@@ -6,6 +6,7 @@ using SAGM.Models;
 using SAGM.Enums;
 using SAGM.Data.Entities;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity;
 
 namespace SAGM.Controllers
 {
@@ -23,6 +24,112 @@ namespace SAGM.Controllers
             _comboHelper = comboHelper;
             _blobHelper = blobHelper;
         }
+
+        public IActionResult ChangePassword()
+        {
+            return View();
+        }
+
+        [HttpPost]
+
+        public async Task<IActionResult> ChangePassword(ChangePasswordViewModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                User? user = await _userHelper.GetUserAsync(User.Identity.Name);
+                if (user != null)
+                {
+                    IdentityResult result = await _userHelper.ChangeUserPasswordAsync(user, model.OldPassword, model.NewPassword);
+                    if (result.Succeeded)
+                    {
+                        return RedirectToAction("ChangeUser");
+                    }
+                    else
+                    {
+                        if (result.Errors.FirstOrDefault().Description == "Incorrect password.")
+                        {
+                            ModelState.AddModelError(string.Empty, "Contraseña incorrecta");
+                        }
+                        else
+                        {
+                            ModelState.AddModelError(string.Empty, result.Errors.FirstOrDefault().Description);
+                        }
+                        
+                    }
+                }
+                else
+                {
+                    ModelState.AddModelError(string.Empty, "Usuario no encontrado");
+                }
+            }
+            return View(model);
+        }
+
+        public async Task<IActionResult> ChangeUser()
+        {
+            User user = await _userHelper.GetUserAsync(User.Identity.Name);
+            if (user == null)
+            {
+                return NotFound();
+            }
+            else
+            {
+                EditUserViewModel model = new()
+                {
+                    Document = user.Document,
+                    Address = user.Address,
+                    FirstName = user.FirstName,
+                    LastName = user.LastName,
+                    PhoneNumber = user.PhoneNumber,
+                    ImageId = user.ImageId,
+                    CityId = user.City.CityId,
+                    StateId = user.City.State.StateId,
+                    CountryId = user.City.State.Country.CountryId,
+                    Cities = await _comboHelper.GetComboCitiesAsync(user.City.State.StateId),
+                    States = await _comboHelper.GetComboStatesAsync(user.City.State.Country.CountryId),
+                    Countries = await _comboHelper.GetComboCountriesAsync()
+                };
+                return View(model);
+            }
+
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+
+        public async Task<IActionResult> ChangeUser(EditUserViewModel model)
+        {
+
+            if (ModelState.IsValid)
+            {
+
+                Guid imageId = model.ImageId;
+
+                if (model.ImageFile != null)
+                {
+                    imageId = await _blobHelper.UploadBlobAsync(model.ImageFile, "users");
+                }
+
+                User user = await _userHelper.GetUserAsync(User.Identity.Name);
+                user.Document = model.Document;
+                user.FirstName = model.FirstName;
+                user.LastName = model.LastName;
+                user.PhoneNumber = model.PhoneNumber;
+                user.City = await _context.Cities.FindAsync(model.CityId);
+                await _userHelper.UpdateUserAsync(user);
+                return RedirectToAction("Index", "Home");
+
+            }
+            else
+            {
+                model.Countries = await _comboHelper.GetComboCountriesAsync();
+                model.States = await _comboHelper.GetComboStatesAsync(model.CountryId);
+                model.Cities = await _comboHelper.GetComboCitiesAsync(model.StateId);
+
+                return View(model);
+            }
+        }
+
 
         public IActionResult Login()
         {
