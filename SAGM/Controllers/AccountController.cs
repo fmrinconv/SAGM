@@ -7,6 +7,7 @@ using SAGM.Enums;
 using SAGM.Data.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
+using SignInResult = Microsoft.AspNetCore.Identity.SignInResult;
 
 namespace SAGM.Controllers
 {
@@ -36,6 +37,12 @@ namespace SAGM.Controllers
         {
             if (ModelState.IsValid)
             {
+                if (model.OldPassword == model.NewPassword)
+                {
+                    ModelState.AddModelError(string.Empty, "Debes ingresar una contraseña diferente.");
+                    return View(model);
+                }
+
                 User? user = await _userHelper.GetUserAsync(User.Identity.Name);
                 if (user != null)
                 {
@@ -76,6 +83,7 @@ namespace SAGM.Controllers
             {
                 EditUserViewModel model = new()
                 {
+                    Id = user.Id,
                     Document = user.Document,
                     Address = user.Address,
                     FirstName = user.FirstName,
@@ -146,18 +154,20 @@ namespace SAGM.Controllers
         {
             if (ModelState.IsValid)
             {
-                Microsoft.AspNetCore.Identity.SignInResult result = await _userHelper.LoginAsync(model);
+                SignInResult result = await _userHelper.LoginAsync(model);
                 if (result.Succeeded)
                 {
                     return RedirectToAction("Index", "Home");
                 }
-                ModelState.AddModelError(string.Empty, "Cuenta o contraseña inválidos.");
-
+                if (result.IsLockedOut)
+                {
+                    ModelState.AddModelError(string.Empty, "Ha superado el número máximo de intentos, la cuenta se desbloqueará en 5 min para que vuelva a intentarlo");
+                }
+                else {
+                    ModelState.AddModelError(string.Empty, "Cuenta o contraseña inválidas.");
+                }
             }
-
-
             return View(model);
-
         }
         public async Task<IActionResult> Logout()
         {
