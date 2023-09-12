@@ -19,16 +19,20 @@ internal class Program
 
         builder.Services.AddIdentity<User, IdentityRole>(cfg =>
         {
+            cfg.Tokens.AuthenticatorTokenProvider = TokenOptions.DefaultAuthenticatorProvider;
+            cfg.SignIn.RequireConfirmedEmail = true;
             cfg.User.RequireUniqueEmail = true;
-            cfg.Password.RequireDigit = true;
+            cfg.Password.RequireDigit = false;
             cfg.Password.RequiredUniqueChars = 0;
-            cfg.Password.RequireLowercase = true;
-            cfg.Password.RequireUppercase = true;
+            cfg.Password.RequireLowercase = false;
+            cfg.Password.RequireUppercase = false;
             cfg.Password.RequireNonAlphanumeric = false;
-            cfg.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(1);
+            cfg.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
             cfg.Lockout.MaxFailedAccessAttempts = 3;
             cfg.Lockout.AllowedForNewUsers = true;
-        }).AddEntityFrameworkStores<SAGMContext>();
+        })
+            .AddDefaultTokenProviders()
+            .AddEntityFrameworkStores<SAGMContext>();
 
         builder.Services.ConfigureApplicationCookie(options =>
         {
@@ -41,7 +45,9 @@ internal class Program
         builder.Services.AddScoped<IUserHelper, UserHelper>();
         builder.Services.AddScoped<IComboHelper, ComboHelper>();
         builder.Services.AddScoped<IBlobHelper, BlobHelper>();
+        builder.Services.AddScoped<IMailHelper, MailHelper>();
         builder.Services.AddRazorPages().AddRazorRuntimeCompilation();
+        
         var app = builder.Build();
 
         SeedData();

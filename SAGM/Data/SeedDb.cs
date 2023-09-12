@@ -18,6 +18,7 @@ namespace SAGM.Data
         public async Task SeedAsync()
         {
             await _context.Database.EnsureCreatedAsync();
+            await CheckCategoriesAsync();
             await CheckCountriesAsync();
             await CheckRolesAsync();
             await CheckUserAsync("1010", "Francisco Manuel", "Rincón Vargas", "admin@simaqap.com", "811 027 95 00", "tolon 300", UserType.Admin);
@@ -50,7 +51,11 @@ namespace SAGM.Data
                 };
 
                 await _userHelper.AddUserAsync(user, "123456");
+
                 await _userHelper.AddUserToRoleAsync(user, userType.ToString());
+
+                string token = await _userHelper.GenerateEmailConfirmationTokenAsync(user);
+                await _userHelper.ConfirmEmailAsync(user, token);
             }
             return user;
         }
@@ -3355,9 +3360,130 @@ namespace SAGM.Data
 
                                 }
                         },
+                        new State{
+                                StateName = "Texas",
+                                Active = true,
+                                Cities = new List<City>()
+                                {
+                                    new City{ CityName = "Abbott", Active = true},
+                                    new City{ CityName = "Ace", Active = true},
+                                    new City{ CityName = "Addison", Active = true},
+                                    new City{ CityName = "Agua Dulce", Active = true},
+                                    new City{ CityName = "Alba", Active = true},
+                                    new City{ CityName = "Arlington", Active = true},
+                                    new City{ CityName = "Austín", Active = true},
+                                    new City{ CityName = "Brownsville", Active = true},
+                                    new City{ CityName = "Corpus Christi", Active = true},
+                                    new City{ CityName = "Dallas", Active = true},
+                                    new City{ CityName = "Galveston", Active = true},
+                                    new City{ CityName = "Laredo", Active = true},
+                                    new City{ CityName = "McAllen", Active = true},
+                                    new City{ CityName = "Houston", Active = true},
+                                    new City{ CityName = "San Antonio", Active = true},
+                                    new City{ CityName = "Waco", Active = true},
+                                }
+                        }
+                     },
+                });
+
+            }
+            await _context.SaveChangesAsync();
+        }
+
+        private async Task CheckCategoriesAsync()
+        {
+            if (!_context.Categories.Any())
+            {
+                _context.Categories.Add(new Category
+                {
+                    CategoryName = "Productos",
+                    Active = true,
+                    MaterialTypes = new List<MaterialType>()
+                    {
+                        new MaterialType{
+                                MaterialTypeName = "Aceros",
+                                Active = true,
+                                Materials = new List<Material>()
+                                {
+                                    new Material{ MaterialName = "1018", Active = true},
+                                    new Material{ MaterialName = "1026", Active = true},
+                                    new Material{ MaterialName = "1045", Active = true},
+                                    new Material{ MaterialName = "1518", Active = true},
+                                    new Material{ MaterialName = "4140", Active = true},
+                                    new Material{ MaterialName = "4140T", Active = true},
+                                    new Material{ MaterialName = "8620", Active = true},
+                                    new Material{ MaterialName = "9840", Active = true},
+                                    new Material{ MaterialName = "A36", Active = true},
+                                    new Material{ MaterialName = "A516", Active = true},
+                                    new Material{ MaterialName = "ASTM A572 GR50", Active = true},
+                                    new Material{ MaterialName = "Estructural", Active = true},
+                                    new Material{ MaterialName = "H13", Active = true},
+                                    new Material{ MaterialName = "INOX 304", Active = true},
+                                    new Material{ MaterialName = "INOX 310", Active = true},
+                                    new Material{ MaterialName = "INOX 316", Active = true},
+                                    new Material{ MaterialName = "S7", Active = true},
+                                    new Material{ MaterialName = "O1", Active = true},
+                                }
+                        },
+                        new MaterialType{
+                                MaterialTypeName = "Metales",
+                                Active = true,
+                                Materials = new List<Material>()
+                                {
+                                    new Material{ MaterialName = "Aluminio T6061", Active = true},
+                                    new Material{ MaterialName = "Aluminio T7075", Active = true},
+                                    new Material{ MaterialName = "Bronce", Active = true},
+                                    new Material{ MaterialName = "Bronce SAE64", Active = true},
+                                    new Material{ MaterialName = "Bronce Estándar", Active = true},
+                                    new Material{ MaterialName = "Bronce al plomo", Active = true},
+                                    new Material{ MaterialName = "Latón", Active = true},
+                                    new Material{ MaterialName = "Teflón", Active = true},
+                                    new Material{ MaterialName = "Poliacetal", Active = true}
+                                },
+                        },
+                         new MaterialType{
+                                MaterialTypeName = "Plásticos",
+                                Active = true,
+                                Materials = new List<Material>()
+                                {
+                                    new Material{ MaterialName = "Nylon", Active = true},
+                                    new Material{ MaterialName = "Nylamid", Active = true},
+                                    new Material{ MaterialName = "UHM PWE", Active = true},
+                                    new Material{ MaterialName = "PVC", Active = true},
+                                    new Material{ MaterialName = "Acrílico", Active = true},
+                                    new Material{ MaterialName = "Policarbonato", Active = true},
+                                    new Material{ MaterialName = "Ertalyte", Active = true},
+                                },
+                        },
+                         new MaterialType{
+                                MaterialTypeName = "Otros",
+                                Active = true,
+                                Materials = new List<Material>()
+                                {
+                                    new Material{ MaterialName = "Micarta", Active = true},
+
+                                },
+                        },
+
                      }
                 });
 
+                _context.Categories.Add(new Category
+                {
+                    CategoryName = "Servicios",
+                    Active = true,
+                    MaterialTypes = new List<MaterialType>()
+                    {
+                        new MaterialType{
+                                MaterialTypeName = "NA",
+                                Active = true,
+                                Materials = new List<Material>()
+                                {
+                                    new Material{ MaterialName = "NA", Active = true},
+                                }
+                        }
+                    }
+                });
             }
             await _context.SaveChangesAsync();
         }

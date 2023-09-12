@@ -6,6 +6,7 @@ using SAGM.Helpers;
 using SAGM.Models;
 using SAGM.Enums;
 using SAGM.Data.Entities;
+using SAGM.Common;
 
 namespace SAGM.Controllers
 {
@@ -16,13 +17,19 @@ namespace SAGM.Controllers
         private readonly IUserHelper _userHelper;
         private readonly IComboHelper _comboHelper;
         private readonly IBlobHelper _blobHelper;
+        private readonly IMailHelper _mailHelper;
 
-        public UsersController(SAGMContext context, IUserHelper userHelper, IComboHelper comboHelper, IBlobHelper blobHelper)
+        public UsersController(SAGMContext context, 
+                               IUserHelper userHelper, 
+                               IComboHelper comboHelper,
+                               IBlobHelper blobHelper,
+                               IMailHelper mailHelper)
         {
             _context = context;
             _userHelper = userHelper;
             _comboHelper = comboHelper;
             _blobHelper = blobHelper;
+            _mailHelper = mailHelper;
         }
 
         public async Task<IActionResult> Index()
@@ -76,6 +83,29 @@ namespace SAGM.Controllers
                     model.Cities = await _comboHelper.GetComboCitiesAsync(model.StateId);
                     return View(model);
                 }
+
+                string myToken = await _userHelper.GenerateEmailConfirmationTokenAsync(user);
+                string tokenLink = Url.Action("ConfirmEmail", "Account", new
+                {
+                    userid = user.Id,
+                    token = myToken
+                }, protocol: HttpContext.Request.Scheme);
+
+                Response response = _mailHelper.SendMail(
+                    $"{model.FirstName} {model.LastName}",
+                    model.Username,
+                    "SAGEM - Confirmación de Email",
+                    $"<h1>SAGEM - Confirmación de Email</h1>" +
+                        $"Para habilitar el usuario por favor hacer click en el siguiente link:, " +
+                        $"<hr/><br/><p><a href = \"{tokenLink}\">Confirmar Email</a></p>");
+
+                if (response.IsSuccess)
+                {
+                    ViewBag.Message = "Las instrucciones para habilitar el usuario han sido enviadas al correo.";
+                    return View(model);
+                }
+
+                ModelState.AddModelError(string.Empty, response.Message);
 
             }
 

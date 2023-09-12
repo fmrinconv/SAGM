@@ -8,6 +8,9 @@ using SAGM.Data.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
 using SignInResult = Microsoft.AspNetCore.Identity.SignInResult;
+using NuGet.Protocol.Plugins;
+using SAGM.Common;
+using NuGet.Packaging.Signing;
 
 namespace SAGM.Controllers
 {
@@ -17,13 +20,19 @@ namespace SAGM.Controllers
         private readonly SAGMContext _context;
         private readonly IComboHelper _comboHelper;
         private readonly IBlobHelper _blobHelper;
+        private readonly IMailHelper _mailHelper;
 
-        public AccountController(IUserHelper userHelper, SAGMContext context, IComboHelper comboHelper, IBlobHelper blobHelper)
+        public AccountController(IUserHelper userHelper, 
+                                SAGMContext context, 
+                                IComboHelper comboHelper, 
+                                IBlobHelper blobHelper,
+                                IMailHelper mailHelper)
         {
             _userHelper = userHelper;
             _context = context;
             _comboHelper = comboHelper;
             _blobHelper = blobHelper;
+            _mailHelper = mailHelper;
         }
 
         public IActionResult ChangePassword()
@@ -46,7 +55,7 @@ namespace SAGM.Controllers
                 User? user = await _userHelper.GetUserAsync(User.Identity.Name);
                 if (user != null)
                 {
-                    IdentityResult result = await _userHelper.ChangeUserPasswordAsync(user, model.OldPassword, model.NewPassword);
+                    IdentityResult result = await _userHelper.ChangePasswordAsync(user, model.OldPassword, model.NewPassword);
                     if (result.Succeeded)
                     {
                         return RedirectToAction("ChangeUser");
@@ -163,7 +172,13 @@ namespace SAGM.Controllers
                 {
                     ModelState.AddModelError(string.Empty, "Ha superado el número máximo de intentos, la cuenta se desbloqueará en 5 min para que vuelva a intentarlo");
                 }
-                else {
+                else if (result.IsNotAllowed)
+                {
+                    ModelState.AddModelError(string.Empty, "Usuario no ha confirmado cuenta, debe seguir las instrucciones del correo enviado " +
+                        "para la confirmación y así habilitar su cuenta.");
+                }
+                else
+                {
                     ModelState.AddModelError(string.Empty, "Cuenta o contraseña inválidas.");
                 }
             }
@@ -216,18 +231,29 @@ namespace SAGM.Controllers
                     return View(model);
                 }
 
-                LoginViewModel loginViewModel = new LoginViewModel
+                string myToken = await _userHelper.GenerateEmailConfirmationTokenAsync(user);
+                string tokenLink = Url.Action("ConfirmEmail", "Account", new
                 {
-                    Password = model.Password,
-                    RememberMe = false,
-                    Username = model.Username
-                };
+                    userid = user.Id,
+                    token = myToken
+                },protocol: HttpContext.Request.Scheme);
 
-                var result2 = await _userHelper.LoginAsync(loginViewModel);
+                Response response = _mailHelper.SendMail(
+                    $"{model.FirstName} {model.LastName}",
+                    model.Username,
+                    "SAGEM - Confirmación de Email",
+                    $"<h1>SAGEM - Confirmación de Email</h1>" +
+                        $"Para habilitar el usuario por favor hacer click en el siguiente link:, " +
+                        $"<hr/><br/><p><a href = \"{tokenLink}\">Confirmar Email</a></p>");
 
-                if (result2.Succeeded) {
-                    return RedirectToAction("Index", "Home");
+                if (response.IsSuccess) 
+                {
+                    ViewBag.Message = "Las instrucciones para habilitar el usuario han sido enviadas al correo.";
+                    return View(model);
                 }
+                
+                ModelState.AddModelError(string.Empty, response.Message);
+                
             }
 
             model.Countries = await _comboHelper.GetComboCountriesAsync();
@@ -263,5 +289,102 @@ namespace SAGM.Controllers
         }
 
 
+        public async Task<IActionResult> ConfirmEmail(string userid, string token)
+        {
+            if (string.IsNullOrEmpty(userid) || string.IsNullOrEmpty(token))
+            {
+                return NotFound();
+            }
+            User user = await _userHelper.GetUserAsync(new Guid(userid));
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            IdentityResult result = await _userHelper.ConfirmEmailAsync(user, token);
+            if (!result.Succeeded)
+            {
+                return NotFound();
+            }
+
+            return View();
+        }
+
+        public IActionResult RecoveryPassword(string email)
+        {
+            return View();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> RecoveryPassword(RecoveryPasswordViewModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                User user = await _userHelper.GetUserAsync(model.Email);
+                if (user == null)
+                {
+                    ModelState.AddModelError(string.Empty, "El email no corresponde a ningún usuario registrado.");
+                    return View(model);
+                }
+                else {
+                    string myToken = await _userHelper.GeneratePasswordResetTokenAsync(user);
+                    string tokenLink = Url.Action("ResetPassword", 
+                        "Account", 
+                        new  {token = myToken }, protocol: HttpContext.Request.Scheme);
+
+                    Response response = _mailHelper.SendMail(
+                        $"{user.FullName}",
+                        model.Email,
+                        "SAGEM - Recuperación de contraseña",
+                        $"<h1>SAGEM - Recuperación de contraseña</h1>" +
+                            $"Para recuperar la contraseña haga click en el siguiente elace:, " +
+                            $"<hr/><br/><p><a href = \"{tokenLink}\">Cambiar contraseña</a></p>");
+
+                    if (response.IsSuccess)
+                    {
+                        ViewBag.Message = "Las instrucciones para cambiar la contraseña han sido enviadas  a su correo.";
+                        return View();
+                    }
+                }
+            }
+            return View(model);
+        }
+
+        public IActionResult ResetPassword(string token)
+        {
+            return View();  
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> ResetPassword(ResetPasswordViewModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                User user = await _userHelper.GetUserAsync(model.Email);
+                if (user != null)
+                {
+                    IdentityResult result = await _userHelper.ResetPasswordAsync(user, model.Token, model.Password);
+                    if (result.Succeeded)
+                    {
+                        ViewBag.Message = "Contraseña cambiarda con éxito.";
+                        return View();
+                    }
+                    else
+                    {
+                        ViewBag.Message = "Error al intentar cambiar contraseña.";
+                        return View();
+                    }
+                }
+                else {
+                    ViewBag.Message = "Usuario no encontrado.";
+                    return View();
+                }
+                    
+                }
+        else {
+                 ViewBag.Message = "Error al intentar cambiar contraseña.";
+                    return View(model);
+             }
+        }
     }
 }
