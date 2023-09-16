@@ -12,6 +12,7 @@
 <div class="row">
     <div class="col-md-12">
         <form asp-action="Register" enctype="multipart/form-data">
+            <input type="hidden" id="Result" name="Result" value="@ViewBag.Result" />
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <input type="hidden" asp-for="Id" />
             <input type="hidden" asp-for="UserType" />
@@ -61,7 +62,6 @@
     <script type="text/javascript">
         $(document).ready(function () {
             $("#CountryId").change(function () {
-                debugger;
                 $("#StateId").empty();
                 $("#StateId").append('<option value="0">[Selecciona un estado...]</option>');
                 $("#CityId").empty();
@@ -107,6 +107,15 @@
                 });
                 return false;
             })
+
+            if ($("#Result").val() == "true") {
+                $.notify('@ViewBag.Message', "info");
+                $("#Username").val("");
+                $("#Document").val("");
+                $("#FirstName").val("");
+                $("#LastName").val("");
+                $("#CountryId").val('0');
+            }
         });
     </script>
 }

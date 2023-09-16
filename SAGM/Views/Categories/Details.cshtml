@@ -97,9 +97,9 @@
                                     @Html.DisplayFor(modelItem => item.Active)
                                 </td>
                                 <td>
-                                    <a asp-action="EditMaterialType" asp-route-id="@item.MaterialTypeId" class="btn btn-sm btn-outline-warning" data-toggle='tooltip' title='Editar'><i class="fa fa-pencil"></i></a>
-                                    <a asp-action="DetailsMaterialType" asp-route-id="@item.MaterialTypeId" class="btn btn-sm btn-outline-info" data-toggle='tooltip' title='Detalles'><i class="fa fa-info-circle"></i></a>
-                                    <a asp-action="DeleteMaterialType" asp-route-id="@item.MaterialTypeId" class="btn btn-sm btn-outline-danger" data-toggle='tooltip' title='Eliminar'><i class="fa fa-trash"></i></a>
+                                    <a asp-action="EditMaterialType" asp-route-id="@item.MaterialTypeId" class="btn btn-sm btn-outline-warning" data-toggle='tooltip' title='Editar'><i class="fa-solid fa-pencil"></i></a>
+                                    <a asp-action="DetailsMaterialType" asp-route-id="@item.MaterialTypeId" class="btn btn-sm btn-outline-info" data-toggle='tooltip' title='Detalles'><i class="fa-solid fa-info-circle"></i></a>
+                                    <a asp-action="DeleteMaterialType" asp-route-id="@item.MaterialTypeId" class="btn btn-sm btn-outline-danger" data-toggle='tooltip' title='Eliminar'><i class="fa-solid fa-trash"></i></a>
                                 </td>
                             </tr>
                         }
@@ -115,10 +115,6 @@
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
     <script src="//code.jquery.com/jquery-3.7.0.js"></script>
-    <script src="//cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
-    <script src="//cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
-    <script src="//cdn.datatables.net/responsive/2.5.0/js/dataTables.responsive.min.js"></script>
-    <script src="//cdn.datatables.net/responsive/2.5.0/js/responsive.bootstrap5.min.js"></script>
     <script type="text/javascript">
         var count = 0;
         $(document).ready(function () {

@@ -18,7 +18,7 @@
             <input type="hidden" asp-for="Countries" />
             <input type="hidden" asp-for="States" />
             <input type="hidden" asp-for="Cities" />
-
+            <input type="hidden" id="Result" name="Result" value="@ViewBag.Result" />
             <partial name="_User" />
 
             <div class="form-group mt-2">
@@ -37,9 +37,8 @@
     <script type="text/javascript">
         $(document).ready(function () {
             $("#CountryId").change(function () {
-                debugger;
                 $("#StateId").empty();
-                $("#StateId").append('<option value="0">[Selecciona un Departamento / Estado...]</option>');
+                $("#StateId").append('<option value="0">[Selecciona un estado...]</option>');
                 $("#CityId").empty();
                 $("#CityId").append('<option value="0">[Selecciona una ciudad...]</option>');
                 $.ajax({
@@ -47,11 +46,11 @@
                     url: '@Url.Action("GetStates")',
                     dataType: 'json',
                     data: { countryId: $("#CountryId").val() },
-                    success: function (states) {
-                        $.each(states, function (i, state) {
+                    success: function (States) {
+                        $.each(States, function (i, state) {
                             $("#StateId").append('<option value="'
-                                + state.id + '">'
-                                + state.name + '</option>');
+                                + state.stateId + '">'
+                                + state.stateName + '</option>');
                         });
                     },
                     error: function (ex) {
@@ -73,8 +72,8 @@
                         $.each(cities, function (i, city) {
                             debugger;
                             $("#CityId").append('<option value="'
-                                + city.id + '">'
-                                + city.name + '</option>');
+                                + city.cityId + '">'
+                                + city.cityName + '</option>');
                         });
                     },
                     error: function (ex) {
@@ -83,6 +82,10 @@
                 });
                 return false;
             })
+
+            if ($("#Result").val() == "true") {
+                $.notify('@ViewBag.Message', "success");
+            }
         });
     </script>
 }

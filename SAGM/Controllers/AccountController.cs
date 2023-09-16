@@ -116,16 +116,17 @@ namespace SAGM.Controllers
 
         public async Task<IActionResult> ChangeUser(EditUserViewModel model)
         {
-
+            ViewBag.Result = "false";
             if (ModelState.IsValid)
             {
-
                 Guid imageId = model.ImageId;
 
                 if (model.ImageFile != null)
                 {
                     imageId = await _blobHelper.UploadBlobAsync(model.ImageFile, "users");
                 }
+
+                model.ImageId = imageId;
 
                 User user = await _userHelper.GetUserAsync(User.Identity.Name);
                 user.Document = model.Document;
@@ -134,7 +135,13 @@ namespace SAGM.Controllers
                 user.PhoneNumber = model.PhoneNumber;
                 user.City = await _context.Cities.FindAsync(model.CityId);
                 await _userHelper.UpdateUserAsync(user);
-                return RedirectToAction("Index", "Home");
+                ViewBag.Result = "true";
+                ViewBag.Message = "El cambio de datos ha sido exitoso";
+
+                model.Countries = await _comboHelper.GetComboCountriesAsync();
+                model.States = await _comboHelper.GetComboStatesAsync(model.CountryId);
+                model.Cities = await _comboHelper.GetComboCitiesAsync(model.StateId);
+                return View(model);
 
             }
             else
@@ -249,6 +256,22 @@ namespace SAGM.Controllers
                 if (response.IsSuccess) 
                 {
                     ViewBag.Message = "Las instrucciones para habilitar el usuario han sido enviadas al correo.";
+                    ViewBag.Result = "true";
+                    model = new()
+                    {
+                        Address = "",
+                        Username = "",
+                        Document = "",
+                        FirstName = "",
+                        LastName = "",
+                        PhoneNumber = "",
+                        Id = Guid.Empty.ToString(),
+                        Countries = await _comboHelper.GetComboCountriesAsync(),
+                        States = await _comboHelper.GetComboStatesAsync(0),
+                        Cities = await _comboHelper.GetComboCitiesAsync(0),
+                        UserType = UserType.User
+                    };
+                    ViewBag.Username = "";
                     return View(model);
                 }
                 
@@ -312,12 +335,14 @@ namespace SAGM.Controllers
 
         public IActionResult RecoveryPassword(string email)
         {
+            ViewBag.Result = "false";
             return View();
         }
 
         [HttpPost]
         public async Task<IActionResult> RecoveryPassword(RecoveryPasswordViewModel model)
         {
+            ViewBag.Result = "false";
             if (ModelState.IsValid)
             {
                 User user = await _userHelper.GetUserAsync(model.Email);
@@ -342,12 +367,12 @@ namespace SAGM.Controllers
 
                     if (response.IsSuccess)
                     {
-                        ViewBag.Message = "Las instrucciones para cambiar la contraseña han sido enviadas  a su correo.";
+                        ViewBag.Result = "true";
                         return View();
                     }
                 }
             }
-            return View(model);
+            return View();
         }
 
         public IActionResult ResetPassword(string token)
@@ -360,6 +385,7 @@ namespace SAGM.Controllers
         {
             if (ModelState.IsValid)
             {
+                ViewBag.Result = "false";
                 User user = await _userHelper.GetUserAsync(model.Email);
                 if (user != null)
                 {
@@ -367,6 +393,7 @@ namespace SAGM.Controllers
                     if (result.Succeeded)
                     {
                         ViewBag.Message = "Contraseña cambiarda con éxito.";
+                        ViewBag.Result = "true";
                         return View();
                     }
                     else
@@ -385,6 +412,17 @@ namespace SAGM.Controllers
                  ViewBag.Message = "Error al intentar cambiar contraseña.";
                     return View(model);
              }
+        }
+
+
+        public IActionResult NotfyTest()
+        { return View(); }
+
+        [HttpPost]
+        public async Task<IActionResult> NotfyTest(int? id)
+        {
+            ViewBag.Result = "true";
+            return View();
         }
     }
 }

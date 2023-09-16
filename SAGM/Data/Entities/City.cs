@@ -23,7 +23,9 @@ namespace SAGM.Data.Entities
 
         public ICollection<User> Users{ get; set; }
 
-       
+        public ICollection<Customer> Customers { get; set; }
+
+
 
 
     }

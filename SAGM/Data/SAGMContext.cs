@@ -18,6 +18,12 @@ namespace SAGM.Data
         public DbSet<Category> Categories { get; set; }
         public DbSet<MaterialType> MaterialTypes { get; set; }
         public DbSet<Material> Materials { get; set; }
+
+        internal static IConfiguration GetService(Type type)
+        {
+            throw new NotImplementedException();
+        }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);

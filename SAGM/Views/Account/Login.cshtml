@@ -14,39 +14,49 @@
         background-color: orange;
     }
 </style>
+<flash dismissable="true" />
 
 <div class="row">
-    <div class="col-md-3"></div>
-    <div class="col-md-4 g1">
-        <h3 style="color:dimgray; text-align:center;">Iniciar sesión</h3>
-        <form asp-action="Login">
-            
-            <div asp-validation-summary="ModelOnly" class="text-danger" ></div>
-            <div class="form-group">
-                <label asp-for="Username" class="control-label"></label>
-                <input asp-for="Username" class="form-control"/>
-                <span asp-validation-for="Username" class="text-danger"></span>
+    <div class="col-md-4"></div>
+    <div class="col-md-4">
+        <div class="card bg-secondary mb-3 g1" style="width: 380px; height: 330px">
+            <h5 class="card-header text-center text-white"><i class="fa-solid fa-envelope text-navy text-white"></i> Iniciar Sesión</h5>
+            <div class="card-body bg-warning">
+                <form asp-action="Login">
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+                    <div class="form-group">
+                        <label class="control-label">Dirección de correo</label>
+                        <input asp-for="Username" class="form-control" />
+                        <span asp-validation-for="Username" class="text-danger"></span>
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="Password" class="control-label"></label>
+                        <input asp-for="Password" type="password" class="form-control" />
+                        <span asp-validation-for="Password" class="text-danger"></span>
+                    </div>
+                    <div class="form-group mt-2">
+                        <div class="form-check">
+                            <input asp-for="RememberMe" type="checkbox" class="form-check-input" />
+                            <label asp-for="RememberMe" class="form-check-label"></label>
+                        </div>
+                        <span asp-validation-for="RememberMe" class="text-warning"></span>
+                    </div>
+                    <div class="form-group mt-2 text-center">
+                        <button input type="submit" value="Login" class="btn btn-primary btn-block"> Iniciar Sesión</button>
+                        <a asp-action="Register" class="btn btn-secondary">Nuevo Usuario</a>
+                    </div>
+                </form>
             </div>
-            <div class="form-group">
-                <label asp-for="Password" class="control-label"></label>
-                <input asp-for="Password" type="password" class="form-control" />
-                <span asp-validation-for="Password" class="text-danger"></span>
+            <div class="card-footer bg-secondary text-center">
+                ¿Has olvidado tu contraseña?<a asp-action="RecoveryPassword" class="text-white"> Recupérala</a>
             </div>
-            <div class="form-group mt-2">
-                <div class="form-check">
-                    <input asp-for="RememberMe" type="checkbox" class="form-check-input" />
-                    <label asp-for="RememberMe" class="form-check-label"></label>
-                    
-                </div>
-                <span asp-validation-for="RememberMe" class="text-warning"></span>
-            </div>
-            <div class="form-group mt-2 text-center">
-                <input type="submit" value="Iniciar sesión" class="btn btn-primary btn-sm" />
-                <a asp-action="Register" class="btn btn-secondary btn-sm">Nuevo usuario</a>
-                <a asp-action="RecoveryPassword" class="btn btn-link link-dark">¿Olvidaste tu contraseña?</a>
-            </div>
-            <div>&nbsp;</div>
-        </form>
+        </div>
     </div>
-    <div class="col-md-3"></div>
+    <div class="col-md-4"></div>
 </div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

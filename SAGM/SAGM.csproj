@@ -23,10 +23,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="wwwroot\Images\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <Reference Include="Microsoft.AspNet.Identity.EntityFramework">
       <HintPath>..\..\INGENYA\Bin\Microsoft.AspNet.Identity.EntityFramework.dll</HintPath>
     </Reference>
