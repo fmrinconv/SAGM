@@ -4,9 +4,10 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Mvc.ViewEngines;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
 
-namespace SAGM.Helpers
+namespace Shooping.Helpers
 {
-    public class ModalHelper {
+    public class ModalHelper
+    {
         public static string RenderRazorViewToString(Controller controller, string viewName, object model = null)
         {
             controller.ViewData.Model = model;
@@ -40,7 +41,5 @@ namespace SAGM.Helpers
                 }
             }
         }
-
     }
-    
 }

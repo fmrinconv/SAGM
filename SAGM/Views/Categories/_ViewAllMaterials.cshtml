@@ -1,0 +1,46 @@
+﻿@model SAGM.Data.Entities.MaterialType
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h3 class="panel-title">Materiales</h3>
+            </div>
+            <div class="panel-body">
+                <table class="table-hover table-responsive compact row-border" id="TableMaterials" style="font-size:small;">
+
+                    <thead>
+                        <tr>
+                            <th style="text-align:center;">&nbsp;&emsp;#</th>
+                            <th>
+                                @Html.DisplayNameFor(model => model.Materials.FirstOrDefault().MaterialName)
+                            </th>
+                            <th style="text-align: center;">
+                                @Html.DisplayNameFor(model => model.Active)
+                            </th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model.Materials)
+                        {
+                            <tr>
+                                <td></td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.MaterialName)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.Active)
+                                </td>
+                                <td>
+                                    <a onclick="showInPopup('@Url.Action("EditMaterial","Categories", new {id = item.MaterialId}, Context.Request.Scheme)','Editar material','bg-warning')" class="btn btn-sm btn-outline-warning"><i class="fa-solid fa-pencil-alt"></i></a>
+                                    <button data-id="@item.MaterialId" class="btn btn-sm btn-danger deleteItem" data-bs-toggle="modal" data-bs-target="#deleteDialog"><i class="fa-solid fa-trash"></i></button>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

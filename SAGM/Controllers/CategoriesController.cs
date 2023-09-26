@@ -1,15 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using SAGM.Data;
 using SAGM.Data.Entities;
 using SAGM.Models;
-
+using Shooping.Helpers;
+using static Shooping.Helpers.ModalHelper;
 
 namespace SAGM.Controllers
 {
@@ -27,6 +23,25 @@ namespace SAGM.Controllers
 
         public async Task<IActionResult> Index()
         {
+            ViewBag.Result = "";
+            ViewBag.Message = "";
+
+            if (TempData["CategoryDeleteResult"] != null)
+            {
+                ViewBag.Result = TempData["CategoryDeleteResult"].ToString();
+                ViewBag.Message = TempData["CategoryDeleteMessage"].ToString();
+                TempData.Remove("CategoryDeleteResult");
+                TempData.Remove("CategoryDeleteMessage");
+            }
+
+            if (TempData["AddOrEditCategoryResult"] != null)
+            {
+                ViewBag.Result = TempData["AddOrEditCategoryResult"].ToString();
+                ViewBag.Message = TempData["AddOrEditCategoryMessage"].ToString();
+                TempData.Remove("AddOrEditCategoryResult");
+                TempData.Remove("AddOrEditCategoryMessage");
+            }
+
             return View(await _context.Categories
                 .Include(c => c.MaterialTypes.OrderBy(s => s.MaterialTypeName))
                 .ThenInclude(mt => mt.Materials)
@@ -37,6 +52,37 @@ namespace SAGM.Controllers
         // GET: Categories/Details/5
         public async Task<IActionResult> Details(int? id)
         {
+            ViewBag.Result = "";
+            ViewBag.Message = "";
+
+            if (TempData["MaterialTypeDeleteResult"] != null)
+            {
+
+                ViewBag.Result = TempData["MaterialTypeDeleteResult"].ToString();
+                ViewBag.Message = TempData["MaterialTypeDeleteMessage"].ToString();
+                TempData.Remove("MaterialTypeDeleteResult");
+                TempData.Remove("MaterialTypeDeleteMessage");
+            }
+
+            if (TempData["MaterialTypeEditResult"] != null)
+            {
+
+                ViewBag.Result = TempData["MaterialTypeEditResult"].ToString();
+                ViewBag.Message = TempData["MaterialTypeEditMessage"].ToString();
+                TempData.Remove("MaterialTypeEditResult");
+                TempData.Remove("MaterialTypeEditMessage");
+            }
+            if (TempData["MaterialTypeAddResult"] != null)
+            {
+
+                ViewBag.Result = TempData["MaterialTypeAddResult"].ToString();
+                ViewBag.Message = TempData["MaterialTypeAddMessage"].ToString();
+                TempData.Remove("MaterialTypeAddResult");
+                TempData.Remove("MaterialTypeAddMessage");
+            }
+
+
+
             if (id == null || _context.Categories == null)
             {
                 return NotFound();
@@ -56,10 +102,34 @@ namespace SAGM.Controllers
 
         public async Task<IActionResult> DetailsMaterialType(int? id)
         {
-            if (id == null || _context.Categories == null)
+            ViewBag.Result = "";
+            ViewBag.Message = "";
+
+            if (TempData["MaterialAddResult"] != null)
             {
-                return NotFound();
+                ViewBag.Result = TempData["MaterialAddResult"].ToString();
+                ViewBag.Message = TempData["MaterialAddMessage"].ToString();
+                TempData.Remove("MaterialAddResult");
+                TempData.Remove("MaterialAddMessage");
             }
+
+            if (TempData["MaterialEditResult"] != null)
+            {
+
+                ViewBag.Result = TempData["MaterialEditResult"].ToString();
+                ViewBag.Message = TempData["MaterialEditMessage"].ToString();
+                TempData.Remove("MaterialEditResult");
+                TempData.Remove("MaterialEditMessage");
+            }
+            if (TempData["MaterialDeleteResult"] != null)
+            {
+
+                ViewBag.Result = TempData["MaterialDeleteResult"].ToString();
+                ViewBag.Message = TempData["MaterialDeleteMessage"].ToString();
+                TempData.Remove("MaterialDeleteResult");
+                TempData.Remove("MaterialDeleteMessage");
+            }
+
 
             var materialtype = await _context.MaterialTypes
                 .Include(s => s.Category)
@@ -73,63 +143,88 @@ namespace SAGM.Controllers
             return View(materialtype);
         }
 
-        public async Task<IActionResult> DetailsMaterial(int? id)
+
+
+        [NoDirectAccess]
+        public async Task<IActionResult> AddOrEditCategory(int id = 0)
         {
-            if (id == null || _context.Materials == null)
+            if (id == 0)
             {
-                return NotFound();
+                Category category = new Category();
+                category.Active = true;
+                return View(category);
             }
-
-            var material = await _context.Materials
-                .Include(c => c.MaterialType)
-                .FirstOrDefaultAsync(c => c.MaterialId == id);
-            if (material == null)
+            else
             {
-                return NotFound();
+                Category category = await _context.Categories.FindAsync(id);
+                if (category == null)
+                {
+                    return NotFound();
+                }
+                return View(category);
             }
-
-            return View(material);
         }
-
-        public IActionResult Create()
-        {
-            Category Category = new() { MaterialTypes = new List<MaterialType>() };
-            return View();
-        }
-
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(Category Category)
+        public async Task<IActionResult> AddOrEditCategory(int id, Category category)
         {
-
-
             if (ModelState.IsValid)
             {
+
                 try
                 {
-                    _context.Add(Category);
-                    await _context.SaveChangesAsync();
-                    return RedirectToAction(nameof(Index));
+                    if (id == 0)
+                    {
+                        _context.Add(category);
+                        await _context.SaveChangesAsync();
+                        TempData["AddOrEditCategoryResult"] = "true";
+                        TempData["AddOrEditCategoryMessage"] = "La categoría fué agregada";
+                    }
+                    else
+                    {
+                        _context.Update(category);
+                        await _context.SaveChangesAsync();
+                        TempData["AddOrEditCategoryResult"] = "true";
+                        TempData["AddOrEditCategoryMessage"] = "La categoría fué actualizada";
+                    }
+                    return Json(new { isValid = true, html = ModalHelper.RenderRazorViewToString(this, "_ViewAllCategories", _context.Categories.ToList()) });
+
                 }
                 catch (DbUpdateException dbUpdateException)
                 {
                     if (dbUpdateException.InnerException.Message.Contains("duplicate"))
                     {
-                        ModelState.AddModelError(string.Empty, "Ya existe un país con el mismo nombre");
+                        ModelState.AddModelError(string.Empty, "Ya existe una categoría con el mismo nombre en este estado");
+                        return Json(new { isValid = false, html = ModalHelper.RenderRazorViewToString(this, "AddOrEditCategory", category) });
                     }
                     else
                     {
-                        ModelState.AddModelError(string.Empty, dbUpdateException.InnerException.Message);
+                        TempData["AddOrEditCategoryResult"] = "false";
+                        TempData["AddOrEditCategoryMessage"] = dbUpdateException.InnerException.Message;
                     }
+
                 }
+
                 catch (Exception exception)
                 {
-                    ModelState.AddModelError(string.Empty, exception.Message);
+                    TempData["AddOrEditCategoryResult"] = "false";
+                    TempData["AddOrEditCategoryResult"] = exception.Message;
+
                 }
+                return Json(new { isValid = true, html = ModalHelper.RenderRazorViewToString(this, "_ViewAllCategories", _context.Categories.ToList()) });
+
             }
-            return View(Category);
+            else
+            {
+                return Json(new { isValid = false, html = ModalHelper.RenderRazorViewToString(this, "AddOrEditCategory", category) });
+            }
+
         }
+
+
+
+
         public async Task<IActionResult> AddMaterialType(int? id)
         {
             if (id == null)
@@ -155,8 +250,6 @@ namespace SAGM.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> AddMaterialType(MaterialTypeViewModel materialtypemodel)
         {
-
-
             if (ModelState.IsValid)
             {
                 try
@@ -171,17 +264,22 @@ namespace SAGM.Controllers
                     };
                     _context.Add(materialtype);
                     await _context.SaveChangesAsync();
-                    return RedirectToAction(nameof(Details), new { Id = materialtypemodel.CategoryId });
+                    TempData["MaterialTypeAddResult"] = "true";
+                    TempData["MaterialTypeAddMessage"] = "El tipo de material fue agregado";
+                    return Json(new { isValid = true, html = ModalHelper.RenderRazorViewToString(this, "_ViewAllMaterialTypes", _context.Categories.ToList()) });
                 }
                 catch (DbUpdateException dbUpdateException)
                 {
                     if (dbUpdateException.InnerException.Message.Contains("duplicate"))
                     {
-                        ModelState.AddModelError(string.Empty, "Ya existe un tipo de material con el mismo nombre en esta categoría");
+
+                        ModelState.AddModelError(string.Empty, "Ya existe un tipo de material con el mismo nombre");
+                        return Json(new { isValid = false, html = ModalHelper.RenderRazorViewToString(this, "AddMaterialType", materialtypemodel) });
                     }
                     else
                     {
-                        ModelState.AddModelError(string.Empty, dbUpdateException.InnerException.Message);
+                        ModelState.AddModelError(string.Empty, dbUpdateException.InnerException.Message.ToString());
+                        return Json(new { isValid = false, html = ModalHelper.RenderRazorViewToString(this, "AddMaterialType", materialtypemodel) });
                     }
                 }
                 catch (Exception exception)
@@ -234,95 +332,32 @@ namespace SAGM.Controllers
                     };
                     _context.Add(material);
                     await _context.SaveChangesAsync();
-                    return RedirectToAction(nameof(DetailsMaterialType), new { Id = materialmodel.MaterialTypeId });
+                    TempData["MaterialAddResult"] = "true";
+                    TempData["MaterialAddMessage"] = "El material fué agregado";
+                    return Json(new { isValid = true, html = ModalHelper.RenderRazorViewToString(this, "_ViewAllMaterials", _context.MaterialTypes.ToList()) });
                 }
                 catch (DbUpdateException dbUpdateException)
                 {
                     if (dbUpdateException.InnerException.Message.Contains("duplicate"))
                     {
-                        ModelState.AddModelError(string.Empty, "Ya existe una ciudad con el mismo nombre en este estado");
+                        ModelState.AddModelError(string.Empty, "Ya existe un material con el mismo nombre");
+                        return Json(new { isValid = false, html = ModalHelper.RenderRazorViewToString(this, "AddMaterial", materialmodel) });
                     }
                     else
                     {
                         ModelState.AddModelError(string.Empty, dbUpdateException.InnerException.Message);
+                        return Json(new { isValid = false, html = ModalHelper.RenderRazorViewToString(this, "AddMaterial", materialmodel) });
                     }
                 }
                 catch (Exception exception)
                 {
                     ModelState.AddModelError(string.Empty, exception.Message);
+
                 }
             }
             return View(materialmodel);
         }
 
-        public async Task<IActionResult> Edit(int? id)
-        {
-            if (id == null || _context.Categories == null)
-            {
-                return NotFound();
-            }
-
-            var Category = await _context.Categories
-                .Include(c => c.MaterialTypes)
-                .FirstOrDefaultAsync(c => c.CategoryId == id);
-            if (Category == null)
-            {
-                return NotFound();
-            }
-            return View(Category);
-        }
-
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, Category Category)
-        {
-            if (id != Category.CategoryId)
-            {
-                return NotFound();
-            }
-
-            if (ModelState.IsValid)
-            {
-                try
-                {
-                    try
-                    {
-                        _context.Update(Category);
-                        await _context.SaveChangesAsync();
-                        return RedirectToAction(nameof(Index));
-                    }
-                    catch (DbUpdateException dbUpdateException)
-                    {
-                        if (dbUpdateException.InnerException.Message.Contains("duplicate"))
-                        {
-                            ModelState.AddModelError(string.Empty, "Ya existe un país con el mismo nombre");
-                        }
-                        else
-                        {
-                            ModelState.AddModelError(string.Empty, dbUpdateException.InnerException.Message);
-                        }
-                    }
-                    catch (Exception exception)
-                    {
-                        ModelState.AddModelError(string.Empty, exception.Message);
-                    }
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!CategoryExists(Category.CategoryId))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-
-            }
-            return View(Category);
-        }
 
         public async Task<IActionResult> EditMaterialType(int? id)
         {
@@ -354,10 +389,17 @@ namespace SAGM.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> EditMaterialType(int id, MaterialTypeViewModel model)
         {
-            if (id != model.MaterialTypeId)
+            Category category = await _context.Categories.FindAsync(id);
+            MaterialType materialtype = new();
+            materialtype = new()
             {
-                return NotFound();
-            }
+                MaterialTypeId = model.MaterialTypeId,
+                MaterialTypeName = model.MaterialTypeName,
+                Category = category,
+                Active = model.Active
+            };
+
+
 
             if (ModelState.IsValid)
             {
@@ -365,25 +407,24 @@ namespace SAGM.Controllers
                 {
                     try
                     {
-                        MaterialType materialtype = new()
-                        {
-                            MaterialTypeId = model.MaterialTypeId,
-                            MaterialTypeName = model.MaterialTypeName,
-                            Active = model.Active
-                        };
+
                         _context.Update(materialtype);
                         await _context.SaveChangesAsync();
-                        return RedirectToAction(nameof(Details), new { Id = model.CategoryId });
+                        TempData["MaterialTypeEditResult"] = "true";
+                        TempData["MaterialTypeEditMessage"] = "El tipo de material fué actualizado";
+                        return Json(new { isValid = true, html = ModalHelper.RenderRazorViewToString(this, "_ViewAllMaterialTypes", new { Id = model.CategoryId }) });
                     }
                     catch (DbUpdateException dbUpdateException)
                     {
                         if (dbUpdateException.InnerException.Message.Contains("duplicate"))
                         {
-                            ModelState.AddModelError(string.Empty, "Ya existe un estado con el mismo nombre");
+                            ModelState.AddModelError(string.Empty, "Ya existe un tipo de material con el mismo nombre");
+                            return Json(new { isValid = false, html = ModalHelper.RenderRazorViewToString(this, "EditMaterialType", model) });
                         }
                         else
                         {
-                            ModelState.AddModelError(string.Empty, dbUpdateException.InnerException.Message);
+                            ModelState.AddModelError(string.Empty, dbUpdateException.InnerException.Message.ToString());
+                            return Json(new { isValid = false, html = ModalHelper.RenderRazorViewToString(this, "EditMaterialType", model) });
                         }
                     }
                     catch (Exception exception)
@@ -402,6 +443,11 @@ namespace SAGM.Controllers
                         throw;
                     }
                 }
+
+            }
+            else
+            {
+                return Json(new { isValid = false, html = ModalHelper.RenderRazorViewToString(this, "EditMaterialType", model) });
 
             }
             return View(model);
@@ -437,10 +483,14 @@ namespace SAGM.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> EditMaterial(int id, MaterialViewModel model)
         {
-            if (id != model.MaterialId)
+
+            MaterialType materialtype = await _context.MaterialTypes.FindAsync(id);
+            Material material = new()
             {
-                return NotFound();
-            }
+                MaterialType = materialtype,
+                MaterialName = model.MaterialName,
+                Active = model.Active
+            };
 
             if (ModelState.IsValid)
             {
@@ -448,25 +498,24 @@ namespace SAGM.Controllers
                 {
                     try
                     {
-                        Material material = new()
-                        {
-                            MaterialId = model.MaterialId,
-                            MaterialName = model.MaterialName,
-                            Active = model.Active
-                        };
+
                         _context.Update(material);
                         await _context.SaveChangesAsync();
-                        return RedirectToAction(nameof(DetailsMaterialType), new { Id = model.MaterialTypeId });
+                        TempData["MaterialEditResult"] = "true";
+                        TempData["MaterialEditMessage"] = "El material fué actualizado";
+                        return Json(new { isValid = true, html = ModalHelper.RenderRazorViewToString(this, "_ViewAllMaterials", new { Id = model.MaterialTypeId }) });
                     }
                     catch (DbUpdateException dbUpdateException)
                     {
                         if (dbUpdateException.InnerException.Message.Contains("duplicate"))
                         {
-                            ModelState.AddModelError(string.Empty, "Ya existe una ciudad con el mismo nombre para el estado");
+                            ModelState.AddModelError(string.Empty, "Ya existe un material con el mismo nombre");
+                            return Json(new { isValid = false, html = ModalHelper.RenderRazorViewToString(this, "EditMaterial", model) });
                         }
                         else
                         {
-                            ModelState.AddModelError(string.Empty, dbUpdateException.InnerException.Message);
+                            ModelState.AddModelError(string.Empty, dbUpdateException.InnerException.Message.ToString());
+                            return Json(new { isValid = false, html = ModalHelper.RenderRazorViewToString(this, "EditMaterial", model) });
                         }
                     }
                     catch (Exception exception)
@@ -476,7 +525,7 @@ namespace SAGM.Controllers
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!MaterialTypeExists(model.MaterialId))
+                    if (!MaterialExists(model.MaterialTypeId))
                     {
                         return NotFound();
                     }
@@ -487,85 +536,101 @@ namespace SAGM.Controllers
                 }
 
             }
+            else
+            {
+                return Json(new { isValid = false, html = ModalHelper.RenderRazorViewToString(this, "EditMaterial", model) });
+
+            }
             return View(model);
+
+
+
         }
         // GET: Categories/Delete/5
+        [NoDirectAccess]
         public async Task<IActionResult> Delete(int? id)
         {
-            if (id == null || _context.Categories == null)
-            {
-                return NotFound();
-            }
 
-            var Category = await _context.Categories
+
+            Category Category = await _context.Categories
                 .Include(c => c.MaterialTypes)
                 .ThenInclude(mt => mt.Materials)
                 .FirstOrDefaultAsync(m => m.CategoryId == id);
-            if (Category == null)
-            {
-                return NotFound();
-            }
 
-            return View(Category);
-        }
-
-        // POST: Categories/Delete/5
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
-        {
-            if (_context.Categories == null)
-            {
-                return Problem("Entity set 'SAGMContext.Categories'  is null.");
-            }
-            var Category = await _context.Categories.FindAsync(id);
-            if (Category != null)
+            try
             {
                 _context.Categories.Remove(Category);
+                await _context.SaveChangesAsync();
+                TempData["CategoryDeleteResult"] = "true";
+                TempData["CategoryDeleteMessage"] = "La categoría fué eliminada";
+
             }
 
-            await _context.SaveChangesAsync();
+            catch
+            {
+                TempData["CategoryDeleteResult"] = "false";
+                TempData["CategoryDeleteMessage"] = "La categoría no pudo ser eliminada";
+                throw;
+
+            }
+
             return RedirectToAction(nameof(Index));
         }
 
+        [NoDirectAccess]
         public async Task<IActionResult> DeleteMaterialType(int? id)
         {
-            if (id == null || _context.MaterialTypes == null)
-            {
-                return NotFound();
-            }
 
             var materialtype = await _context.MaterialTypes
                 .Include(s => s.Materials)
                 .Include(s => s.Category)
                 .FirstOrDefaultAsync(m => m.MaterialTypeId == id);
-            if (materialtype == null)
-            {
-                return NotFound();
-            }
-
-            return View(materialtype);
-        }
-
-        [HttpPost, ActionName("DeleteMaterialType")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteMaterialTypeConfirmed(int id)
-        {
-            if (_context.MaterialTypes == null)
-            {
-                return Problem("Entity set 'SAGMContext.Categories'  is null.");
-            }
-            var materialtype = await _context.MaterialTypes
-                .Include(s => s.Category)
-                .FirstOrDefaultAsync(s => s.MaterialTypeId == id);
-            if (materialtype != null)
+            try
             {
                 _context.MaterialTypes.Remove(materialtype);
+                await _context.SaveChangesAsync();
+                TempData["MaterialTypeDeleteResult"] = "true";
+                TempData["MaterialTypeDeleteMessage"] = "El tipo de material fué eliminado";
             }
 
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Details), new { Id = materialtype.Category.CategoryId });
+            catch
+            {
+                TempData["MaterialTypeDeleteResult"] = "false";
+                TempData["MaterialTypeDeleteMessage"] = "El tipo de material no pudo ser eliminado";
+                return RedirectToAction(nameof(Details), new { id = materialtype.Category.CategoryId });
+
+            }
+
+            return RedirectToAction(nameof(Details), new { id = materialtype.Category.CategoryId });
+
         }
+
+        public async Task<IActionResult> DeleteMaterial(int? id)
+        {
+
+            var material = await _context.Materials
+                .Include(m => m.MaterialType)
+                .FirstOrDefaultAsync(m => m.MaterialId == id);
+            try
+            {
+                _context.Materials.Remove(material);
+                await _context.SaveChangesAsync();
+                TempData["MaterialDeleteResult"] = "true";
+                TempData["MaterialDeleteMessage"] = "El material fué eliminado";
+            }
+
+            catch
+            {
+                TempData["MaterialDeleteResult"] = "false";
+                TempData["MaterialDeleteMessage"] = "El material no pudo ser eliminado";
+                return RedirectToAction(nameof(DetailsMaterialType), new { id = material.MaterialType.MaterialTypeId });
+
+            }
+
+            return RedirectToAction(nameof(DetailsMaterialType), new { id = material.MaterialType.MaterialTypeId });
+
+        }
+
 
         private bool CategoryExists(int id)
         {
@@ -575,6 +640,11 @@ namespace SAGM.Controllers
         private bool MaterialTypeExists(int id)
         {
             return (_context.MaterialTypes?.Any(e => e.MaterialTypeId == id)).GetValueOrDefault();
+        }
+
+        private bool MaterialExists(int id)
+        {
+            return (_context.Materials?.Any(e => e.MaterialId == id)).GetValueOrDefault();
         }
     }
 }

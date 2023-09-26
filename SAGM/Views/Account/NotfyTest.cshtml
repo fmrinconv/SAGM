@@ -47,7 +47,7 @@
 <h4>Probar notificaciones</h4>
 <form method="post">
     <input type="hidden" id="Result" name="Result" value="@ViewBag.Result" />
-    <input type="submit" value="Recuperar" class="btn btn-primary btn-sm" asp-action="NotfyTest" />
+    <input type="submit" id="btnRecuperar" value="Recuperar" class="btn btn-primary btn-sm" asp-action="NotfyTest" />
 
     </form>
 
@@ -57,8 +57,8 @@
         $(document).ready(function () {
            
             if ($("#Result").val() == "true") {
-               
-                $.notify('Las instrucciones para cambiar la contraseña han sido enviadas  a su correo.',"info");
+
+                $("#Notify").notify('Las instrucciones para cambiar la contraseña han sido enviadas  a su correo.', "info", { position: "left", showDuration: 300 });
 
                 
             }

@@ -108,7 +108,7 @@
                                     @Html.DisplayFor(modelItem => item.EmailConfirmed)
                                 </td>
                                 <td>
-                                    <img src="@item.ImageFullPath" style="width:60px; height:60px; border-radius:50px;"/>
+                                    <img src="@item.ImageFullPath" style="width:60px; height:60px; border-radius:50px;" class="zoom"/>
                                 </td>
                                 <td>
                                     <a asp-action="Edit" asp-route-id="@item.UserName" class="btn btn-sm btn-outline-warning" data-toggle='tooltip' title='Editar'><i class="fa-solid fa-pencil"></i></a>

@@ -1,0 +1,49 @@
+﻿@model SAGM.Data.Entities.Category
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="panel panel-default">
+            <div class="panel-body">
+                <table class="table-hover table-responsive compact row-border" id="TableCategories" style="font-size:small;">
+
+                    <thead>
+                        <tr>
+                            <th style="text-align:center;">&nbsp;&emsp;#</th>
+                            <th>
+                                @Html.DisplayNameFor(model => model.MaterialTypes.FirstOrDefault().MaterialTypeName)
+                            </th>
+                            <th style="text-align:center;">
+                                @Html.DisplayNameFor(model => model.MaterialTypes.FirstOrDefault().MaterialsNumber)
+                            </th>
+                            <th style="text-align: center;">
+                                @Html.DisplayNameFor(model => model.Active)
+                            </th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model.MaterialTypes)
+                        {
+                            <tr>
+                                <td></td>
+                                <td>
+                                    <a asp-action="DetailsMaterialType" asp-controller="Categories" asp-route-Id="@item.MaterialTypeId">@Html.DisplayFor(modelItem => item.MaterialTypeName)</a>
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.MaterialsNumber)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.Active)
+                                </td>
+                                <td>
+                                    <a onclick="showInPopup('@Url.Action("EditMaterialType","Categories", new {id = item.MaterialTypeId}, Context.Request.Scheme)','Editar tipo de material','bg-warning')" class="btn btn-sm btn-outline-warning"><i class="fa-solid fa-pencil-alt"></i></a>
+                                    <button data-id="@item.MaterialTypeId" class="btn btn-sm btn-danger deleteItem" data-bs-toggle="modal" data-bs-target="#deleteDialog"><i class="fa-solid fa-trash"></i></button>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

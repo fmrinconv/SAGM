@@ -1,28 +1,29 @@
-﻿@model SAGM.Models.MaterialViewModel
-
+﻿@model SAGM.Data.Entities.Category
 @{
-    ViewData["Title"] = "Crear";
+    ViewData["Title"] = "AddOrEditCategory";
     Layout = null;
 }
 
+
+
 <div class="container smfont">
-    <form asp-action="AddMaterial" autocomplete="off" onsubmit="return jQueryAjaxPost(this);">
-        <input type="hidden" asp-for="MaterialTypeId" />
+    <form asp-action="AddOrEditCategory" autocomplete="off" asp-route-id="@Model.CategoryId" onsubmit="return jQueryAjaxPost(this);">
+        <input type="hidden" asp-for="CategoryId" />
         <div class="box-body">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <div class="form-group">
-                <label asp-for="MaterialName" class="control-label"></label>
-                <input asp-for="MaterialName" class="form-control" id="materialName" />
-                <span asp-validation-for="MaterialName" class="text-danger"></span>
+                <span class="required">*</span>
+                <label asp-for="CategoryName" class="control-label"></label>
+                <input asp-for="CategoryName" class="form-control smfont" />
+                <span asp-validation-for="CategoryName" class="text-danger"></span>
             </div>
-            <br />
+           <br />
             <div class="form-group">
                 <label asp-for="Active" class="control-label"></label>
-                <input type="checkbox" asp-for="Active" id="Active" checked="checked" />
+                @Html.EditorFor(model => model.Active)
                 <span asp-validation-for="Active" class="text-danger"></span>
             </div>
         </div>
-      
         <div class="modal-footer">
             <div class="col text-center">
                 <button type="button" class="btn btn-sm btn-primary" data-bs-dismiss="modal"><i class="fa fa-ban"></i> Cancelar</button>
@@ -32,18 +33,11 @@
     </form>
 </div>
 
-
-
-
-
 @section Scripts {
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
+
     }
-    <script>
-        //script para tener el foco sobre el campo inicial
-        $(document).ready(function () {
-            $("#materialName").focus();
-        })
-    </script>
+
 }
+

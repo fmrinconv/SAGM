@@ -1,7 +1,50 @@
-﻿
+﻿@model SAGM.Models.MaterialViewModel
 @{
     ViewData["Title"] = "EditMaterial";
+    Layout = null;
 }
 
-<h1>EditMaterial</h1>
+<div class="container smfont">
+    <form asp-action="EditMaterial" autocomplete="off" asp-route-id="@Model.MaterialId" onsubmit="return jQueryAjaxPost(this);">
+        <input type="hidden" asp-for="MaterialTypeId" />
+        <input type="hidden" asp-for="MaterialId" />
+        <div class="box-body">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <span class="required">*</span>
+                <label asp-for="MaterialName" class="control-label"></label>
+                <input asp-for="MaterialName" class="form-control" id="materialName" />
+                <span asp-validation-for="MaterialName" class="text-danger"></span>
+            </div>
+            <br />
+            <div class="form-group">
+                <label asp-for="Active" class="control-label"></label>
+                <input type="checkbox" asp-for="Active" id="Active" />
+                <span asp-validation-for="Active" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <div class="col text-center">
+                <button type="button" class="btn btn-sm btn-primary" data-bs-dismiss="modal"><i class="fa fa-ban"></i> Cancelar</button>
+                <button type="submit" class="btn btn-sm btn-success"><i class="fa fa-save"></i> Guardar</button>
+            </div>
+        </div>
+    </form>
+</div>
+
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script>
+        //script para tener el foco sobre el campo inicial
+        $(document).ready(function () {
+            $("#materialTypeName").focus();
+            var tmpStr = $("#materialTypeName").val();
+            $("#materialTypeName").val('');
+            $("#materialTypeName").val(tmpStr);
+        })
+    </script>
+}
 

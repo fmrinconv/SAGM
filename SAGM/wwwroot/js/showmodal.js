@@ -1,11 +1,26 @@
-﻿showInPopup = (url, title) => {
+﻿showInPopup = (url, title, classname) => {
     $.ajax({
         type: 'GET',
         url: url,
         success: function (res) {
+            $('#form-modal .modal-header').removeClass("bg-primary");
+            $('#form-modal .modal-header').removeClass("text-white");
+            $('#form-modal .modal-header').removeClass("bg-warning");
+            $('#form-modal .modal-header').removeClass("text-black");
+            
+            $('#form-modal .modal-header').addClass(classname);
+            if (classname == "bg-primary") {
+                $('#form-modal .modal-header').addClass("text-white");
+            }
+            else {
+                $('#form-modal .modal-header').addClass("text-black");
+            }
             $('#form-modal .modal-body').html(res);
             $('#form-modal .modal-title').html(title);
             $('#form-modal').modal('show');
+            setTimeout(function () {
+                $("#form-modal input:text, #form-modal textarea").first().focus();
+            }, 600);
 
         }
     })

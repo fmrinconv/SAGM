@@ -61,7 +61,6 @@
     <script type="text/javascript">
         $(document).ready(function () {
             $("#CountryId").change(function () {
-                debugger;
                 $("#StateId").empty();
                 $("#StateId").append('<option value="0">[Selecciona un estado...]</option>');
                 $("#CityId").empty();
@@ -95,7 +94,6 @@
                     data: { stateId: $("#StateId").val() },
                     success: function (cities) {
                         $.each(cities, function (i, city) {
-                            debugger;
                             $("#CityId").append('<option value="'
                                 + city.cityId + '">'
                                 + city.cityName + '</option>');

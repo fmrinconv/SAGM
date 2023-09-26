@@ -70,7 +70,6 @@
                     data: { stateId: $("#StateId").val() },
                     success: function (cities) {
                         $.each(cities, function (i, city) {
-                            debugger;
                             $("#CityId").append('<option value="'
                                 + city.cityId + '">'
                                 + city.cityName + '</option>');

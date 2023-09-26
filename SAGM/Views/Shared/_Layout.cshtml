@@ -3,13 +3,13 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - SAGM</title>
+    <title>@ViewData["Title"] - SAGEM</title>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/lib/font-awesome/css/all.min.css" />
+    <link rel="stylesheet" href="~/lib/datatables/css/jquery.dataTables.min.css" />
+    <link rel="stylesheet" href="~/lib/jqueryui/themes/base/jquery-ui.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/SAGM.styles.css" asp-append-version="true" />
-    <link href="~/lib/font-awesome/css/all.min.css" rel="stylesheet" />
-    <link rel="stylesheet" href="~/lib/datatables/css/jquery.dataTables.min.css" />
-    <link rel="stylesheet" href="~/lib/jqueryui/jquery-ui.min.css" />
 </head>
 <body>
     <header >
@@ -64,6 +64,7 @@
             </div>
         </nav>
     </header>
+    <div id="Notify" class="col-12"></div>
     <div class="container">
         <main role="main" class="pb-3">
             <partial name="_BusyIndicatorPartial" />
@@ -73,18 +74,19 @@
 
     <footer class="border-top footer text-muted">
         <div class="container">
-            &copy; 2023 - SAGM by Francisco Rincón - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+            &copy; @DateTime.Now.Year - SAGEM by Francisco Rincón - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
         </div>
     </footer>
+
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
-    <script src="~/lib/jasny/jasny-bootstrap.min.js"></script>
+    <script src="~/lib/jquery/dist/notify.min.js"></script>
+    <script src="~/lib/jasny-bootstrap/js/jasny-bootstrap.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
     <script src="~/lib/datatables/js/jquery.dataTables.min.js"></script>
-    <script src="~/lib/jquery-ui/jquery-ui.min.js"></script>
+    <script src="~/lib/jqueryui/jquery-ui.min.js"></script>
     <script src="~/lib/font-awesome/js/all.min.js"></script>
-    <script src="~/js/notify.min.js"></script>
-    <script src="~/lib/font-awesome/js/fontawesome.min.js"></script>
+   
     <script>
         function displayBusyIndicator() {
             $('.loading').show();

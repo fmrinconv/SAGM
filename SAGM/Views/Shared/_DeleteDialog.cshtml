@@ -1,15 +1,35 @@
-﻿﻿<div class="modal fade in" id="deleteDialog" tabindex="-1" role="dialog" data-bs-backdrop="static" aria-labelledby="exampleModalLabel" aria-hidden="true">
+﻿<style>
+    .g1 {
+        background-color: #F9F9F9;
+        margin: 10px 10px 10px 10px;
+        border: 2px solid orange;
+        border-radius: 12px;
+        box-shadow: 5px 5px 5px #555;
+        background-color: whitesmoke;
+        padding: 1px 2px 2px 1px;
+    }
+</style> 
+
+<div class="modal fade in" id="deleteDialog" tabindex="-1" role="dialog" data-bs-backdrop="static" aria-labelledby="exampleModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header bg-blue-gradient">
-                <h5 class="modal-title" id="exampleModalLabel">Borrar Registro</h5>
+        <div class="modal-content g1">
+            <div class="modal-header bg-blue-gradient" style="background-color:gainsboro;">
+                <div class="col-11">
+                    <h5 class="modal-title text-danger" id="exampleModalLabel"><b>¡ Eliminar Registro !</b></h5>
+                </div>
+                <div class="col-1">
+                    <h4><i class="fa-solid fa-triangle-exclamation text-danger"></i></h4>
+                </div>
             </div>
             <div class="modal-body">
                 <p>¿Estas seguro de querer borrar este registro?</p>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-primary" data-bs-dismiss="modal"><i class="fa fa-ban"> </i> No</button>
-                <button type="button" class="btn btn-danger" id="btnYesDelete"><i class="fa fa-check-circle"> </i> Sí</button>
+                <div class="col text-center">
+                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal"><i class="fa fa-ban"> </i> No</button>
+                    <button type="button" class="btn btn-danger" id="btnYesDelete"><i class="fa fa-check-circle"> </i> Sí</button>
+                </div>
+             
             </div>
         </div>
     </div>

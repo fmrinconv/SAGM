@@ -1,0 +1,51 @@
+﻿@model IEnumerable<SAGM.Data.Entities.Category>
+<table class="table-hover table-responsive compact row-border" id="TableCategories" style="font-size:small;">
+    <colgroup>
+        <col span="1" />
+        <col span="1" />
+    </colgroup>
+    <thead>
+        <tr>
+            <th style="text-align:center;">&nbsp;&emsp;#</th>
+            <th>
+                @Html.DisplayNameFor(model => model.CategoryName)
+            </th>
+            <th style="text-align: center;">
+                @Html.DisplayNameFor(model => model.MaterialTypesNumber)
+            </th>
+            <th style="text-align: center;">
+                @Html.DisplayNameFor(model => model.MaterialesNumber)
+            </th>
+            <th style="text-align: center;">
+                @Html.DisplayNameFor(model => model.Active)
+            </th>
+
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td></td>
+                <td>
+                    <a asp-action="Details" asp-controller="Categories" asp-route-Id="@item.CategoryId">@Html.DisplayFor(modelItem => item.CategoryName)</a>
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.MaterialTypesNumber)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.MaterialesNumber)
+                </td>
+                <td>
+                    @Html.CheckBoxFor(modelItem => item.Active, new { @id = "chkDeleted", @disabled = "true", @title="notitle"})
+                </td>
+                <td>
+                    <a onclick="showInPopup('@Url.Action("AddOrEditCategory","Categories", new {id = item.CategoryId}, Context.Request.Scheme)','Editar categoría','bg-warning')" class="btn btn-sm btn-outline-warning"><i class="fa-solid fa-pencil-alt"></i></a>
+                    <button data-id="@item.CategoryId" class="btn btn-sm btn-danger deleteItem" data-bs-toggle="modal" data-bs-target="#deleteDialog"><i class="fa-solid fa-trash"></i></button>
+                   
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

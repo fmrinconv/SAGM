@@ -3,113 +3,78 @@
 @{
     ViewData["Title"] = "Details";
 }
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.0/css/bootstrap.min.css" />
-<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css" />
-<link rel="stylesheet" href="https://cdn.datatables.net/responsive/2.5.0/css/responsive.bootstrap5.min.css" />
-<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css" />
-<link href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" />
-<style>
 
-    a.firstlevel {
-        width: 90px;
-    }
-</style>
 
 <div>
-    <h4>Detalles de tipos de materiales</h4>
-    <hr />
-    <dl class="row">
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.MaterialTypeName)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.MaterialTypeName)
-        </dd>
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.MaterialsNumber)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.MaterialsNumber)
-        </dd>
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.Active)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.Active)
-        </dd>
-    </dl>
-</div>
-<div>
-    <a asp-action="AddMaterial" asp-route-id="@Model.MaterialTypeId" class="btn btn-outline-primary firstlevel">+Material</a>
-    <a asp-action="EditMaterialType" asp-route-id="@Model?.MaterialTypeId" class="btn btn-outline-warning firstlevel">Editar</a>
-    <a asp-action="Details" asp-route-id="@Model.Category.CategoryId" class="btn btn-outline-success firstlevel">Regresar</a>
-</div>
-<div>
-    <hr />
+    <div class="text-primary bg-secondary bg-opacity-25 header">
+        <div class="row">
+            <div class="col-11"><i class="fa fa-object-group"></i><strong> Detalles de tipos de materiales:  <b>@Html.DisplayFor(model => model.MaterialTypeName)</b></strong></div>
+            <div class="col-1 text-end"><a asp-action="Details" asp-route-id="@Model.Category.CategoryId" title="Regresar" class="btn btn-sm btn-outline-success"><i class="fa-solid fa-arrow-rotate-left" title="Regresar"></i></a></div>
+        </div>
+    </div>
+    <div class="contenido container-fluid">
+        <dl class="row">
+            <dt class="col-sm-2">
+                @Html.DisplayNameFor(model => model.MaterialTypeName)
+            </dt>
+            <dd class="col-sm-10">
+                @Html.DisplayFor(model => model.MaterialTypeName)
+            </dd>
+            <dt class="col-sm-2">
+                @Html.DisplayNameFor(model => model.MaterialsNumber)
+            </dt>
+            <dd class="col-sm-10">
+                @Html.DisplayFor(model => model.MaterialsNumber)
+            </dd>
+            <dt class="col-sm-2">
+                @Html.DisplayNameFor(model => model.Active)
+            </dt>
+            <dd class="col-sm-10">
+                @Html.DisplayFor(model => model.Active)
+            </dd>
+        </dl>
+    </div>
+    
 </div>
 
-<div class="row">
-    <div class="col-md-12">
-        <div class="panel panel-default">
-            <div class="panel-heading">
-                <h3 class="panel-title">Materiales</h3>
-            </div>
-            <div class="panel-body">
-                <table class="table-hover table-responsive compact row-border" id="TableStates" style="font-size:small;">
 
-                    <thead>
-                        <tr>
-                            <th style="text-align:center;">&nbsp;&emsp;#</th>
-                            <th>
-                                @Html.DisplayNameFor(model => model.Materials.FirstOrDefault().MaterialName)
-                            </th>
-                            <th style="text-align: center;">
-                                @Html.DisplayNameFor(model => model.Active)
-                            </th>
-                            <th>Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach (var item in Model.Materials)
-                        {
-                            <tr>
-                                <td></td>
-                                <td>
-                                    @Html.DisplayFor(modelItem => item.MaterialName)
-                                </td>
-                                <td>
-                                    @Html.DisplayFor(modelItem => item.Active)
-                                </td>
-                                <td>
-                                    <a asp-action="EditMaterial" asp-route-id="@item.MaterialId" class="btn btn-sm btn-outline-warning" data-toggle='tooltip' title='Editar'><i class="fa-solid fa-pencil"></i></a>
-                                    <a asp-action="DetailsMaterial" asp-route-id="@item.MaterialId" class="btn btn-sm btn-outline-info" data-toggle='tooltip' title='Detalles'><i class="fa-solid fa-info-circle"></i></a>
-                                    <a asp-action="DeleteMaterial" asp-route-id="@item.MaterialId" class="btn btn-sm btn-outline-danger" data-toggle='tooltip' title='Eliminar'><i class="fa-solid fa-trash"></i></a>
-                                </td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
-            </div>
+<div class="contenido card mt-2">
+    <div class="card-header text-primary bg-secondary bg-opacity-25">
+        <i class="fa fa-object-group"></i><strong> Materiales</strong>
+        <a onclick="showInPopup('@Url.Action("AddMaterial", "Categories", new { id = Model.MaterialTypeId}, Context.Request.Scheme)','Nuevo material','bg-primary')" class="btn btn-sm btn-outline-primary"><i class="fa-solid fa-plus-circle" title="Agregar material"></i></a>
+    </div>
+    <div class="card-body">
+        <div id="view-all">
+            <input type="hidden" id="Result" name="Result" value="@ViewBag.Result" />
+            @await Html.PartialAsync("_ViewAllMaterials", Model)
         </div>
     </div>
 </div>
+
+
+
+<partial name="_AddOrEditDialog" />
+<partial name="_DeleteDialog" />
 
 @section Scripts{
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
-    <script src="//code.jquery.com/jquery-3.7.0.js"></script>
-    <script src="//cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
-    <script src="//cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
-    <script src="//cdn.datatables.net/responsive/2.5.0/js/dataTables.responsive.min.js"></script>
-    <script src="//cdn.datatables.net/responsive/2.5.0/js/responsive.bootstrap5.min.js"></script>
+
+    <script src="~/js/showmodal.js"></script>
     <script type="text/javascript">
         var count = 0;
         $(document).ready(function () {
-            $('#TableStates').DataTable(
+            if ($("#Result").val() == "true") {
+                $.notify('@Html.Raw(ViewBag.Message)', "success", { globalPosition: "top center" });
+            }
+            else if ($("#Result").val() == "false") {
+                $.notify('@Html.Raw(ViewBag.Message)', "error", { globalPosition: "top center" });
+            }
+            $('#TableMaterials').DataTable(
                 {
                     "language": {
-                        "url": "//cdn.datatables.net/plug-ins/9dcbecd42ad/i18n/Spanish.json"
+                        "url": "/lib/datatables/Spanish.json"
                     },
                     "aLengthMenu": [
                         [10, 25, 50, 100, 200, -1],
@@ -136,6 +101,7 @@
                         { "data": "MaterialId" }
                     ]
                 });
+            sc_deleteDialog.openModal('deleteItem', true, 'btnYesDelete', '/Categories/DeleteMaterial/', false);
 
         });
     </script>
