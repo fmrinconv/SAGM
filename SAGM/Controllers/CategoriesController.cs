@@ -4,8 +4,8 @@ using Microsoft.EntityFrameworkCore;
 using SAGM.Data;
 using SAGM.Data.Entities;
 using SAGM.Models;
-using Shooping.Helpers; 
-using static Shooping.Helpers.ModalHelper;
+using SAGM.Helpers; 
+using static SAGM.Helpers.ModalHelper;
 
 namespace SAGM.Controllers
 {

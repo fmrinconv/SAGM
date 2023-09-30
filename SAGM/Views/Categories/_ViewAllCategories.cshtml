@@ -1,5 +1,5 @@
 ﻿@model IEnumerable<SAGM.Data.Entities.Category>
-<table class="table-hover table-responsive compact row-border" id="TableCategories" style="font-size:small;">
+<table class="table table-hover table-responsive compact" id="TableCategories" style="font-size:small;">
     <colgroup>
         <col span="1" />
         <col span="1" />
@@ -42,7 +42,7 @@
                 </td>
                 <td>
                     <a onclick="showInPopup('@Url.Action("AddOrEditCategory","Categories", new {id = item.CategoryId}, Context.Request.Scheme)','Editar categoría','bg-warning')" class="btn btn-sm btn-outline-warning"><i class="fa-solid fa-pencil-alt"></i></a>
-                    <button data-id="@item.CategoryId" class="btn btn-sm btn-danger deleteItem" data-bs-toggle="modal" data-bs-target="#deleteDialog"><i class="fa-solid fa-trash"></i></button>
+                    <button data-id="@item.CategoryId" class="btn btn-sm btn-outline-danger deleteItem" data-bs-toggle="modal" data-bs-target="#deleteDialog"><i class="fa-solid fa-trash"></i></button>
                    
                 </td>
             </tr>

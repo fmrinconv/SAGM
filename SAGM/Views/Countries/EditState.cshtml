@@ -2,21 +2,19 @@
 
 @{
     ViewData["Title"] = "Editar Estado";
+    Layout = null;
 }
 
-<h1>Editar</h1>
-
-<h4>Estado</h4>
-<hr />
-<div class="row">
-    <div class="col-md-4">
-        <form asp-action="EditState">
+<div class="container smfont">
+    <form asp-action="EditState" autocomplete="off" asp-route-id="@Model.StateId" onsubmit="return jQueryAjaxPost(this);">
+        <input type="hidden" asp-for="CountryId" />
+        <input type="hidden" asp-for="StateId" />
+        <div class="box-body">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <input type="hidden" asp-for="CountryId" />
-            <input type="hidden" asp-for="StateId" />
             <div class="form-group">
+                <span class="required">*</span>
                 <label asp-for="StateName" class="control-label"></label>
-                <input asp-for="StateName" class="form-control" id="statename" />
+                <input asp-for="StateName" class="form-control" id="stateName" />
                 <span asp-validation-for="StateName" class="text-danger"></span>
             </div>
             <br />
@@ -25,13 +23,14 @@
                 <input type="checkbox" asp-for="Active" id="Active" />
                 <span asp-validation-for="Active" class="text-danger"></span>
             </div>
-            <br />
-            <div class="form-group mt-2">
-                <input type="submit" value="Guardar" class="btn btn-outline-warning" />
-                <a asp-action="Details" asp-route-id="@Model.CountryId" class="btn btn-outline-success">Regresar</a>
+        </div>
+        <div class="modal-footer">
+            <div class="col text-center">
+                <button type="button" class="btn btn-sm btn-primary" data-bs-dismiss="modal"><i class="fa fa-ban"></i> Cancelar</button>
+                <button type="submit" class="btn btn-sm btn-success"><i class="fa fa-save"></i> Guardar</button>
             </div>
-        </form>
-    </div>
+        </div>
+    </form>
 </div>
 
 
