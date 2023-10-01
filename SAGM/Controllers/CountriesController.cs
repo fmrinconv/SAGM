@@ -101,6 +101,37 @@ namespace SAGM.Controllers
 
         public async Task<IActionResult> DetailsState(int? id)
         {
+            //---------------------
+
+            ViewBag.Result = "";
+            ViewBag.Message = "";
+
+            if (TempData["CityDeleteResult"] != null)
+            {
+
+                ViewBag.Result = TempData["CityDeleteResult"].ToString();
+                ViewBag.Message = TempData["CityDeleteMessage"].ToString();
+                TempData.Remove("CityDeleteResult");
+                TempData.Remove("CityDeleteMessage");
+            }
+
+            if (TempData["CityEditResult"] != null)
+            {
+
+                ViewBag.Result = TempData["CityEditResult"].ToString();
+                ViewBag.Message = TempData["CityEditMessage"].ToString();
+                TempData.Remove("CityEditResult");
+                TempData.Remove("CityEditMessage");
+            }
+            if (TempData["CityAddResult"] != null)
+            {
+
+                ViewBag.Result = TempData["CityAddResult"].ToString();
+                ViewBag.Message = TempData["CityAddMessage"].ToString();
+                TempData.Remove("CityAddResult");
+                TempData.Remove("CityAddMessage");
+            }
+
             if (id == null)
             {
                 return NotFound();
@@ -193,9 +224,12 @@ namespace SAGM.Controllers
             CityViewModel model = new()
             {
                 StateId = state.StateId,
+                Active = true
             };
 
             return View(model);
+
+
         }
 
         [HttpPost]
@@ -210,9 +244,13 @@ namespace SAGM.Controllers
                     {
                         State = await _context.States.FindAsync(model.StateId),
                         CityName = model.CityName,
+                        Active = model.Active
                     };
                     _context.Add(city);
                     await _context.SaveChangesAsync();
+                    await _context.SaveChangesAsync();
+                    TempData["CityAddResult"] = "true";
+                    TempData["CityAddMessage"] = "La ciudad fué agregada";
                     State state = await _context.States
                         .Include(s => s.Cities)
                         .FirstOrDefaultAsync(c => c.StateId == model.StateId);
@@ -224,10 +262,12 @@ namespace SAGM.Controllers
                     if (dbUpdateException.InnerException.Message.Contains("duplicate"))
                     {
                         ModelState.AddModelError(string.Empty, "Ya existe una ciudad con el mismo nombre en este Estado.");
+                        return Json(new { isValid = false, html = ModalHelper.RenderRazorViewToString(this, "AddCity", model) });
                     }
                     else
                     {
                         ModelState.AddModelError(string.Empty, dbUpdateException.InnerException.Message);
+                        return Json(new { isValid = false, html = ModalHelper.RenderRazorViewToString(this, "AddCity", model) });
                     }
                 }
                 catch (Exception exception)
@@ -236,7 +276,7 @@ namespace SAGM.Controllers
                 }
             }
 
-            return Json(new { isValid = false, html = ModalHelper.RenderRazorViewToString(this, "AddCity", model) });
+            return View(model);
         }
 
         [NoDirectAccess]
@@ -344,6 +384,7 @@ namespace SAGM.Controllers
                 StateId = city.State.StateId,
                 CityId = city.CityId,
                 CityName = city.CityName,
+                Active = city.Active,
             };
 
             return View(model);
@@ -366,13 +407,15 @@ namespace SAGM.Controllers
                     {
                         CityId = model.CityId,
                         CityName = model.CityName,
+                        Active = model.Active,
                     };
                     _context.Update(city);
                     await _context.SaveChangesAsync();
                     State state = await _context.States
                         .Include(s => s.Cities)
                         .FirstOrDefaultAsync(c => c.StateId == model.StateId);
-
+                        TempData["CityEditResult"] = "true";
+                        TempData["CityEditMessage"] = "El estado fué actualizado";
                     return Json(new { isValid = true, html = ModalHelper.RenderRazorViewToString(this, "_ViewAllCities", state) });
                 }
                 catch (DbUpdateException dbUpdateException)
@@ -380,10 +423,12 @@ namespace SAGM.Controllers
                     if (dbUpdateException.InnerException.Message.Contains("duplicate"))
                     {
                         ModelState.AddModelError(string.Empty, "Ya existe una ciuad con el mismo nombre en este Estado.");
+                        return Json(new { isValid = false, html = ModalHelper.RenderRazorViewToString(this, "EditCity", model) });
                     }
                     else
                     {
-                        ModelState.AddModelError(string.Empty, dbUpdateException.InnerException.Message);
+                        ModelState.AddModelError(string.Empty, dbUpdateException.InnerException.Message.ToString());
+                        return Json(new { isValid = false, html = ModalHelper.RenderRazorViewToString(this, "EditCity", model) });
                     }
                 }
                 catch (Exception exception)
@@ -392,7 +437,7 @@ namespace SAGM.Controllers
                 }
             }
 
-            return Json(new { isValid = false, html = ModalHelper.RenderRazorViewToString(this, "EditCity", model) });
+            return View(model);
         }
 
         [NoDirectAccess]
@@ -519,12 +564,12 @@ namespace SAGM.Controllers
                 _context.States.Remove(state);
                 await _context.SaveChangesAsync();
                 TempData["StateDeleteResult"] = "true";
-                TempData["StateDeleteMessage"] = "El tipo de material fué eliminado";
+                TempData["StateDeleteMessage"] = "El estado fué eliminado";
             }
             catch
             {
                 TempData["StateeDeleteResult"] = "false";
-                TempData["StateeDeleteMessage"] = "El tipo de material no pudo ser eliminado";
+                TempData["StateeDeleteMessage"] = "El estado no pudo ser eliminado";
                 return RedirectToAction(nameof(Details), new { id = state.Country.CountryId });
             }
 
@@ -537,22 +582,22 @@ namespace SAGM.Controllers
             City city = await _context.Cities
                 .Include(c => c.State)
                 .FirstOrDefaultAsync(c => c.CityId == id);
-            if (city == null)
-            {
-                return NotFound();
-            }
 
             try
             {
+                TempData["CityDeleteResult"] = "true";
+                TempData["CityDeleteMessage"] = "La ciudad fué eliminada";
                 _context.Cities.Remove(city);
                 await _context.SaveChangesAsync();
+               
             }
             catch
             {
-               // _flashMessage.Danger("No se puede borrar la ciudad porque tiene registros relacionados.");
+                TempData["CityDeleteResult"] = "false";
+                TempData["CityDeleteMessage"] = "La ciudad no pudo ser eliminada";
+                return RedirectToAction(nameof(DetailsState), new { id = city.State.StateId });
             }
 
-           // _flashMessage.Info("Registro borrado.");
             return RedirectToAction(nameof(DetailsState), new { id = city.State.StateId });
         }
 

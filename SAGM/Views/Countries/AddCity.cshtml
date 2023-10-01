@@ -2,34 +2,35 @@
 
 @{
     ViewData["Title"] = "Crear";
+    Layout = null;
 }
 
-
-<h4>Agregar ciudad</h4>
-<hr />
-<div class="row">
-    <div class="col-md-4">
-        <form asp-action="AddCity">
+<div class="container smfont">
+    <form asp-action="AddCity" autocomplete="off" onsubmit="return jQueryAjaxPost(this);">
+        <input type="hidden" asp-for="StateId" />
+        <div class="box-body">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <input type="hidden" asp-for="StateId" />
             <div class="form-group">
                 <label asp-for="CityName" class="control-label"></label>
                 <input asp-for="CityName" class="form-control" id="cityname" />
                 <span asp-validation-for="CityName" class="text-danger"></span>
             </div>
-            <br/>
+            <br />
             <div class="form-group">
                 <label asp-for="Active" class="control-label"></label>
                 <input type="checkbox" asp-for="Active" id="Active" checked="checked" />
                 <span asp-validation-for="Active" class="text-danger"></span>
             </div>
-            <div class="form-group mt-2">
-                <input type="submit" value="Crear" class="btn btn-outline-primary" />
-                <a asp-action="DetailsState" asp-route-id="@Model.StateId" class="btn btn-outline-success">Regresar</a>
+        </div>
+        <div class="modal-footer">
+            <div class="col text-center">
+                <button type="button" class="btn btn-sm btn-primary" data-bs-dismiss="modal"><i class="fa fa-ban"></i> Cancelar</button>
+                <button type="submit" class="btn btn-sm btn-success"><i class="fa fa-save"></i> Guardar</button>
             </div>
-        </form>
-    </div>
+        </div>
+    </form>
 </div>
+
 
 @section Scripts {
     @{

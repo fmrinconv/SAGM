@@ -2,21 +2,18 @@
 
 @{
     ViewData["Title"] = "Editar Ciudad";
+    Layout = null;
 }
-
-<h1>Editar</h1>
-
-<h4>Ciudad</h4>
-<hr />
-<div class="row">
-    <div class="col-md-4">
-        <form asp-action="EditCity">
+<div class="container smfont">
+    <form asp-action="EditCity" autocomplete="off" asp-route-id="@Model.CityId" onsubmit="return jQueryAjaxPost(this);">
+        <input type="hidden" asp-for="StateId" />
+        <input type="hidden" asp-for="CityId" />
+        <div class="box-body">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <input type="hidden" asp-for="StateId" />
-            <input type="hidden" asp-for="CityId" />
             <div class="form-group">
+                <span class="required">*</span>
                 <label asp-for="CityName" class="control-label"></label>
-                <input asp-for="CityName" class="form-control" id="cityname" />
+                <input asp-for="CityName" class="form-control" id="cityName" />
                 <span asp-validation-for="CityName" class="text-danger"></span>
             </div>
             <br />
@@ -25,16 +22,15 @@
                 <input type="checkbox" asp-for="Active" id="Active" />
                 <span asp-validation-for="Active" class="text-danger"></span>
             </div>
-            <br />
-            <div class="form-group mt-2">
-                <input type="submit" value="Guardar" class="btn btn-outline-warning" />
-                <a asp-action="DetailsState" asp-route-id="@Model.StateId" class="btn btn-outline-success">Regresar</a>
+        </div>
+        <div class="modal-footer">
+            <div class="col text-center">
+                <button type="button" class="btn btn-sm btn-primary" data-bs-dismiss="modal"><i class="fa fa-ban"></i> Cancelar</button>
+                <button type="submit" class="btn btn-sm btn-success"><i class="fa fa-save"></i> Guardar</button>
             </div>
-        </form>
-    </div>
+        </div>
+    </form>
 </div>
-
-
 @section Scripts {
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");

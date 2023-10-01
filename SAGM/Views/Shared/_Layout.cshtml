@@ -23,6 +23,9 @@
     .login{
         color: orange !important;
     }
+    .home:hover {
+        color: navy !important;
+    }
     
 </style>
 <body>
@@ -37,14 +40,14 @@
                         </button>
                         <div class="collapse navbar-collapse" id="navbarSupportedContent">
                             <ul class="navbar-nav">
-                                <li class="nav-item">
-                                    <a class="nav-link text-primary" asp-controller="Home" asp-action="Index">Inicio</a>
-                                </li>
 @*                                <li class="nav-item">
                                     <a class="nav-link" href="#">Link</a>
                                 </li>*@
                                 @if (User.Identity.IsAuthenticated)
                                 {
+                                    <li class="nav-item">
+                                        <a class="nav-link text-primary home" asp-controller="Home" asp-action="Index"><i class="fa fa-home"></i></a>
+                                    </li>
                                 <li class="nav-item dropdown">
                                     <a class="nav-link dropdown-toggle text-primary" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                                         Catalogos

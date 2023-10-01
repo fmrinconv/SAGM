@@ -1,103 +1,75 @@
 ﻿@model SAGM.Data.Entities.State
 
 @{
-    ViewData["Title"] = "Details";
+    ViewData["Title"] = "Detalle de " + Model.StateName;
 }
 
-<style>
-
-    a.firstlevel {
-        width: 80px;
-    }
-</style>
 
 <div>
-    <h4>Detalles de estado</h4>
-    <hr />
-    <dl class="row">
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.StateName)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.StateName)
-        </dd>
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.CitiesNumber)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.CitiesNumber)
-        </dd>
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.Active)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.Active)
-        </dd>
-    </dl>
-</div>
-<div>
-    <a asp-action="AddCity" asp-route-id="@Model.StateId" class="btn btn-outline-primary firstlevel">+Ciudad</a>
-    <a asp-action="EditState" asp-route-id="@Model?.StateId" class="btn btn-outline-warning firstlevel">Editar</a>
-    <a asp-action="Details" asp-route-id="@Model.Country.CountryId" class="btn btn-outline-success firstlevel">Regresar</a>
-</div>
-<div>
-    <hr />
+    <div class="text-primary bg-secondary bg-opacity-25 header">
+        <div class="row">
+            <div class="col-11"><i class="fa fa-globe"></i><strong> Detalle de estado:  <b>@Html.DisplayFor(model => model.StateName)</b></strong></div>
+            <div class="col-1 text-end"><a asp-action="Details" asp-route-id="@Model.Country.CountryId" title="Regresar" class="btn btn-sm btn-outline-success"><i class="fa-solid fa-arrow-rotate-left" title="Regresar"></i></a></div>
+        </div>
+    </div>
+
+    <div class="contenido container-fluid">
+        <dl class="row">
+            <dt class="col-sm-2">
+                @Html.DisplayNameFor(model => model.StateName)
+            </dt>
+            <dd class="col-sm-10">
+                @Html.DisplayFor(model => model.StateName)
+            </dd>
+            <dt class="col-sm-2">
+                @Html.DisplayNameFor(model => model.CitiesNumber)
+            </dt>
+            <dd class="col-sm-10">
+                @Html.DisplayFor(model => model.CitiesNumber)
+            </dd>
+            <dt class="col-sm-2">
+                @Html.DisplayNameFor(model => model.Active)
+            </dt>
+            <dd class="col-sm-10">
+                @Html.DisplayFor(model => model.Active)
+            </dd>
+        </dl>
+    </div>
 </div>
 
-<div class="row">
-    <div class="col-md-12">
-        <div class="panel panel-default">
-            <div class="panel-heading">
-                <h3 class="panel-title">Ciudades</h3>
-            </div>
-            <div class="panel-body">
-                <table class="table-hover table-responsive compact row-border" id="TableStates" style="font-size:small;">
 
-                    <thead>
-                        <tr>
-                            <th style="text-align:center;">&nbsp;&emsp;#</th>
-                            <th>
-                                @Html.DisplayNameFor(model => model.Cities.FirstOrDefault().CityName)
-                            </th>
-                            <th style="text-align: center;">
-                                @Html.DisplayNameFor(model => model.Active)
-                            </th>
-                            <th>Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach (var item in Model.Cities)
-                        {
-                            <tr>
-                                <td></td>
-                                <td>
-                                    @Html.DisplayFor(modelItem => item.CityName)
-                                </td>
-                                <td>
-                                    @Html.DisplayFor(modelItem => item.Active)
-                                </td>
-                                <td>
-                                    <a asp-action="EditCity" asp-route-id="@item.CityId" class="btn btn-sm btn-outline-warning" data-toggle='tooltip' title='Editar'><i class="fa-solid fa-pencil"></i></a>
-                                    <a asp-action="DetailsCity" asp-route-id="@item.CityId" class="btn btn-sm btn-outline-info" data-toggle='tooltip' title='Detalles'><i class="fa-solid fa-info-circle"></i></a>
-                                    <a asp-action="DeleteCity" asp-route-id="@item.CityId" class="btn btn-sm btn-outline-danger" data-toggle='tooltip' title='Eliminar'><i class="fa-solid fa-trash"></i></a>
-                                </td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
-            </div>
+<div class="contenido card mt-2">
+    <div class="card-header text-primary bg-secondary bg-opacity-25">
+        <i class="fa fa-globe"></i><strong> Ciudades</strong>
+        <a onclick="showInPopup('@Url.Action("AddCity", "Countries", new { id = Model.StateId}, Context.Request.Scheme)','Agregar ciudad','bg-primary')" class="btn btn-sm btn-outline-primary"><i class="fa-solid fa-plus-circle" title="Agregar ciudad"></i></a>
+    </div>
+    <div class="card-body">
+        <div id="view-all">
+            <input type="hidden" id="Result" name="Result" value="@ViewBag.Result" />
+            @await Html.PartialAsync("_ViewAllCities", Model)
         </div>
     </div>
 </div>
+
+<partial name="_AddOrEditDialog" />
+<partial name="_DeleteDialog" />
 
 @section Scripts{
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
+
+    <script src="~/js/showmodal.js"></script>
     <script type="text/javascript">
         var count = 0;
         $(document).ready(function () {
-            $('#TableStates').DataTable(
+            if ($("#Result").val() == "true") {
+                $.notify('@Html.Raw(ViewBag.Message)', "success", { globalPosition: "top center" });
+            }
+            else if ($("#Result").val() == "false") {
+                $.notify('@Html.Raw(ViewBag.Message)', "error", { globalPosition: "top center" });
+            }
+            $('#TableCities').DataTable(
                 {
                     "language": {
                         "url": "/lib/datatables/Spanish.json"
@@ -127,7 +99,7 @@
                         { "data": "CityId" }
                     ]
                 });
-
+            sc_deleteDialog.openModal('deleteItem', true, 'btnYesDelete', '/Countries/DeleteCity/', false);
         });
     </script>
            }
