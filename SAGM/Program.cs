@@ -14,7 +14,7 @@ internal class Program
         builder.Services.AddControllersWithViews();
         builder.Services.AddDbContext<SAGMContext>(o =>
         {
-            o.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
+            o.UseSqlServer(builder.Configuration.GetConnectionString("LocalConnection"));
         });
 
         builder.Services.AddIdentity<User, IdentityRole>(cfg =>

@@ -1181,7 +1181,63 @@ namespace SAGM.Data
                                     new City{ CityName = "Cadereyta Jiménez", Active = true},
                                     new City{ CityName = "El Carmen", Active = true},
                                     new City{ CityName = "Cerralvo", Active = true},
-                                    new City{ CityName = "Ciénega de Flores", Active = true},
+                                    new City{ CityName = "Ciénega de Flores", Active = true,
+                                            Customer = new List<Customer>()
+                                            { new Customer { CustomerName = "NGK CERAMICS MEXICO",
+                                                             CustomerNickName = "NGK",
+                                                             TaxId = "NCM080123TZ1",
+                                                             Address = "AV TECNOLOGICO, MONTERREY TECHNOLOGY PARK",
+                                                             PostalCode = "65550",
+                                                             CreditDays = 30,
+                                                             Active = true,
+                                                             PhoneNumber = "82881000",
+                                                             Contacts = new List<Contact>(){
+                                                                                            new Contact { Name = "Adan",
+                                                                                                          LastName="Reyna",
+                                                                                                          Email = "adan.reyna@ngk.com.mx",
+                                                                                                          Mobile= "",
+                                                                                                          Active = true,
+                                                                                                          PhoneNumber = "8182881000 ext 159"
+                                                                                                        } ,
+                                                                                            new Contact { Name = "Alejandra",
+                                                                                                          LastName="Alfaro",
+                                                                                                          Email = "alejandra.alfaro@ngk.com.mx",
+                                                                                                          Mobile= "",
+                                                                                                          Active = true,
+                                                                                                          PhoneNumber = "8182881000 ext 646"
+                                                                                                        } ,
+                                                                                             new Contact { Name = "Alberto",
+                                                                                                          LastName="Ríos",
+                                                                                                          Email = "alberto.rios@ngk.com.mx",
+                                                                                                          Mobile= "",
+                                                                                                          Active = true,
+                                                                                                          PhoneNumber = "8182881000 ext 554"
+                                                                                                        } ,
+                                                                                            new Contact { Name = "Daniel",
+                                                                                                          LastName="Fernandez",
+                                                                                                          Email = "daniel.fernandez@ngk.com.mx",
+                                                                                                          Mobile= "8123500162",
+                                                                                                          Active = true, 
+                                                                                                          PhoneNumber = "8182881000 ext 159"
+                                                                                                        } ,
+                                                                                            new Contact { Name = "Ruben",
+                                                                                                          LastName="Rojas",
+                                                                                                          Email = "ruben.rojas@ngk.com.mx",
+                                                                                                          Mobile= "",
+                                                                                                          Active = true, 
+                                                                                                          PhoneNumber = "8182881000 ext 168"
+                                                                                                        },
+                                                                                             new Contact { Name = "Chrisitian",
+                                                                                                          LastName="Enriquez",
+                                                                                                          Email = "christian.enriquez@ngk.com.mx",
+                                                                                                          Mobile= "81 23 67 94 84",
+                                                                                                          Active = true,
+                                                                                                          PhoneNumber = "8182881000 ext 551"
+                                                                                                        }
+                                                                                            } 
+                                                            } 
+                                            }
+                                    },
                                     new City{ CityName = "China", Active = true},
                                     new City{ CityName = "Doctor Arroyo", Active = true},
                                     new City{ CityName = "Doctor Coss", Active = true},
@@ -1195,7 +1251,63 @@ namespace SAGM.Data
                                     new City{ CityName = "General Treviño", Active = true},
                                     new City{ CityName = "General Zaragoza", Active = true},
                                     new City{ CityName = "General Zuazua", Active = true},
-                                    new City{ CityName = "Guadalupe", Active = true},
+                                    new City{ CityName = "Guadalupe", Active = true,
+                                            Customer = new List<Customer>()
+                                            { new Customer { CustomerName = "VESUVIUS MEXICO",
+                                                             CustomerNickName = "VESUVIUS",
+                                                             TaxId = "VME651207490",
+                                                             Address = "AV RUIZ CORTINEZ 140, JARDINDES DE SAN RAFAEL",
+                                                             PostalCode = "67119",
+                                                             CreditDays = 30,
+                                                             Active = true,
+                                                             PhoneNumber = "8183194500",
+                                                             Contacts = new List<Contact>(){
+                                                                                            new Contact { Name = "",
+                                                                                                          LastName="Reyna",
+                                                                                                          Email = "Aaron.Gonzalez@vesuvius.com",
+                                                                                                          Mobile= "8120227644",
+                                                                                                          Active = true,
+                                                                                                          PhoneNumber = "8183194500"
+                                                                                                        } ,
+                                                                                            new Contact { Name = "Ana",
+                                                                                                          LastName="Martinez",
+                                                                                                          Email = "Ana.Martinez@vesuvius.com",
+                                                                                                          Mobile= "",
+                                                                                                          Active = true,
+                                                                                                          PhoneNumber = "8183194500"
+                                                                                                        } ,
+                                                                                             new Contact { Name = "Evaristo",
+                                                                                                          LastName="Beltran",
+                                                                                                          Email = "Evaristo.Beltran@vesuvius.com",
+                                                                                                          Mobile= "8114813945",
+                                                                                                          Active = true,
+                                                                                                          PhoneNumber = "8183194500 ext 4636"
+                                                                                                        } ,
+                                                                                            new Contact { Name = "Luis",
+                                                                                                          LastName="Puebla",
+                                                                                                          Email = "luis.puebla@vesuvius.com",
+                                                                                                          Mobile= "81 8704 2789",
+                                                                                                          Active = true,
+                                                                                                          PhoneNumber = "8183194500"
+                                                                                                        } ,
+                                                                                            new Contact { Name = "Roberto",
+                                                                                                          LastName="Ramirez",
+                                                                                                          Email = "roberto.ramirez@vesuvius.com",
+                                                                                                          Mobile= "81 8366 8662",
+                                                                                                          Active = true,
+                                                                                                          PhoneNumber = "8183194500"
+                                                                                                        },
+                                                                                             new Contact { Name = "Victor",
+                                                                                                          LastName="Solis",
+                                                                                                          Email = "victor.solis@vesuvius.com",
+                                                                                                          Mobile= "8115162677",
+                                                                                                          Active = true,
+                                                                                                          PhoneNumber = "8183194500"
+                                                                                                        }
+                                                                                            }
+                                                            }
+                                            }
+                                    },
                                     new City{ CityName = "Los Herreras", Active = true},
                                     new City{ CityName = "Higueras", Active = true},
                                     new City{ CityName = "Hualahuises", Active = true},
@@ -3487,5 +3599,8 @@ namespace SAGM.Data
             }
             await _context.SaveChangesAsync();
         }
+
+
+     
     }
 }

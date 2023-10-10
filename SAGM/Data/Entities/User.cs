@@ -23,6 +23,8 @@ namespace SAGM.Data.Entities
         [Required(ErrorMessage = "El campo {0} es obligatorio.")]
         public string LastName { get; set; }
 
+
+
         [Display(Name = "Ciudad")]
         public City City { get; set; }
 
@@ -53,8 +55,6 @@ namespace SAGM.Data.Entities
 
         [Display(Name = "Usuario")]
         public string FullNameWithDocument => $"{FirstName} {LastName} - {Document}";
-
-
 
 
     }

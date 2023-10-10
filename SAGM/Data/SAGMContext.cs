@@ -19,6 +19,10 @@ namespace SAGM.Data
         public DbSet<MaterialType> MaterialTypes { get; set; }
         public DbSet<Material> Materials { get; set; }
 
+        public DbSet<Customer> Customers{ get; set; }
+
+        public DbSet<Contact> Contacts { get; set; }
+
         internal static IConfiguration GetService(Type type)
         {
             throw new NotImplementedException();
@@ -31,9 +35,10 @@ namespace SAGM.Data
             modelBuilder.Entity<State>().HasIndex("StateName","CountryId").IsUnique();
             modelBuilder.Entity<City>().HasIndex("CityName", "StateId").IsUnique();
             modelBuilder.Entity<Category>().HasIndex(c => c.CategoryName).IsUnique();
+            modelBuilder.Entity<Customer>().HasIndex(c => c.CustomerName).IsUnique();
             modelBuilder.Entity<MaterialType>().HasIndex("MaterialTypeName", "CategoryId").IsUnique();
             modelBuilder.Entity<Material>().HasIndex("MaterialName", "MaterialTypeId").IsUnique();
+            modelBuilder.Entity<Contact>().HasIndex("Name", "LastName", "CustomerId").IsUnique();
         }
-
     }
 }

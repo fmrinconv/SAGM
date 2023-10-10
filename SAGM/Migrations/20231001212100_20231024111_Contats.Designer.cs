@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SAGM.Data;
 
@@ -11,9 +12,11 @@ using SAGM.Data;
 namespace SAGM.Migrations
 {
     [DbContext(typeof(SAGMContext))]
-    partial class SAGMContextModelSnapshot : ModelSnapshot
+    [Migration("20231001212100_20231024111_Contats")]
+    partial class _20231024111_Contats
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -220,12 +223,16 @@ namespace SAGM.Migrations
                     b.Property<bool>("Active")
                         .HasColumnType("bit");
 
-                    b.Property<int?>("CustomerId")
+                    b.Property<string>("Address")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<int?>("CityId")
                         .HasColumnType("int");
 
-                    b.Property<string>("Email")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int?>("CustomerId")
+                        .HasColumnType("int");
 
                     b.Property<Guid>("ImageId")
                         .HasColumnType("uniqueidentifier");
@@ -250,7 +257,12 @@ namespace SAGM.Migrations
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)");
 
+                    b.Property<string>("PostalCode")
+                        .HasColumnType("nvarchar(max)");
+
                     b.HasKey("ContactId");
+
+                    b.HasIndex("CityId");
 
                     b.HasIndex("CustomerId");
 
@@ -419,6 +431,9 @@ namespace SAGM.Migrations
                     b.Property<int?>("CountryId")
                         .HasColumnType("int");
 
+                    b.Property<int?>("CustomerId")
+                        .HasColumnType("int");
+
                     b.Property<string>("StateName")
                         .IsRequired()
                         .HasMaxLength(100)
@@ -427,6 +442,8 @@ namespace SAGM.Migrations
                     b.HasKey("StateId");
 
                     b.HasIndex("CountryId");
+
+                    b.HasIndex("CustomerId");
 
                     b.HasIndex("StateName", "CountryId")
                         .IsUnique()
@@ -595,9 +612,15 @@ namespace SAGM.Migrations
 
             modelBuilder.Entity("SAGM.Data.Entities.Contact", b =>
                 {
+                    b.HasOne("SAGM.Data.Entities.City", "City")
+                        .WithMany()
+                        .HasForeignKey("CityId");
+
                     b.HasOne("SAGM.Data.Entities.Customer", "Customer")
-                        .WithMany("Contacts")
+                        .WithMany()
                         .HasForeignKey("CustomerId");
+
+                    b.Navigation("City");
 
                     b.Navigation("Customer");
                 });
@@ -605,7 +628,7 @@ namespace SAGM.Migrations
             modelBuilder.Entity("SAGM.Data.Entities.Customer", b =>
                 {
                     b.HasOne("SAGM.Data.Entities.City", "City")
-                        .WithMany("Customer")
+                        .WithMany("Customers")
                         .HasForeignKey("CityId");
 
                     b.Navigation("City");
@@ -635,6 +658,10 @@ namespace SAGM.Migrations
                         .WithMany("States")
                         .HasForeignKey("CountryId");
 
+                    b.HasOne("SAGM.Data.Entities.Customer", null)
+                        .WithMany("States")
+                        .HasForeignKey("CustomerId");
+
                     b.Navigation("Country");
                 });
 
@@ -654,7 +681,7 @@ namespace SAGM.Migrations
 
             modelBuilder.Entity("SAGM.Data.Entities.City", b =>
                 {
-                    b.Navigation("Customer");
+                    b.Navigation("Customers");
 
                     b.Navigation("Users");
                 });
@@ -666,7 +693,7 @@ namespace SAGM.Migrations
 
             modelBuilder.Entity("SAGM.Data.Entities.Customer", b =>
                 {
-                    b.Navigation("Contacts");
+                    b.Navigation("States");
                 });
 
             modelBuilder.Entity("SAGM.Data.Entities.MaterialType", b =>

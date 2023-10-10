@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SAGM.Data;
 
@@ -11,9 +12,11 @@ using SAGM.Data;
 namespace SAGM.Migrations
 {
     [DbContext(typeof(SAGMContext))]
-    partial class SAGMContextModelSnapshot : ModelSnapshot
+    [Migration("20231001204121_Customers")]
+    partial class Customers
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -207,58 +210,6 @@ namespace SAGM.Migrations
                         .HasFilter("[StateId] IS NOT NULL");
 
                     b.ToTable("Cities");
-                });
-
-            modelBuilder.Entity("SAGM.Data.Entities.Contact", b =>
-                {
-                    b.Property<int>("ContactId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ContactId"));
-
-                    b.Property<bool>("Active")
-                        .HasColumnType("bit");
-
-                    b.Property<int?>("CustomerId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Email")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<Guid>("ImageId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("LastName")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<string>("Mobile")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<string>("PhoneNumber")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
-
-                    b.HasKey("ContactId");
-
-                    b.HasIndex("CustomerId");
-
-                    b.HasIndex("Name", "LastName", "CustomerId")
-                        .IsUnique()
-                        .HasFilter("[CustomerId] IS NOT NULL");
-
-                    b.ToTable("Contacts");
                 });
 
             modelBuilder.Entity("SAGM.Data.Entities.Country", b =>
@@ -593,19 +544,10 @@ namespace SAGM.Migrations
                     b.Navigation("State");
                 });
 
-            modelBuilder.Entity("SAGM.Data.Entities.Contact", b =>
-                {
-                    b.HasOne("SAGM.Data.Entities.Customer", "Customer")
-                        .WithMany("Contacts")
-                        .HasForeignKey("CustomerId");
-
-                    b.Navigation("Customer");
-                });
-
             modelBuilder.Entity("SAGM.Data.Entities.Customer", b =>
                 {
                     b.HasOne("SAGM.Data.Entities.City", "City")
-                        .WithMany("Customer")
+                        .WithMany("Customers")
                         .HasForeignKey("CityId");
 
                     b.Navigation("City");
@@ -654,7 +596,7 @@ namespace SAGM.Migrations
 
             modelBuilder.Entity("SAGM.Data.Entities.City", b =>
                 {
-                    b.Navigation("Customer");
+                    b.Navigation("Customers");
 
                     b.Navigation("Users");
                 });
@@ -662,11 +604,6 @@ namespace SAGM.Migrations
             modelBuilder.Entity("SAGM.Data.Entities.Country", b =>
                 {
                     b.Navigation("States");
-                });
-
-            modelBuilder.Entity("SAGM.Data.Entities.Customer", b =>
-                {
-                    b.Navigation("Contacts");
                 });
 
             modelBuilder.Entity("SAGM.Data.Entities.MaterialType", b =>
