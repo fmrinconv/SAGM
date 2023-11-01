@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using SAGM.Data.Entities;
+using SAGM.Models;
 
 namespace SAGM.Data
 {
@@ -22,6 +23,18 @@ namespace SAGM.Data
         public DbSet<Customer> Customers{ get; set; }
 
         public DbSet<Contact> Contacts { get; set; }
+
+        public DbSet<Currency> Currencies { get; set; }
+
+        public DbSet<Quote> Quotes { get; set; }
+
+        public DbSet<QuoteDetail> QuoteDetails { get; set; }
+
+        public DbSet<QuoteStatus> QuoteStatus { get; set; }
+
+
+        public DbSet<Unit> Units { get; set; }
+
 
         internal static IConfiguration GetService(Type type)
         {

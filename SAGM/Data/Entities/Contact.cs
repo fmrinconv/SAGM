@@ -54,8 +54,7 @@ namespace SAGM.Data.Entities
 
         [Display(Name = "Contacto")]
         public string FullName => $"{Name} {LastName}";
-
-
         public Customer Customer { get; set; }
+
     }
 }

@@ -3,140 +3,48 @@
 @{
     ViewData["Title"] = "Usuarios";
 }
-<style>
-
-    a.firstlevel { width: 80px;}
-
-    td.details-control {
-        background: url('../../Img/details_open.png') no-repeat center center;
-        cursor: pointer;
-    }
-
-    tr.shown td.details-control {
-        background: url('../../Img/details_close.png') no-repeat center center;
-    }
-
-</style>
 
 
-<p>
-    <a asp-action="Create" class="btn btn-sm btn btn-outline-primary firstlevel">+ Usuario</a>
-</p>
-<div class="row">
-    <div class="col-md-12">
-        <div class="panel panel-default">
-            <div class="panel-heading">
-                <h3 class="panel-title">Usuarios</h3>
-            </div>
-            <div class="panel-body">
-                <table class="table-hover table-responsive compact row-border" id="TableUsers" style="font-size:small;">
-                    <thead>
-                        <tr>
-                            <th style="text-align:center;">&nbsp;&emsp;#</th>
-                            <th>
-                                @Html.DisplayNameFor(model => model.Document)
-                            </th>
-                            <th style="text-align: center;">
-                                @Html.DisplayNameFor(model => model.Email)
-                            </th>
-                            <th style="text-align: center;">
-                                @Html.DisplayNameFor(model => model.FullName)
-                            </th>
-                            <th style="text-align: center;">
-                                @Html.DisplayNameFor(model => model.City.State.Country.CountryName)
-                            </th>
-                            <th style="text-align: center;">
-                                @Html.DisplayNameFor(model => model.City.State.StateName)
-                            </th>
-                            <th style="text-align: center;">
-                                @Html.DisplayNameFor(model => model.City.CityName)
-                            </th>
-                            <th style="text-align: center;">
-                                @Html.DisplayNameFor(model => model.Address)
-                            </th>
-                            <th style="text-align: center;">
-                                @Html.DisplayNameFor(model => model.PhoneNumber)
-                            </th>
-                            <th style="text-align: center;">
-                                @Html.Label("Tipo")
-                            </th>
-                            <th style="text-align: center;">
-                                @Html.Label("Habilitado")
-                            </th>
-                            <th style="text-align: center;">
-                                @Html.DisplayNameFor(model => model.ImageFullPath)
-                            </th>
-                            <th style="width:120px;text-align: center;">Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach (var item in Model)
-                        {
-                            <tr>
-                                <td></td>
-                                <td>
-                                    @Html.DisplayFor(modelItem => item.Document)
-                                </td>
-                                <td>
-                                    @Html.DisplayFor(modelItem => item.Email)
-                                </td>
-                                <td>
-                                    @Html.DisplayFor(modelItem => item.FullName)
-                                </td>
-                                 <td>
-                                    @Html.DisplayFor(modelItem => item.City.State.Country.CountryName)
-                                </td>
-                                 <td>
-                                    @Html.DisplayFor(modelItem => item.City.State.StateName)
-                                </td>
-                                 <td>
-                                    @Html.DisplayFor(modelItem => item.City.CityName)
-                                </td>
-                                 <td>
-                                    @Html.DisplayFor(modelItem => item.Address)
-                                </td>
-                                 <td>
-                                    @Html.DisplayFor(modelItem => item.PhoneNumber)
-                                </td>
-                                <td>
-                                    @Html.DisplayFor(modelItem => item.UserType)
-                                </td>
-                                <td>
-                                    @Html.DisplayFor(modelItem => item.EmailConfirmed)
-                                </td>
-                                <td>
-                                    <img src="@item.ImageFullPath" style="width:60px; height:60px; border-radius:50px;" class="zoom"/>
-                                </td>
-                                <td>
-                                    <a asp-action="Edit" asp-route-id="@item.UserName" class="btn btn-sm btn-outline-warning" data-toggle='tooltip' title='Editar'><i class="fa-solid fa-pencil"></i></a>
-                                    <a asp-action="Details" asp-route-id="@item.UserName" class="btn btn-sm btn-outline-info" data-toggle='tooltip' title='Detalles'><i class="fa-solid fa-info-circle"></i></a>
-                                    <a asp-action="Delete" asp-route-id="@item.UserName" class="btn btn-sm btn-outline-danger" data-toggle='tooltip' title='Eliminar'><i class="fa-solid fa-trash"></i></a>
-                                </td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
+<div class="container-fluid">
+    <div class="card mt-2">
+        <div class="card-header text-primary bg-secondary bg-opacity-25">
+            <i class="fa fa-users-line"></i>  <strong>Usuarios</strong>
+            <a onclick="showInPopup('@Url.Action("AddOrEdit", "Users", new { id = "" }, Context.Request.Scheme)' , 'Nuevo Usuario','bg-primary')" class="btn btn-sm btn-outline-primary" title="Agregar usuario"><i class="fa fa-plus-circle"></i></a>
+        </div>
+        <div class="card-body">
+            <div id="view-all">
+                <input type="hidden" id="Result" name="Result" value="@ViewBag.Result" />
+                @await Html.PartialAsync("_ViewAllUsers", Model)
             </div>
         </div>
     </div>
 </div>
 
+<partial name="_AddOrEditDialog" />
+<partial name="_DeleteDialog" />
 @section Scripts{
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
 
+    <script src="~/js/showmodal.js"></script>
     <script type="text/javascript">
         var count = 0;
         $(document).ready(function () {
+            if ($("#Result").val() == "true") {
+                $.notify('@Html.Raw(ViewBag.Message)', "success", { globalPosition: "top left" });
+            }
+            else {
+                $.notify('@Html.Raw(ViewBag.Message)', "error", { globalPosition: "top left" });
+            }
             $('#TableUsers').DataTable(
                 {
                     "language": {
-                        "url": "//cdn.datatables.net/plug-ins/9dcbecd42ad/i18n/Spanish.json"
+                        "url": "/lib/datatables/Spanish.json"
                     },
                     "aLengthMenu": [
-                        [10, 25, 50, 100, 200, -1],
-                        [10, 25, 50, 100, 200, "Todos"]
+                        [25, 50, 100, 200, -1],
+                        [25, 50, 100, 200, "Todos"]
                     ],
                     "columnDefs": [
                         {
@@ -144,39 +52,42 @@
                             className: 'dt-body-center'
                         },
                         {
-                            "targets": [2, 3, 4],
+                            "targets": [1,4,5,6,7],
+                            visible: false
+                        },
+                        {
+                            "targets": [2,3],
                             "orderable": true,
+                            className: 'dt-body-left'
+                        },
+                        {
+                            "targets": [8,9,10],
                             className: 'dt-body-center'
                         },
                         {
                             "targets": 5,
                             "orderable": false,
                             className: 'dt-body-left'
-                        },
-                         {
-                            "targets": 12,
-                            "orderable": false,
-                            className: 'dt-body-center'
                         }],
                     "columns": [
-                        { "data": "UserName", "render": function (data) { count = count + 1; return count.toString(); } },
+                        { "data": "Id", "render": function (data) { count = count + 1; return count.toString(); } },
                         { "data": "Document" },
                         { "data": "Email" },
                         { "data": "FullName" },
-                        { "data": "City.State.Country.CountryName" },
-                        { "data": "City.State.StateName" },
-                        { "data": "City.Name" },
+                        { "data": "CountryName" },
+                        { "data": "StateName" },
+                        { "data": "CityName" },
                         { "data": "Address" },
                         { "data": "PhoneNumber" },
-                        { "data": "UserType" },
                         { "data": "EmailConfirmed" },
                         { "data": "ImageFullPath" },
-                        { "data": "UserName"}
-
-                            ]
+                        { "data": "Id" }
+                    ]
                 });
+            sc_deleteDialog.openModal('deleteItem', true, 'btnYesDelete', '/Users/Delete/', false);
 
         });
     </script>
-           }
+    }
+
 

@@ -4,6 +4,8 @@ using SAGM.Data.Entities;
 using Microsoft.EntityFrameworkCore;
 using SAGM.Models;
 using System.Security.Cryptography.X509Certificates;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using Humanizer;
 
 namespace SAGM.Helpers
 {
@@ -44,7 +46,7 @@ namespace SAGM.Helpers
                 PhoneNumber = model.PhoneNumber,
                 City = await _context.Cities.FindAsync(model.CityId),
                 UserName = model.Username,
-                UserType = model.UserType,
+
 
             };
             IdentityResult result = await _userManager.CreateAsync(user, model.Password);
@@ -61,6 +63,13 @@ namespace SAGM.Helpers
         public async Task AddUserToRoleAsync(User user, string roleName)
         {
             await _userManager.AddToRoleAsync(user, roleName);
+
+        }
+
+        public async Task RemoveFromRoleAsync(User user, string roleName) { 
+
+            await _userManager.RemoveFromRoleAsync(user, roleName);
+
         }
 
         public async Task<IdentityResult> ChangeUserPasswordAsync(User user, string oldPassword, string newPassword)
@@ -116,8 +125,9 @@ namespace SAGM.Helpers
         public async Task<IdentityResult> UpdateUserAsync(User user)
         {
             return await _userManager.UpdateAsync(user);
-        }
 
+        
+        }
 
 
         public async Task<IdentityResult> ConfirmEmailAsync(User user, string token)
@@ -143,6 +153,35 @@ namespace SAGM.Helpers
         public async Task<IdentityResult> ResetPasswordAsync(User user, string token, string password)
         {
             return await _userManager.ResetPasswordAsync(user, token, password);
+        }
+
+
+        public async Task<IEnumerable<string>> GetUserRolesAsync(User user)
+        {
+     
+            IList<string> list =  await _userManager.GetRolesAsync(user);
+            return list;
+
+        }
+
+        public async Task<IEnumerable<string>> GetRolesForUserAsync(User user)
+        {
+
+            IList<string> listAllRoles = new List<string>();
+
+            foreach (var rol in Enum.GetValues(typeof(Enums.UserType)))
+            {
+                listAllRoles.Add(rol.ToString());
+            }
+
+            IList<string> listAsignedRoles = await _userManager.GetRolesAsync(user);
+
+            IList<string> listRolesForUser = new List<string>();
+
+            listRolesForUser = (IList<string>)listAllRoles.Except(listAsignedRoles).ToList();
+
+            return listRolesForUser;
+
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using SAGM.Enums;
+﻿using SAGM.Data.Entities;
+using SAGM.Enums;
 using System.ComponentModel.DataAnnotations;
 using System.Xml.Linq;
 
@@ -7,7 +8,7 @@ namespace SAGM.Models
     public class AddUserViewModel : EditUserViewModel
     {
 
-        [Display(Name = "Direccion de correo")]
+        [Display(Name = "Usuario")]
         [Required(ErrorMessage = "El campo {0} es obligatorio.")]
         [EmailAddress(ErrorMessage = "Debes ingresar un correo valido.")]
         public string Username { get; set; }
@@ -27,7 +28,10 @@ namespace SAGM.Models
         public string PasswordConfirm { get; set; }
 
 
-        [Display(Name = "tipo de Usuario")]
-        public UserType UserType { get; set; }
+        [Display(Name = "Correo")]
+        public string Email { get; set; }
+
+        [Display(Name = "Roles")]
+        public ICollection<RolesViewModel> RolesVM { get; set; }
     }
 }

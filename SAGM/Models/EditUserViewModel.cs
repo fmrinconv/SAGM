@@ -73,7 +73,7 @@ namespace SAGM.Models
         [Display(Name = "Tipo de usuario")]
         public UserType UserType { get; set; }
 
-        [Display(Name = "Usuario")]
+        [Display(Name = "Nombre")]
         public string FullName => $"{FirstName} {LastName}";
 
         [Display(Name = "Usuario")]

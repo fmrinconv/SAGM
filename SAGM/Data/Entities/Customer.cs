@@ -60,6 +60,8 @@ namespace SAGM.Data.Entities
 
         public ICollection<Contact> Contacts { get; set; }
 
+        public ICollection<Quote> Quotes { get; set; }
+
 
 
     }

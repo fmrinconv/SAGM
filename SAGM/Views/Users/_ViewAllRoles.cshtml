@@ -1,0 +1,38 @@
+﻿@model SAGM.Models.AddUserViewModel
+<table class="table table-hover table-responsive compact" style="font-size:small;" id="TableRoles">
+    <thead>
+        <tr>
+            <th style="text-align:center;">&nbsp;&emsp;#</th>
+            <th>
+                @Html.DisplayNameFor(model => model.RolesVM)
+            </th>
+
+            <th>
+                Acciones
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model?.RolesVM)
+        {
+            <tr>
+                <td></td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Name)
+
+                </td>
+                <td>
+                    @{
+                        var parms = new Dictionary<string, string>
+                {
+                { "Username", @Model.Username },
+                { "UserType", item.Name }
+                };
+                    }
+                    <button data-id="@Model.Username&@item.Name" data-userType="@item.Name" class="btn btn-sm btn-outline-danger deleteItem" data-bs-toggle="modal" data-bs-target="#deleteDialog" ><i class="fa fa-trash"></i></button>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+

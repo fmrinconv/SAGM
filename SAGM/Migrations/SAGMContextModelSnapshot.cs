@@ -236,7 +236,6 @@ namespace SAGM.Migrations
                         .HasColumnType("nvarchar(50)");
 
                     b.Property<string>("Mobile")
-                        .IsRequired()
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)");
 
@@ -283,6 +282,24 @@ namespace SAGM.Migrations
                         .IsUnique();
 
                     b.ToTable("Countries");
+                });
+
+            modelBuilder.Entity("SAGM.Data.Entities.Currency", b =>
+                {
+                    b.Property<int>("CurrencyId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("CurrencyId"));
+
+                    b.Property<string>("Curr")
+                        .IsRequired()
+                        .HasMaxLength(3)
+                        .HasColumnType("nvarchar(3)");
+
+                    b.HasKey("CurrencyId");
+
+                    b.ToTable("Currencies");
                 });
 
             modelBuilder.Entity("SAGM.Data.Entities.Customer", b =>
@@ -405,6 +422,157 @@ namespace SAGM.Migrations
                     b.ToTable("MaterialTypes");
                 });
 
+            modelBuilder.Entity("SAGM.Data.Entities.Quote", b =>
+                {
+                    b.Property<int>("QuoteId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("QuoteId"));
+
+                    b.Property<bool>("Active")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("BuyerContactId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Comments")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("CreatedById")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<int?>("CurrencyId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("CustomerId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("CustomerPO")
+                        .HasMaxLength(128)
+                        .HasColumnType("nvarchar(128)");
+
+                    b.Property<int>("FinalUser")
+                        .HasColumnType("int");
+
+                    b.Property<string>("ModifiedBy")
+                        .HasMaxLength(128)
+                        .HasColumnType("nvarchar(128)");
+
+                    b.Property<DateTime?>("ModifyDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("QuoteDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("QuoteName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("QuoteStatusId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("SellerId")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("Tax")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<DateTime?>("validUntilDate")
+                        .IsRequired()
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("QuoteId");
+
+                    b.HasIndex("BuyerContactId");
+
+                    b.HasIndex("CreatedById");
+
+                    b.HasIndex("CurrencyId");
+
+                    b.HasIndex("CustomerId");
+
+                    b.HasIndex("QuoteStatusId");
+
+                    b.HasIndex("SellerId");
+
+                    b.ToTable("Quotes");
+                });
+
+            modelBuilder.Entity("SAGM.Data.Entities.QuoteDetail", b =>
+                {
+                    b.Property<int>("QuoteDetailId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("QuoteDetailId"));
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("MaterialId")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("Price")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<float>("Quantity")
+                        .HasColumnType("real");
+
+                    b.Property<int?>("QuoteId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("UnitId")
+                        .HasColumnType("int");
+
+                    b.HasKey("QuoteDetailId");
+
+                    b.HasIndex("MaterialId");
+
+                    b.HasIndex("QuoteId");
+
+                    b.HasIndex("UnitId");
+
+                    b.ToTable("QuoteDetails");
+                });
+
+            modelBuilder.Entity("SAGM.Data.Entities.QuoteStatus", b =>
+                {
+                    b.Property<int>("QuoteStatusId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("QuoteStatusId"));
+
+                    b.Property<string>("QuoteStatusName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("QuoteStatusId");
+
+                    b.ToTable("QuoteStatus");
+                });
+
+            modelBuilder.Entity("SAGM.Data.Entities.Seller", b =>
+                {
+                    b.Property<int>("SellerId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("SellerId"));
+
+                    b.Property<string>("UserId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("SellerId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Sellers");
+                });
+
             modelBuilder.Entity("SAGM.Data.Entities.State", b =>
                 {
                     b.Property<int>("StateId")
@@ -433,6 +601,26 @@ namespace SAGM.Migrations
                         .HasFilter("[CountryId] IS NOT NULL");
 
                     b.ToTable("States");
+                });
+
+            modelBuilder.Entity("SAGM.Data.Entities.Unit", b =>
+                {
+                    b.Property<int>("UnitId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("UnitId"));
+
+                    b.Property<bool>("Active")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("UnitName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("UnitId");
+
+                    b.ToTable("Units");
                 });
 
             modelBuilder.Entity("SAGM.Data.Entities.User", b =>
@@ -533,6 +721,20 @@ namespace SAGM.Migrations
                     b.ToTable("AspNetUsers", (string)null);
                 });
 
+            modelBuilder.Entity("SAGM.Models.SellerView", b =>
+                {
+                    b.Property<string>("FullName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("UserName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.ToTable("SellerViews", t =>
+                        {
+                            t.ExcludeFromMigrations();
+                        });
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
                 {
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
@@ -629,6 +831,81 @@ namespace SAGM.Migrations
                     b.Navigation("Category");
                 });
 
+            modelBuilder.Entity("SAGM.Data.Entities.Quote", b =>
+                {
+                    b.HasOne("SAGM.Data.Entities.Contact", "Buyer")
+                        .WithMany()
+                        .HasForeignKey("BuyerContactId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("SAGM.Data.Entities.User", "CreatedBy")
+                        .WithMany()
+                        .HasForeignKey("CreatedById")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("SAGM.Data.Entities.Currency", "Currency")
+                        .WithMany("Quotes")
+                        .HasForeignKey("CurrencyId");
+
+                    b.HasOne("SAGM.Data.Entities.Customer", "Customer")
+                        .WithMany("Quotes")
+                        .HasForeignKey("CustomerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("SAGM.Data.Entities.QuoteStatus", null)
+                        .WithMany("Quotes")
+                        .HasForeignKey("QuoteStatusId");
+
+                    b.HasOne("SAGM.Data.Entities.Seller", "Seller")
+                        .WithMany("Quotes")
+                        .HasForeignKey("SellerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Buyer");
+
+                    b.Navigation("CreatedBy");
+
+                    b.Navigation("Currency");
+
+                    b.Navigation("Customer");
+
+                    b.Navigation("Seller");
+                });
+
+            modelBuilder.Entity("SAGM.Data.Entities.QuoteDetail", b =>
+                {
+                    b.HasOne("SAGM.Data.Entities.Material", "Material")
+                        .WithMany("QuoteDetails")
+                        .HasForeignKey("MaterialId");
+
+                    b.HasOne("SAGM.Data.Entities.Quote", "Quote")
+                        .WithMany("QuoteDetails")
+                        .HasForeignKey("QuoteId");
+
+                    b.HasOne("SAGM.Data.Entities.Unit", "Unit")
+                        .WithMany("QuoteDetails")
+                        .HasForeignKey("UnitId");
+
+                    b.Navigation("Material");
+
+                    b.Navigation("Quote");
+
+                    b.Navigation("Unit");
+                });
+
+            modelBuilder.Entity("SAGM.Data.Entities.Seller", b =>
+                {
+                    b.HasOne("SAGM.Data.Entities.User", "User")
+                        .WithMany("Sellers")
+                        .HasForeignKey("UserId");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("SAGM.Data.Entities.State", b =>
                 {
                     b.HasOne("SAGM.Data.Entities.Country", "Country")
@@ -664,9 +941,21 @@ namespace SAGM.Migrations
                     b.Navigation("States");
                 });
 
+            modelBuilder.Entity("SAGM.Data.Entities.Currency", b =>
+                {
+                    b.Navigation("Quotes");
+                });
+
             modelBuilder.Entity("SAGM.Data.Entities.Customer", b =>
                 {
                     b.Navigation("Contacts");
+
+                    b.Navigation("Quotes");
+                });
+
+            modelBuilder.Entity("SAGM.Data.Entities.Material", b =>
+                {
+                    b.Navigation("QuoteDetails");
                 });
 
             modelBuilder.Entity("SAGM.Data.Entities.MaterialType", b =>
@@ -674,9 +963,34 @@ namespace SAGM.Migrations
                     b.Navigation("Materials");
                 });
 
+            modelBuilder.Entity("SAGM.Data.Entities.Quote", b =>
+                {
+                    b.Navigation("QuoteDetails");
+                });
+
+            modelBuilder.Entity("SAGM.Data.Entities.QuoteStatus", b =>
+                {
+                    b.Navigation("Quotes");
+                });
+
+            modelBuilder.Entity("SAGM.Data.Entities.Seller", b =>
+                {
+                    b.Navigation("Quotes");
+                });
+
             modelBuilder.Entity("SAGM.Data.Entities.State", b =>
                 {
                     b.Navigation("Cities");
+                });
+
+            modelBuilder.Entity("SAGM.Data.Entities.Unit", b =>
+                {
+                    b.Navigation("QuoteDetails");
+                });
+
+            modelBuilder.Entity("SAGM.Data.Entities.User", b =>
+                {
+                    b.Navigation("Sellers");
                 });
 #pragma warning restore 612, 618
         }

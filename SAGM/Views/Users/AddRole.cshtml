@@ -1,0 +1,65 @@
+﻿@model SAGM.Models.AddUserViewModel
+
+@{
+    ViewData["Title"] = "Agregar Rol";
+    Layout = null;
+}
+<link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+<link rel="stylesheet" href="~/lib/font-awesome/css/all.min.css" />
+<link rel="stylesheet" href="~/lib/datatables/css/jquery.dataTables.min.css" />
+<link rel="stylesheet" href="~/lib/jqueryui/themes/base/jquery-ui.min.css" />
+<link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+<link rel="stylesheet" href="~/SAGM.styles.css" asp-append-version="true" />
+<div class="container smfont">
+    <form asp-action="AddRole"  autocomplete="off" onsubmit="return jQueryAjaxPost(this);">
+        <input type="hidden" asp-for="Username" />
+        <input type="hidden" asp-for="UserType" />
+        <div class="box-body">
+            <table class="table table-hover table-responsive compact" style="font-size:small;" id="TableRoles">
+                <thead>
+                    <tr>
+                        <th style="text-align:center;">&nbsp;&emsp;#</th>
+                        <th>
+                            @Html.DisplayNameFor(model => model.RolesVM)
+                        </th>
+
+                        <th>
+                            Acciones
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model?.RolesVM)
+                    {
+                        <tr>
+                            <td></td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.Name)
+
+                            </td>
+                            <td>
+
+                                <button data-id="@item.Name" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" onclick="return asign_role('@item.Name')"><i class="fa fa-plus"></i></button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+        <div class="modal-footer">
+            <div class="col text-center">
+                <button type="button" class="btn btn-sm btn-primary" data-bs-dismiss="modal"><i class="fa fa-ban"></i> Cancelar</button>
+            </div>
+        </div>
+    </form>
+</div>
+<script src="~/lib/datatables/js/jquery.dataTables.min.js"></script>
+<script>
+
+    function asign_role(role)
+    {
+        $("#UserType").val(role);
+        return true;
+    }
+</script>
+

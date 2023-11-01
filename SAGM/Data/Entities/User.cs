@@ -50,11 +50,13 @@ namespace SAGM.Data.Entities
         [Display(Name = "Tipo de usuario")]
         public UserType UserType { get; set; }
 
-        [Display(Name = "Usuario")]
+        [Display(Name = "Nombre")]
         public string FullName => $"{FirstName} {LastName}";
 
         [Display(Name = "Usuario")]
         public string FullNameWithDocument => $"{FirstName} {LastName} - {Document}";
+
+
 
 
     }

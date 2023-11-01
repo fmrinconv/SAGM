@@ -17,6 +17,8 @@ namespace SAGM.Data.Entities
         public Boolean Active { get; set; }
         public MaterialType MaterialType { get; set; }
 
-       
+        public ICollection<QuoteDetail> QuoteDetails { get; set; }
+
+
     }
 }

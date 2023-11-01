@@ -14,7 +14,7 @@ using static SAGM.Helpers.ModalHelper;
 
 namespace SAGM.Controllers
 {
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = "Administrador")]
     public class CountriesController : Controller
     {
         private readonly SAGMContext _context;

@@ -2,7 +2,10 @@
 {
     public enum UserType
     {
-        Admin,
-        User
+        Administrador,
+        Comprador,
+        Finanzas,
+        Vendedor,
+        Usuario
     }
 }

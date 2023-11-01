@@ -1,0 +1,89 @@
+﻿@model IEnumerable<SAGM.Data.Entities.User>
+
+
+<table class="table table-hover table-responsive compact row-border" id="TableUsers" style="font-size:small;">
+    <thead>
+        <tr>
+            <th style="text-align:center;">
+                &nbsp;&emsp;#
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Document)
+            </th>
+            <th style="text-align: left;">
+                Usuario
+            </th>
+            <th style="text-align: left;">
+                @Html.DisplayNameFor(model => model.FullName)
+            </th>
+            <th style="text-align: center;">
+                @Html.DisplayNameFor(model => model.City.State.Country.CountryName)
+            </th>
+            <th style="text-align: center;">
+                @Html.DisplayNameFor(model => model.City.State.StateName)
+            </th>
+            <th style="text-align: center;">
+                @Html.DisplayNameFor(model => model.City.CityName)
+            </th>
+            <th style="text-align: center;">
+                @Html.DisplayNameFor(model => model.Address)
+            </th>
+            <th style="text-align: center;">
+                @Html.DisplayNameFor(model => model.PhoneNumber)
+            </th>
+            <th style="text-align: center;">
+                @Html.Label("Habilitado")
+            </th>
+            <th style="text-align: center;">
+                @Html.DisplayNameFor(model => model.ImageFullPath)
+            </th>
+            <th style="width:120px;text-align: left;">
+                Acciones
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td></td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Document)
+                </td>
+                <td>
+
+                    <a asp-action="Details" asp-route-id="@item.UserName" data-toggle='tooltip' title='Detalles'>@Html.DisplayFor(modelItem => item.UserName)</a>
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.FullName)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.City.State.Country.CountryName)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.City.State.StateName)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.City.CityName)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Address)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.PhoneNumber)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.EmailConfirmed)
+                </td>
+                <td>
+                    <img src="@item.ImageFullPath" style="width:60px; height:60px; border-radius:50px;" class="zoom" />
+                </td>
+                <td>
+                    <a onclick="showInPopup('@Url.Action("AddOrEdit", "Users", new { id = item.UserName }, Context.Request.Scheme)' , 'Actualizar usuario')" class="btn btn-sm btn-outline-warning"><i class="fa fa-pencil-alt"></i> </a>
+                   
+                    <a asp-action="Delete" asp-route-id="@item.UserName" class="btn btn-sm btn-outline-danger" data-toggle='tooltip' title='Eliminar'><i class="fa-solid fa-trash"></i></a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

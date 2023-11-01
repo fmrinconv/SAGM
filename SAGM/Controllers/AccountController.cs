@@ -11,6 +11,7 @@ using SignInResult = Microsoft.AspNetCore.Identity.SignInResult;
 using NuGet.Protocol.Plugins;
 using SAGM.Common;
 using NuGet.Packaging.Signing;
+using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace SAGM.Controllers
 {
@@ -209,7 +210,7 @@ namespace SAGM.Controllers
                 Countries = await _comboHelper.GetComboCountriesAsync(),
                 States = await _comboHelper.GetComboStatesAsync(0),
                 Cities = await _comboHelper.GetComboCitiesAsync(0),
-                UserType = UserType.User
+                UserType = UserType.Usuario
             };
             return View(model);
         }
@@ -269,7 +270,7 @@ namespace SAGM.Controllers
                         Countries = await _comboHelper.GetComboCountriesAsync(),
                         States = await _comboHelper.GetComboStatesAsync(0),
                         Cities = await _comboHelper.GetComboCitiesAsync(0),
-                        UserType = UserType.User
+                        UserType = UserType.Usuario
                     };
                     ViewBag.Username = "";
                     return View(model);
@@ -424,5 +425,17 @@ namespace SAGM.Controllers
             ViewBag.Result = "true";
             return View();
         }
+
+        public  async Task< JsonResult> GetRoles(string username)
+        {
+
+            User user = await _userHelper.GetUserAsync(username);
+
+            List<SelectListItem> list = (List<SelectListItem>) await  _userHelper.GetUserRolesAsync(user);
+
+            return Json(list);
+        }
+
+
     }
 }

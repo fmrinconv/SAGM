@@ -13,16 +13,31 @@ namespace SAGM.Data
         {
             _context = context;
             _userHelper = userHelper;
-        }
+        }       
 
         public async Task SeedAsync()
         {
             await _context.Database.EnsureCreatedAsync();
+            await CheckUnitsAsync();
             await CheckCategoriesAsync();
             await CheckCountriesAsync();
             await CheckRolesAsync();
-            await CheckUserAsync("1010", "Francisco Manuel", "Rincón Vargas", "admin@simaqap.com", "811 027 95 00", "tolon 300", UserType.Admin);
-            await CheckUserAsync("2020", "Usuario", "de pruebas", "user@simaqap.com", "811 027 95 00", "tolon 300", UserType.User);
+            await CheckUserAsync("1010", "Francisco Manuel", "Rincón Vargas", "admin@simaqap.com", "811 027 95 00", "tolon 300", UserType.Usuario);
+            await CheckUserAsync("2020", "Usuario", "de pruebas", "user@simaqap.com", "811 027 95 00", "tolon 300", UserType.Usuario);
+
+
+            User user = await _userHelper.GetUserAsync("admin@simaqap.com");
+            await _userHelper.AddUserToRoleAsync(user, UserType.Usuario.ToString());
+            await _userHelper.AddUserToRoleAsync(user, UserType.Administrador.ToString());
+            await _userHelper.AddUserToRoleAsync(user, UserType.Comprador.ToString());
+            await _userHelper.AddUserToRoleAsync(user, UserType.Vendedor.ToString());
+
+
+            user = await _userHelper.GetUserAsync("user@simaqap.com");
+            await _userHelper.AddUserToRoleAsync(user, UserType.Usuario.ToString());
+
+
+
         }
 
         private async Task<User> CheckUserAsync(
@@ -52,7 +67,7 @@ namespace SAGM.Data
 
                 await _userHelper.AddUserAsync(user, "123456");
 
-                await _userHelper.AddUserToRoleAsync(user, userType.ToString());
+                
 
                 string token = await _userHelper.GenerateEmailConfirmationTokenAsync(user);
                 await _userHelper.ConfirmEmailAsync(user, token);
@@ -63,8 +78,11 @@ namespace SAGM.Data
       
         private async Task CheckRolesAsync()
         {
-            await _userHelper.CheckRoleAsync(UserType.Admin.ToString());
-            await _userHelper.CheckRoleAsync(UserType.User.ToString());
+            await _userHelper.CheckRoleAsync(UserType.Administrador.ToString());
+            await _userHelper.CheckRoleAsync(UserType.Usuario.ToString());
+            await _userHelper.CheckRoleAsync(UserType.Finanzas.ToString());
+            await _userHelper.CheckRoleAsync(UserType.Comprador.ToString());
+            await _userHelper.CheckRoleAsync(UserType.Vendedor.ToString());
         }
 
         private async Task CheckCountriesAsync()
@@ -3600,7 +3618,16 @@ namespace SAGM.Data
             await _context.SaveChangesAsync();
         }
 
-
-     
+        private async Task CheckUnitsAsync()
+        {
+            if (!_context.Units.Any())
+            {
+                _context.Units.Add(new Unit { UnitName = "Pieza", Active = true });
+                _context.Units.Add(new Unit { UnitName = "Servicio", Active = true });
+                _context.Units.Add(new Unit { UnitName = "Juego", Active = true });
+                _context.Units.Add(new Unit { UnitName = "EA", Active = true });
+                await _context.SaveChangesAsync();
+            } 
+        }
     }
 }

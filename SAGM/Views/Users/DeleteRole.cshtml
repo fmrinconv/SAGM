@@ -1,0 +1,47 @@
+﻿@model SAGM.Models.AddUserViewModel
+
+@{
+    ViewData["Title"] = "Agregar Rol";
+}
+
+<div class="container smfont">
+    <form asp-action="DeleteRole" autocomplete="off" >
+        <input type="text" asp-for="Username" />
+        <input type="text" asp-for="UserType" />
+
+                <div class="modal-content g1">
+                    <div class="modal-header bg-blue-gradient" style="background-color:gainsboro;">
+                        <div class="col-11">
+                            <h5 class="modal-title text-danger" id="exampleModalLabel"><b>¡ Eliminar Registro !</b></h5>
+                        </div>
+                        <div class="col-1">
+                            <h4><i class="fa-solid fa-triangle-exclamation text-danger"></i></h4>
+                        </div>
+                    </div>
+                    <div class="modal-body">
+                        <p>¿Estas seguro de querer borrar este registro?</p>
+                    </div>
+                    <div class="modal-footer">
+                        <div class="col text-center">
+                            <button type="button" class="btn btn-primary" data-bs-dismiss="modal"><i class="fa fa-ban"> </i> No</button>
+                            <button type="submit" class="btn btn-danger" id="btnsubmit"><i class="fa fa-check-circle"> </i> Sí</button>
+                        </div>
+
+                    </div>
+                </div>
+
+    </form>
+</div>
+
+@section Scripts{
+
+    <script type="text/javascript" >
+    $(document).ready(function () {
+
+            $("#btnsubmit").click();
+    });
+
+
+</script>
+}        
+

@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using SAGM.Data.Entities;
 using SAGM.Models;
 
@@ -18,6 +19,8 @@ namespace SAGM.Helpers
 
         Task AddUserToRoleAsync(User user, string roleName);
 
+        Task RemoveFromRoleAsync(User user, string roleName);
+
         Task<bool> IsUserInRoleAsync(User user, string roleName);
 
         Task<SignInResult> LoginAsync(LoginViewModel model);
@@ -35,5 +38,9 @@ namespace SAGM.Helpers
         Task<string> GeneratePasswordResetTokenAsync(User user);
 
         Task<IdentityResult> ResetPasswordAsync(User user, string token, string password);
+
+        Task<IEnumerable<string>> GetUserRolesAsync(User user);
+
+        Task<IEnumerable<string>> GetRolesForUserAsync(User user);
     }
 }
