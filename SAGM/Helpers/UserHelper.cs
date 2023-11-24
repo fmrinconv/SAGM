@@ -6,6 +6,7 @@ using SAGM.Models;
 using System.Security.Cryptography.X509Certificates;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Humanizer;
+using System.Collections.Immutable;
 
 namespace SAGM.Helpers
 {
@@ -181,6 +182,46 @@ namespace SAGM.Helpers
             listRolesForUser = (IList<string>)listAllRoles.Except(listAsignedRoles).ToList();
 
             return listRolesForUser;
+
+        }
+
+        public async Task<IEnumerable<SelectListItem>> GetSellersAsync()
+        {
+            List<User> list = await _userManager.Users.ToListAsync();
+            List<SelectListItem> listSellers = new List<SelectListItem>();
+
+            foreach (User user in list)
+            {
+                if (await _userManager.IsInRoleAsync(user, "Vendedor"))
+                {
+                    SelectListItem item = new SelectListItem();
+                    item.Text = user.FullName;
+                    item.Value = user.UserName;
+
+                    listSellers.Add(item);
+                }
+            }
+            return listSellers;
+
+        }
+
+        public async Task<IEnumerable<SelectListItem>> GetAllUsersAsync()
+        {
+            List<User> list = await _userManager.Users.ToListAsync();
+
+            List<SelectListItem> listusers = new List<SelectListItem>();
+
+            foreach (User user in list)
+            {
+
+                    SelectListItem item = new SelectListItem();
+                    item.Text = user.FullName;
+                    item.Value = user.UserName;
+
+                listusers.Add(item);
+
+            }
+            return listusers;
 
         }
     }

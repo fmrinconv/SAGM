@@ -1,25 +1,25 @@
-﻿@model SAGM.Data.Entities.Customer
+﻿@model SAGM.Models.CustomerViewModel
 <table class="table table-hover table-responsive compact" id="TableContacts" style="font-size:x-small;">
     <thead>
         <tr>
             <th style="text-align:center;">&nbsp;&emsp;#</th>
             <th>
-                @Html.DisplayNameFor(model => model.Contacts.FirstOrDefault().FullName))
+                @Html.DisplayNameFor(model => model.ContactsVM.FirstOrDefault().FullName )
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Contacts.FirstOrDefault().Email)
+                @Html.DisplayNameFor(model => model.ContactsVM.FirstOrDefault().Email)
             </th>
             <th style="text-align: center;">
-                @Html.DisplayNameFor(model => model.Contacts.FirstOrDefault().PhoneNumber)
+                @Html.DisplayNameFor(model => model.ContactsVM.FirstOrDefault().PhoneNumber)
             </th>
             <th style="text-align: center;">
-                @Html.DisplayNameFor(model => model.Contacts.FirstOrDefault().Mobile)
+                @Html.DisplayNameFor(model => model.ContactsVM.FirstOrDefault().Mobile)
             </th>
             <th style="text-align: center;">
-                @Html.DisplayNameFor(model => model.Contacts.FirstOrDefault().ImageFullPath)
+                @Html.DisplayNameFor(model => model.ContactsVM.FirstOrDefault().ImageFullPath)
             </th>
             <th style="text-align: center;">
-                @Html.DisplayNameFor(model => model.Contacts.FirstOrDefault().Active)
+                @Html.DisplayNameFor(model => model.ContactsVM.FirstOrDefault().Active)
             </th>
             <th>
                 Acciones
@@ -27,7 +27,7 @@
         </tr>
     </thead>
     <tbody>
-        @foreach (var item in Model.Contacts)
+        @foreach (var item in Model.ContactsVM)
         {
             <tr>
                 <td></td>

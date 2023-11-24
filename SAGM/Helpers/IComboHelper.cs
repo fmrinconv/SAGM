@@ -16,5 +16,9 @@ namespace SAGM.Helpers
         Task<IEnumerable<SelectListItem>> GetComboMaterialTypesAsync(int categoryId);
 
         Task<IEnumerable<SelectListItem>> GetComboMaterialsAsync(int materialTypeId);
+
+        Task<IEnumerable<SelectListItem>> GetComboCustomersAsync();
+
+        Task<IEnumerable<SelectListItem>> GetComboContactCustomersAsync(int customerId);
     }
 }

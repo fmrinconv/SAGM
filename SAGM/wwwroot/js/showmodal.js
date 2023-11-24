@@ -9,17 +9,27 @@
             $('#form-modal .modal-header').removeClass("text-black");
             
             $('#form-modal .modal-header').addClass(classname);
-            if (classname == "bg-primary") {
+            if (classname == "bg-primary" ) {
                 $('#form-modal .modal-header').addClass("text-white");
             }
-            else {
+            else if (classname == "bg-warning") {
                 $('#form-modal .modal-header').addClass("text-black");
+            }
+            else {
+                $('#form-modal .modal-header').addClass("text-white");
+            }
+
+            if (title == "Crear cotización" || title.substring(0,17) == "Editar cotización" ) {
+                $('#form-modal .modal-icon').addClass("fa fa-file-invoice-dollar");
+            }
+            else {
+                $('#form-modal .modal-icon').addClass("fa fa-globe");
             }
             $('#form-modal .modal-body').html(res);
             $('#form-modal .modal-title').html(title);
             $('#form-modal').modal('show');
             setTimeout(function () {
-                $("#form-modal input:text, #form-modal textarea").first().focus();
+                $("#form-modal select, #form-modal input:text, #form-modal textarea").first().focus();
             }, 600);
 
         }

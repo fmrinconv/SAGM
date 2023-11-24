@@ -1,0 +1,158 @@
+﻿@model SAGM.Models.EditQuote
+
+@{
+    ViewData["Title"] = "Cotización";
+    Layout = null;
+}
+
+<div class="container smfont">
+    <form asp-action="EditQuote" autocomplete="off" onsubmit="return jQueryAjaxPost(this);">
+        <div class="row">
+            <div class="col-md-6">
+                <input type="hidden" id="QuoteId" value="@Model.QuoteId" name="QuoteId" />
+                <input type="hidden" id="CreatedBy" value="@User.Identity.Name" name="CreatedBy" />
+                <input type="hidden" id="QuoteName" value="@Model.QuoteName" name="QuoteName" />
+                <div class="form-group">
+                    <b><label class="input">@Model.QuoteName</label></b>
+                </div>
+            </div>
+        </div>
+        <hr />
+        <div class="row">
+            <div class="col-md-6">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+
+                <div class="form-group">
+                    <label asp-for="QuoteDate" class="control-label"></label>
+                    <input asp-for="QuoteDate" class="form-control" />
+                    <span asp-validation-for="QuoteDate" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="CustomerId" class="control-label"></label>
+                    <select asp-for="CustomerId" asp-items="Model.Customers" class="form-control" id="CustomerId"></select>
+                    <span asp-validation-for="CustomerId" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="FinalUserId" class="control-label"></label>
+                    <select asp-for="FinalUserId" asp-items="Model.CustomerBuyerContacts" class="form-control" id="FinalUserId"></select>
+                    <span asp-validation-for="FinalUserId" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="BuyerContactId" class="control-label"></label>
+                    <select asp-for="BuyerContactId" asp-items="Model.CustomerFinalContacts" class="form-control" id="BuyerContactId"></select>
+                    <span asp-validation-for="BuyerContactId" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="SellerId" class="control-label"></label>
+                    <select asp-for="SellerId" asp-items="Model.Sellers" class="form-control" id="SellerId"></select>
+                    <span asp-validation-for="SellerId" class="text-danger"></span>
+                </div>
+                <div class="form-group form-check">
+                    <label class="form-check-label">
+                        <input class="form-check-input" asp-for="Active" /> @Html.DisplayNameFor(model => model.Active)
+                    </label>
+                </div>
+
+            </div>
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label asp-for="validUntilDate" class="control-label"></label>
+                    <input asp-for="validUntilDate" class="form-control" />
+                    <span asp-validation-for="validUntilDate" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="ModifyDate" class="control-label"></label>
+                    <input asp-for="ModifyDate" class="form-control" />
+                    <span asp-validation-for="ModifyDate" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="ModifiedById" class="control-label"></label>
+                    <select asp-for="ModifiedById" asp-items="Model.ModifiedBy" class="form-control" id="ModifiedById"></select>
+                    <span asp-validation-for="ModifiedById" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="CustomerPO" class="control-label"></label>
+                    <input asp-for="CustomerPO" class="form-control" />
+                    <span asp-validation-for="CustomerPO" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="Comments" class="control-label"></label>
+                    <input asp-for="Comments" class="form-control" />
+                    <span asp-validation-for="Comments" class="text-danger"></span>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="Tax" class="control-label"></label>
+                    <input asp-for="Tax" class="form-control" />
+                    <span asp-validation-for="Tax" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="QuoteStatusId" class="control-label"></label>
+                    <select asp-for="QuoteStatusId" asp-items="Model.QuoteStatus" class="form-control" id="QuoteStatusId"></select>
+                    <span asp-validation-for="QuoteStatusId" class="text-danger"></span>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <div class="col text-center">
+                <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal"><i class="fa fa-ban"></i> Cancelar</button>
+                <button type="submit" class="btn btn-sm btn-success"><i class="fa fa-save"></i> Guardar</button>
+            </div>
+        </div>
+    </form>
+</div>
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+
+}
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("#CustomerId").change(function () {
+            $("#FinalUserId").empty();
+            $('#FinalUserId').attr("style", "background-color:silver;");
+            $('#FinalUserId').attr("disabled", "disabled");
+            $("#FinalUserId").append('<option value="0">[...Cargando...]</option>');
+
+            $("#BuyerContactId").empty();
+            $('#BuyerContactId').attr("style", "background-color:silver;");
+            $('#BuyerContactId').attr("disabled", "disabled");
+            $("#BuyerContactId").append('<option value="0">[...Cargando...]</option>');
+            $.ajax({
+                type: 'POST',
+                url: '@Url.Action("GetBuyerContacts")',
+                dataType: 'json',
+                data: { customerId: $("#CustomerId").val() },
+                success: function (contacts) {
+                    $.each(contacts, function (i, contact) {
+                        $("#FinalUserId").append('<option value="'
+                            + contact.value + '">'
+                            + contact.text + '</option>');
+                        $("#BuyerContactId").append('<option value="'
+                            + contact.value + '">'
+                            + contact.text + '</option>');
+                    });
+                    setTimeout(() => { changeatt(); }, "500");
+                },
+                error: function (ex) {
+                    alert('Failed to retrieve.' + ex);
+                }
+            });
+
+            return false;
+        })
+
+    });
+
+    function changeatt() {
+        $('select option:contains("[...Cargando...]")').text('[Selecciona un contacto...]');
+        $('#BuyerContactId').removeAttr('disabled');
+        $('#BuyerContactId').removeAttr('style');
+        $('#FinalUserId').removeAttr('disabled');
+        $('#FinalUserId').removeAttr('style');
+    }
+</script>

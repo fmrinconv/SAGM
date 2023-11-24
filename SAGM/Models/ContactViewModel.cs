@@ -1,14 +1,12 @@
-﻿using System.ComponentModel.DataAnnotations;
-using System.ComponentModel;
-using System.Xml.Linq;
-using System.Text.Json.Serialization;
+﻿using SAGM.Data.Entities;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel;
 
-namespace SAGM.Data.Entities
+namespace SAGM.Models
 {
-    public class Contact
+    public class ContactViewModel 
     {
-        [Key]
         public int ContactId { get; set; }
 
         [Display(Name = "Nombre")]
@@ -51,9 +49,8 @@ namespace SAGM.Data.Entities
         [Display(Name = "Activo")]
         [DefaultValue(true)]
         public Boolean Active { get; set; }
+        public string FullName => $"{Name} {LastName}";
 
         public Customer Customer { get; set; }
-
-
     }
 }

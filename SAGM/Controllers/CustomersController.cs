@@ -270,7 +270,48 @@ namespace SAGM.Controllers
                 return NotFound();
             }
 
-            return View(customer);
+            
+
+            IEnumerable<Contact> contacts = _context.Contacts.Where(c => c.Customer.CustomerId == id)
+                .Include(c => c.Customer)
+                .ToList();
+            List<ContactViewModel> contactsvm = new List<ContactViewModel>().ToList();
+
+            foreach (var item in contacts)
+            {
+                ContactViewModel cvm = new()
+                {
+                    Active = item.Active,
+                    ContactId = item.ContactId,
+                    Email = item.Email,
+                    ImageFile = item.ImageFile,
+                    ImageId = item.ImageId,
+                    LastName = item.LastName,
+                    Mobile = item.Mobile,
+                    Name = item.Name,
+                    PhoneNumber = item.PhoneNumber,
+                    Customer = item.Customer
+
+                };
+                contactsvm.Add(cvm);
+            }
+
+            CustomerViewModel cust = new CustomerViewModel();
+            cust.Active = customer.Active;
+            cust.Address = customer.Address;
+            cust.City = customer.City;
+            cust.ContactsVM = contactsvm.ToList();
+            cust.CustomerNickName = customer.CustomerNickName;
+            cust.CreditDays = customer.CreditDays;
+            cust.CustomerId = customer.CustomerId;
+            cust.CustomerName = customer.CustomerName;
+            cust.CustomerNickName = customer?.CustomerNickName;
+            cust.ImageId = cust.ImageId;
+            cust.PhoneNumber = customer.PhoneNumber;    
+            cust.PostalCode = customer.PostalCode;
+            cust.TaxId = customer.TaxId;
+
+            return View(cust);
         }
 
 

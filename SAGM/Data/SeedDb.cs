@@ -18,6 +18,7 @@ namespace SAGM.Data
         public async Task SeedAsync()
         {
             await _context.Database.EnsureCreatedAsync();
+            await CheckQuoteStatus();
             await CheckUnitsAsync();
             await CheckCategoriesAsync();
             await CheckCountriesAsync();
@@ -1280,10 +1281,10 @@ namespace SAGM.Data
                                                              Active = true,
                                                              PhoneNumber = "8183194500",
                                                              Contacts = new List<Contact>(){
-                                                                                            new Contact { Name = "",
-                                                                                                          LastName="Reyna",
-                                                                                                          Email = "Aaron.Gonzalez@vesuvius.com",
-                                                                                                          Mobile= "8120227644",
+                                                                                            new Contact { Name = "Brenda",
+                                                                                                          LastName="Suarz",
+                                                                                                          Email = "brenda.suarez@vesuvius.com",
+                                                                                                          Mobile= "8261716097",
                                                                                                           Active = true,
                                                                                                           PhoneNumber = "8183194500"
                                                                                                         } ,
@@ -3628,6 +3629,21 @@ namespace SAGM.Data
                 _context.Units.Add(new Unit { UnitName = "EA", Active = true });
                 await _context.SaveChangesAsync();
             } 
+        }
+
+        private async Task CheckQuoteStatus()
+        {
+            if (!_context.QuoteStatus.Any())
+            {
+                _context.QuoteStatus.Add(new QuoteStatus { QuoteStatusName = "CREADA" });
+                _context.QuoteStatus.Add(new QuoteStatus { QuoteStatusName = "EN MODIFICACION" });
+                _context.QuoteStatus.Add(new QuoteStatus { QuoteStatusName = "COMPLETADA" });
+                _context.QuoteStatus.Add(new QuoteStatus { QuoteStatusName = "ENVIADA" });
+                _context.QuoteStatus.Add(new QuoteStatus { QuoteStatusName = "GANADA" });
+                _context.QuoteStatus.Add(new QuoteStatus { QuoteStatusName = "PERDIDA" });
+                _context.QuoteStatus.Add(new QuoteStatus { QuoteStatusName = "CON ORDEN" });
+                await _context.SaveChangesAsync();
+            }
         }
     }
 }

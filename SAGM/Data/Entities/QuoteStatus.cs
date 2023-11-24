@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel;
 
 namespace SAGM.Data.Entities
 {
@@ -10,6 +11,6 @@ namespace SAGM.Data.Entities
         [Display(Name = "Estatus")]
         [Required(ErrorMessage = "El campo {0} es requerido")]
         public string QuoteStatusName { get; set; }
-        public ICollection<Quote> Quotes { get; set; }
+        public ICollection<Quote> Quote { get; set; }
     }
 }

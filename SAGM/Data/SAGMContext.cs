@@ -25,12 +25,11 @@ namespace SAGM.Data
         public DbSet<Contact> Contacts { get; set; }
 
         public DbSet<Currency> Currencies { get; set; }
+        public DbSet<QuoteStatus> QuoteStatus { get; set; }
 
         public DbSet<Quote> Quotes { get; set; }
 
         public DbSet<QuoteDetail> QuoteDetails { get; set; }
-
-        public DbSet<QuoteStatus> QuoteStatus { get; set; }
 
 
         public DbSet<Unit> Units { get; set; }

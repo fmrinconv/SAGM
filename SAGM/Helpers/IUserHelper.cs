@@ -42,5 +42,9 @@ namespace SAGM.Helpers
         Task<IEnumerable<string>> GetUserRolesAsync(User user);
 
         Task<IEnumerable<string>> GetRolesForUserAsync(User user);
+
+        Task<IEnumerable<SelectListItem>> GetSellersAsync();
+
+        Task<IEnumerable<SelectListItem>> GetAllUsersAsync();
     }
 }

@@ -107,8 +107,43 @@ namespace SAGM.Helpers
             return list;
         }
 
-    
+        public async Task<IEnumerable<SelectListItem>> GetComboCustomersAsync()
+        {
+            List<SelectListItem> list = await _context.Customers.Select(c => new SelectListItem
+            {
+                Text = c.CustomerNickName,
+                Value = c.CustomerId.ToString()
+            })
+                 .OrderBy(c => c.Text)
+                 .ToListAsync();
 
-        
+            list.Insert(0, new SelectListItem { Text = "[Seleccione un cliente...]", Value = "0" });
+            return list;
+        }
+
+
+        public async Task<IEnumerable<SelectListItem>> GetComboContactCustomersAsync(int customerId)
+        {
+
+            List<SelectListItem> list = new List<SelectListItem>();
+
+            if (customerId > 0)
+            {
+                list = await _context.Contacts
+              .Where(c => c.Customer.CustomerId == customerId)
+              .Select(c => new SelectListItem
+              {
+                  Text = c.Name + " " + c.LastName,
+                  Value = c.ContactId.ToString()
+              })
+             .OrderBy(c => c.Text)
+             .ToListAsync();
+            }
+          
+
+            list.Insert(0, new SelectListItem { Text = "[Seleccione un contacto...]", Value = "0" });
+            return list;
+        }
+
     }
 }

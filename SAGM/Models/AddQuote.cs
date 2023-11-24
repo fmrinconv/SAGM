@@ -1,43 +1,50 @@
 ﻿using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Text.Json.Serialization;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using SAGM.Data.Entities;
 
-namespace SAGM.Data.Entities
+namespace SAGM.Models
 {
-    public class Quote
+    public class AddQuote
     {
-        [Key]
-        public int QuoteId { get; set; }
+        public int QuoteId  {get; set;}
 
         [Required(ErrorMessage = "El campo {0} es obligatorio.")]
         [Display(Name = "Fecha cotización")]
         [DisplayFormat(DataFormatString = "{0:yyyy-MM-ddTHH:mm:ss}", ApplyFormatInEditMode = true)]
         public DateTime QuoteDate { get; set; }
 
-        [Required]
+        [Display(Name = "Cotización")]
         public string QuoteName { get; set; }
 
-        
         [Display(Name = "Creo")]
-        [Required(ErrorMessage = "El campo {0} es obligatorio.")]
-        public User CreatedBy { get; set; }
+        public string CreatedBy { get; set; }
 
         [Display(Name = "Vendedor")]
-        [Required(ErrorMessage = "El campo {0} es obligatorio.")]
-        public string Seller { get; set; }
+        [Required( ErrorMessage = "El campo {0} es obligatorio.")]
+        public string SellerId { get; set; }
+
+        public IEnumerable<SelectListItem> Sellers { get; set; }
 
         [Display(Name = "Cliente")]
-        [Required(ErrorMessage = "El campo {0} es obligatorio.")]
-        public Customer Customer { get; set; }
+        [Range(1, int.MaxValue, ErrorMessage = "El campo {0} es obligatorio.")]
+        public int CustomerId { get; set; }
+
+        public IEnumerable<SelectListItem> Customers { get; set; }
 
         [Display(Name = "Comprador")]
-        [Required(ErrorMessage = "El campo {0} es obligatorio.")]
-        public int BuyerContactId { get; set; }
+        [Range(1, int.MaxValue, ErrorMessage = "El campo {0} es obligatorio.")]
+        public int BuyerContactId { get; set; } //Id de un contacto
+
+
+        public IEnumerable<SelectListItem> CustomerBuyerContacts { get; set; }
 
         [Display(Name = "Usuario")]
-        [Required(ErrorMessage = "El campo {0} es obligatorio.")]
+        [Range(1, int.MaxValue, ErrorMessage = "El campo {0} es obligatorio.")]
         public int FinalUserId { get; set; } //Es el id de un contacto
+
+        public IEnumerable<SelectListItem> CustomerFinalContacts { get; set; }
 
         [Display(Name = "Fecha vigencia")]
         [Required(ErrorMessage = "El campo {0} es obligatorio.")]
@@ -50,18 +57,22 @@ namespace SAGM.Data.Entities
 
         [Display(Name = "Modificó")]
         [MaxLength(128, ErrorMessage = "El campo {0} debe tener máximo {1} caractéres.")]
-        public string? ModifiedBy { get; set; }
+        public string? ModifiedById { get; set; }
+
+        public IEnumerable<SelectListItem> ModifiedBy { get; set; }
 
         [StringLength(128)]
         [Display(Name = "OC Cliente")]
         public string? CustomerPO { get; set; }
 
         [Display(Name = "Estatus")]
-        [JsonIgnore]
-        public QuoteStatus QuoteStatus { get; set; }
+        public IEnumerable<SelectListItem> QuoteStatus { get; set; }
+
+        [Display(Name = "Estatus")]
+        public int QuoteStatusId { get; set; }
 
         [Display(Name = "Moneda")]
-        public Currency Currency { get; set; }
+        public string CurrencyId { get; set; }
 
         [Display(Name = "Comentarios")]
         public string? Comments { get; set; }
@@ -75,8 +86,5 @@ namespace SAGM.Data.Entities
         [Display(Name = "IVA")]
         [Required(ErrorMessage = "El campo {0} es obligatorio.")]
         public decimal Tax { get; set; }
-
-        public ICollection<QuoteDetail> QuoteDetails { get; set; }
-
     }
 }

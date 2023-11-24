@@ -1,0 +1,126 @@
+﻿@model IEnumerable<SAGM.Models.AllQuotes>
+<style>
+    td.details-control {
+        background: url('images/det_open.png') no-repeat center center;
+        cursor: pointer;
+    }
+
+    tr.shown td.details-control {
+        background: url('images/det_close.png') no-repeat center center;
+    }
+
+</style>
+
+<table class="table table-hover table-responsive compact row-border" id="TableQuotes" style="font-size:x-small;">
+    <thead>
+        <tr>
+            <th></th>
+            <th align="right" >
+                #
+            </th>
+            <th style="text-align:left;">
+                Cotización
+            </th>
+            <th style="text-align:left;">
+                @Html.DisplayNameFor(model => model.Customer.CustomerNickName)
+            </th>
+            <th style="text-align:left;">
+                Contacto
+            </th>
+            <th style="text-align:left;">
+                Comprador
+            </th>
+            <th style="text-align:left;">
+                Fecha
+            </th>
+            <th style="text-align:left;">
+                Vigencia
+            </th>
+            <th style="text-align:left;">
+                @Html.DisplayNameFor(model => model.Seller)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.ModifyDate)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.ModifiedBy)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.CustomerPO)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Comments)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Active)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Tax)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.QuoteStatus.QuoteStatusName)
+            </th>
+            <th>Acción</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td></td>
+                <td></td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.QuoteName)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Customer.CustomerNickName)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.FinalUser)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.BuyerContact)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.QuoteDate)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.validUntilDate)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Seller)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.ModifyDate)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.ModifiedBy)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.CustomerPO)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Comments)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Active)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Tax)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.QuoteStatus.QuoteStatusName)
+                </td>
+                <td>
+                    <a onclick="showInPopup('@Url.Action("EditQuote",
+                                                         "Quotes",
+                                                         new {id= item.QuoteId },
+                                                         Context.Request.Scheme)',
+                                            'Editar cotización  @item.QuoteName' ,
+                                             'bg-warning')" class="btn btn-sm btn-outline-warning"><i class="fa-solid fa-pencil-alt"></i></a>
+                    <button data-id="@item.QuoteId" class="btn btn-sm btn-outline-danger deleteItem" data-bs-toggle="modal" data-bs-target="#deleteDialog"><i class="fa-solid fa-trash"></i></button>
+                </td>
+            </tr>
+        }
+    </tbody>
+    </table>
