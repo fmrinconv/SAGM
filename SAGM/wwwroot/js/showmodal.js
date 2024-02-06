@@ -11,16 +11,20 @@
             $('#form-modal .modal-header').addClass(classname);
             if (classname == "bg-primary" ) {
                 $('#form-modal .modal-header').addClass("text-white");
-            }
-            else if (classname == "bg-warning") {
+            }   
+            else if (classname == "bg-warning") {   
                 $('#form-modal .modal-header').addClass("text-black");
             }
             else {
                 $('#form-modal .modal-header').addClass("text-white");
             }
 
-            if (title == "Crear cotización" || title.substring(0,17) == "Editar cotización" ) {
+            if (title.substring(0, 16) == "Crear cotización" || title.substring(0, 17) == "Editar cotización" || title.substring(0, 15) == "Agregar partida") {
                 $('#form-modal .modal-icon').addClass("fa fa-file-invoice-dollar");
+            }
+            else if (title == "Hacer comentario")
+            {
+                $('#form-modal .modal-icon').addClass("fa fa-comments");
             }
             else {
                 $('#form-modal .modal-icon').addClass("fa fa-globe");
@@ -29,7 +33,7 @@
             $('#form-modal .modal-title').html(title);
             $('#form-modal').modal('show');
             setTimeout(function () {
-                $("#form-modal select, #form-modal input:text, #form-modal textarea").first().focus();
+                $("#form-modal select, #form-modal input:text, #form-modal textarea, #form-control textarea").first().focus();
             }, 600);
 
         }

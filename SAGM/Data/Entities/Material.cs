@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.Xml.Linq;
-
+using System.Text.Json.Serialization;
 namespace SAGM.Data.Entities
 {
     public class Material
@@ -15,6 +15,8 @@ namespace SAGM.Data.Entities
         public string MaterialName { get; set; }
 
         public Boolean Active { get; set; }
+
+        [JsonIgnore]
         public MaterialType MaterialType { get; set; }
 
         public ICollection<QuoteDetail> QuoteDetails { get; set; }

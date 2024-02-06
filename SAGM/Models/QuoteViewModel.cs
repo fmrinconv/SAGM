@@ -1,13 +1,13 @@
-﻿using System.ComponentModel;
+﻿using SAGM.Data.Entities;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
 
-namespace SAGM.Data.Entities
+namespace SAGM.Models
 {
-    public class Quote
+    public class QuoteViewModel
     {
-        [Key]
         public int QuoteId { get; set; }
 
         [Required(ErrorMessage = "El campo {0} es obligatorio.")]
@@ -18,7 +18,7 @@ namespace SAGM.Data.Entities
         [Required]
         public string QuoteName { get; set; }
 
-        
+
         [Display(Name = "Creo")]
         [Required(ErrorMessage = "El campo {0} es obligatorio.")]
         public User CreatedBy { get; set; }
@@ -26,6 +26,12 @@ namespace SAGM.Data.Entities
         [Display(Name = "Vendedor")]
         [Required(ErrorMessage = "El campo {0} es obligatorio.")]
         public string Seller { get; set; }
+
+        [Display(Name = "Vendedor")]
+        [Required(ErrorMessage = "El campo {0} es obligatorio.")]
+        public string SellerName { get; set; }
+
+
 
         [Display(Name = "Cliente")]
         [Required(ErrorMessage = "El campo {0} es obligatorio.")]
@@ -35,9 +41,15 @@ namespace SAGM.Data.Entities
         [Required(ErrorMessage = "El campo {0} es obligatorio.")]
         public int BuyerContactId { get; set; }
 
+        [Display(Name = "Comprador")]
+        public string BuyerName { get; set; }
+
         [Display(Name = "Usuario")]
         [Required(ErrorMessage = "El campo {0} es obligatorio.")]
         public int FinalUserId { get; set; } //Es el id de un contacto
+
+        [Display(Name = "Usuario Final")]
+        public string FinalUserName { get; set; }
 
         [Display(Name = "Fecha vigencia")]
         [Required(ErrorMessage = "El campo {0} es obligatorio.")]
@@ -76,8 +88,9 @@ namespace SAGM.Data.Entities
         [Required(ErrorMessage = "El campo {0} es obligatorio.")]
         public decimal Tax { get; set; }
 
-        public ICollection<QuoteDetail> QuoteDetails { get; set; }
-        public ICollection<QuoteComment> QuoteComments { get; set; }
+   
 
+        public ICollection<AllQuoteDetails> QuoteDetails { get; set; }
+        public ICollection<QuoteComment> QuoteComments { get; set; }
     }
 }

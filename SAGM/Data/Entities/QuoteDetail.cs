@@ -16,10 +16,10 @@ namespace SAGM.Data.Entities
         [Required(ErrorMessage = "El campo {0} es obligatorio.")]
         public string Description { get; set; }
 
-        [DisplayFormat(DataFormatString = "{0:N2}")]
+        [Column(TypeName = "decimal(18,2)")]
         [Display(Name = "Cantidad")]
         [Required(ErrorMessage = "El campo {0} es obligatorio.")]
-        public float Quantity { get; set; }
+        public decimal Quantity { get; set; }
 
         [Column(TypeName = "decimal(18,2)")]
         [Display(Name = "Precio")]
@@ -29,6 +29,9 @@ namespace SAGM.Data.Entities
         public Material Material { get; set; }
 
         public Unit Unit { get; set; }
+
+       
+
 
 
     }

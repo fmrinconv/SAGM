@@ -16,7 +16,7 @@
     <div class="card mt-2">
         <div class="card-header text-success bg-secondary bg-opacity-25">
             <i class="fa fa-file-invoice-dollar"></i><strong>Cotizaciones</strong>
-            <a onclick="showInPopup('@Url.Action("AddQuote", "Quotes", new { id = "" }, Context.Request.Scheme)' , 'Crear cotización','bg-success')" class="btn btn-sm btn-outline-success" title="Crear cotización"><i class="fa fa-plus-circle"></i></a>
+            <a onclick="showInPopup('@Url.Action("AddQuote", "Quotes", new { id = "" }, Context.Request.Scheme)' , 'Crear cotización @DateTime.Now.ToString(" yyyyMMdd")-XXX','bg-success')" class="btn btn-sm btn-outline-success" title="Crear cotización"><i class="fa fa-plus-circle"></i></a>
         </div>  
         <div class="card-body">
             <div id="view-all">

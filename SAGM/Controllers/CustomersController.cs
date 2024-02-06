@@ -121,11 +121,6 @@ namespace SAGM.Controllers
 
             if (ModelState.IsValid)
             {
-
-               
-
-              
-                
                 try
                 {
                     if (model.CustomerId == 0)

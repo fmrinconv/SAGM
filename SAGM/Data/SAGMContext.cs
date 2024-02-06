@@ -34,6 +34,8 @@ namespace SAGM.Data
 
         public DbSet<Unit> Units { get; set; }
 
+        public DbSet<QuoteComment> QuoteComments { get; set; }
+
 
         internal static IConfiguration GetService(Type type)
         {
@@ -51,6 +53,7 @@ namespace SAGM.Data
             modelBuilder.Entity<MaterialType>().HasIndex("MaterialTypeName", "CategoryId").IsUnique();
             modelBuilder.Entity<Material>().HasIndex("MaterialName", "MaterialTypeId").IsUnique();
             modelBuilder.Entity<Contact>().HasIndex("Name", "LastName", "CustomerId").IsUnique();
+            modelBuilder.Entity<Quote>().HasMany(q => q.QuoteComments).WithOne(q => q.Quote).OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

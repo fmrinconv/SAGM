@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.Xml.Linq;
+using System.Text.Json.Serialization;
 
 namespace SAGM.Data.Entities
 {
@@ -15,8 +16,10 @@ namespace SAGM.Data.Entities
 
         public Boolean Active { get; set; }
 
+        [JsonIgnore]//este dato es bien importante porque puede marcar en el retorno de Json el error 500
         public Category Category { get; set; }
 
+        [JsonIgnore]
         public ICollection<Material> Materials { get; set; }
 
         [Display(Name = "Materiales")]

@@ -12,8 +12,8 @@ using SAGM.Data;
 namespace SAGM.Migrations
 {
     [DbContext(typeof(SAGMContext))]
-    [Migration("20231101025632_Quoteschaged")]
-    partial class Quoteschaged
+    [Migration("20231127183626_snapshot")]
+    partial class snapshot
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -489,8 +489,6 @@ namespace SAGM.Migrations
 
                     b.HasKey("QuoteId");
 
-                    b.HasIndex("BuyerContactId");
-
                     b.HasIndex("CreatedById");
 
                     b.HasIndex("CurrencyId");
@@ -500,6 +498,36 @@ namespace SAGM.Migrations
                     b.HasIndex("QuoteStatusId");
 
                     b.ToTable("Quotes");
+                });
+
+            modelBuilder.Entity("SAGM.Data.Entities.QuoteComment", b =>
+                {
+                    b.Property<int>("CommentId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("CommentId"));
+
+                    b.Property<string>("Comment")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("DateComment")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("QuoteId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("UserId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("CommentId");
+
+                    b.HasIndex("QuoteId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("QuoteComments");
                 });
 
             modelBuilder.Entity("SAGM.Data.Entities.QuoteDetail", b =>
@@ -803,12 +831,6 @@ namespace SAGM.Migrations
 
             modelBuilder.Entity("SAGM.Data.Entities.Quote", b =>
                 {
-                    b.HasOne("SAGM.Data.Entities.Contact", "Buyer")
-                        .WithMany("Quotes")
-                        .HasForeignKey("BuyerContactId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("SAGM.Data.Entities.User", "CreatedBy")
                         .WithMany("Quotes")
                         .HasForeignKey("CreatedById")
@@ -825,17 +847,33 @@ namespace SAGM.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("SAGM.Data.Entities.QuoteStatus", null)
-                        .WithMany("Quotes")
+                    b.HasOne("SAGM.Data.Entities.QuoteStatus", "QuoteStatus")
+                        .WithMany("Quote")
                         .HasForeignKey("QuoteStatusId");
-
-                    b.Navigation("Buyer");
 
                     b.Navigation("CreatedBy");
 
                     b.Navigation("Currency");
 
                     b.Navigation("Customer");
+
+                    b.Navigation("QuoteStatus");
+                });
+
+            modelBuilder.Entity("SAGM.Data.Entities.QuoteComment", b =>
+                {
+                    b.HasOne("SAGM.Data.Entities.Quote", "Quote")
+                        .WithMany("QuoteComments")
+                        .HasForeignKey("QuoteId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("SAGM.Data.Entities.User", "User")
+                        .WithMany("QuoteComments")
+                        .HasForeignKey("UserId");
+
+                    b.Navigation("Quote");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("SAGM.Data.Entities.QuoteDetail", b =>
@@ -889,11 +927,6 @@ namespace SAGM.Migrations
                     b.Navigation("Users");
                 });
 
-            modelBuilder.Entity("SAGM.Data.Entities.Contact", b =>
-                {
-                    b.Navigation("Quotes");
-                });
-
             modelBuilder.Entity("SAGM.Data.Entities.Country", b =>
                 {
                     b.Navigation("States");
@@ -923,12 +956,14 @@ namespace SAGM.Migrations
 
             modelBuilder.Entity("SAGM.Data.Entities.Quote", b =>
                 {
+                    b.Navigation("QuoteComments");
+
                     b.Navigation("QuoteDetails");
                 });
 
             modelBuilder.Entity("SAGM.Data.Entities.QuoteStatus", b =>
                 {
-                    b.Navigation("Quotes");
+                    b.Navigation("Quote");
                 });
 
             modelBuilder.Entity("SAGM.Data.Entities.State", b =>
@@ -943,6 +978,8 @@ namespace SAGM.Migrations
 
             modelBuilder.Entity("SAGM.Data.Entities.User", b =>
                 {
+                    b.Navigation("QuoteComments");
+
                     b.Navigation("Quotes");
                 });
 #pragma warning restore 612, 618

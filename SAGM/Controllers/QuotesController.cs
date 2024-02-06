@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data.Entity.SqlServer.Utilities;
+using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
@@ -11,7 +13,14 @@ using Microsoft.SqlServer.Server;
 using SAGM.Data;
 using SAGM.Data.Entities;
 using SAGM.Helpers;
-using SAGM.Migrations;
+using SAGM.Models;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.EntityFrameworkCore;
+using SAGM.Data;
+using SAGM.Data.Entities;
+using SAGM.Enums;
+using SAGM.Helpers;
 using SAGM.Models;
 
 namespace SAGM.Controllers
@@ -45,6 +54,7 @@ namespace SAGM.Controllers
                 TempData.Remove("AddQuoteResult");
                 TempData.Remove("AddQuoteMessage");
             }
+
             if (TempData["EditQuoteResult"] != null)
             {
 
@@ -52,6 +62,22 @@ namespace SAGM.Controllers
                 ViewBag.Message = TempData["EditQuoteMessage"].ToString();
                 TempData.Remove("EditQuoteResult");
                 TempData.Remove("EditQuoteMessage");
+            }
+
+            if (TempData["AddOrEditCommentResult"] != null)
+            {
+                ViewBag.Result = TempData["AddOrEditCommentResult"].ToString();
+                ViewBag.Message = TempData["AddOrEditCommentMessage"].ToString();
+                TempData.Remove("AddOrEditCommentResult");
+                TempData.Remove("AddOrEditCommentMessage");
+            }
+
+            if (TempData["DeleteCommentResult"] != null)
+            {
+                ViewBag.Result = TempData["DeleteCommentResult"].ToString();
+                ViewBag.Message = TempData["DeleteCommentMessage"].ToString();
+                TempData.Remove("DeleteCommentResult");
+                TempData.Remove("DeleteCommentMessage");
             }
 
 
@@ -99,20 +125,75 @@ namespace SAGM.Controllers
 
         // GET: Quotes/Details/5
         public async Task<IActionResult> Details(int? id)
-        {
+            {
             if (id == null || _context.Quotes == null)
             {
                 return NotFound();
             }
 
             var quote = await _context.Quotes
+                .Include(q => q.Customer)
+                .Include(q => q.QuoteStatus)
+                .Include(q => q.QuoteDetails).ThenInclude(d => d.Unit)
+                .Include(q => q.QuoteDetails).ThenInclude(d => d.Material)
                 .FirstOrDefaultAsync(m => m.QuoteId == id);
             if (quote == null)
             {
                 return NotFound();
             }
 
-            return View(quote);
+            User seller = await _userHelper.GetUserAsync(quote.Seller);
+
+            QuoteViewModel quotev = new QuoteViewModel();
+            Contact buyer = await _context.Contacts.FindAsync(quote.BuyerContactId);
+            Contact finaluser = await _context.Contacts.FindAsync(quote.FinalUserId);
+            quotev.QuoteId = quote.QuoteId;
+            quotev.Active = quote.Active;
+            quotev.BuyerContactId = quote.BuyerContactId;
+            quotev.BuyerName = $"{buyer.Name} {buyer.LastName}"; 
+            quotev.Comments = quote.Comments;
+            quotev.CreatedBy = quote.CreatedBy;
+            quotev.Currency = quote.Currency;
+            quotev.Customer = quote.Customer;
+            quotev.CustomerPO = quote.CustomerPO;
+            quotev.FinalUserId = quote.FinalUserId;
+            quotev.FinalUserName = $"{finaluser.Name} {finaluser.LastName}";
+            quotev.ModifiedBy = quote.ModifiedBy;
+            quotev.ModifyDate = quote.ModifyDate;
+            quotev.QuoteComments= quote.QuoteComments;
+            quotev.Seller = quote.Seller;
+            quotev.SellerName = seller.FullName;
+            quotev.QuoteName = quote.QuoteName;
+            quotev.QuoteStatus = quote.QuoteStatus;
+      
+            List<AllQuoteDetails> details = new List<AllQuoteDetails>().ToList();
+            if (quote.QuoteDetails != null) {
+  
+                foreach (var detail in quote.QuoteDetails)
+                {
+                    AllQuoteDetails detailsv = new()
+                    {
+                        QuoteDetailId = detail.QuoteDetailId,
+                        Quote = detail.Quote,
+                        Description = detail.Description,
+                        Material = detail.Material,
+                        MaterialName = detail.Material.MaterialName,
+                        Price = detail.Price,
+                        Quantity = detail.Quantity,
+                        Unit = detail.Unit,
+                        UnitName = detail.Unit.UnitName
+
+                    };
+                    details.Add(detailsv);
+                }
+                
+            }
+
+            quotev.QuoteDetails = details;
+            
+
+
+            return View(quotev);
         }
 
         public async Task<IActionResult> AddQuote()
@@ -217,7 +298,7 @@ namespace SAGM.Controllers
 
                         //-----------------------
                         Contact buyer = await _context.Contacts.FindAsync(model.BuyerContactId);
-                        User createdBy = await _userHelper.GetUserAsync(model.CreatedBy);
+                        User createdBy = await _userHelper.GetUserAsync(User.Identity.Name);
                         Currency currency = await _context.Currencies.FindAsync(model.CurrencyId);
                         Customer customer = await _context.Customers.FindAsync(model.CustomerId);
                         QuoteStatus quotestatus = await _context.QuoteStatus.FindAsync(1);//El primer estatus es creada
@@ -330,7 +411,7 @@ namespace SAGM.Controllers
 
         public async Task<IActionResult> EditQuote(int id)
         {
-
+   
 
             Quote quote = await _context.Quotes
                 .Include(q => q.Customer)
@@ -381,12 +462,15 @@ namespace SAGM.Controllers
                 BuyerContactId = quote.BuyerContactId,
                 CustomerFinalContacts = customerfinalcontacts,
                 FinalUserId = quote.FinalUserId,
+                CustomerPO = quote.CustomerPO,
                 Sellers = sellers,
                 Tax = quote.Tax,
                 Active = quote.Active,
                 ModifiedBy = (List<SelectListItem>)await _userHelper.GetAllUsersAsync(),
+                ModifiedById = quote.ModifiedBy,
                 QuoteStatus = quotestatus,
-                QuoteStatusId = quote.QuoteStatus.QuoteStatusId
+                QuoteStatusId = quote.QuoteStatus.QuoteStatusId,
+                ModifyDate = quote.ModifyDate,
                
             };
 
@@ -404,7 +488,7 @@ namespace SAGM.Controllers
                 {
                         Customer customer = await _context.Customers.FindAsync(model.CustomerId);
                         Quote quote = _context.Quotes.Find(model.QuoteId);
-                        QuoteStatus quotestatus = _context.QuoteStatus.Find(model.QuoteStatusId);
+                        QuoteStatus quotestatus = _context.QuoteStatus.Find(2);//Estatus 2 es en modificación
 
                         quote.Active = model.Active;
                         quote.BuyerContactId = model.BuyerContactId;
@@ -488,141 +572,105 @@ namespace SAGM.Controllers
         }
 
 
-        // GET: Quotes/Create
-        public IActionResult Create()
-        {
-            return View();
+        public  ActionResult AddOrEditComment(int id)
+            {
+            List<QuoteCommentView> comments = _context.QuoteComments
+                .Include(c => c.User)
+                .Where(c => c.Quote.QuoteId == id)
+                .Select(c => new QuoteCommentView
+                {
+                    UserName = c.User.Email,
+                    CommentId = c.CommentId,
+                    QuoteId = c.Quote.QuoteId,
+                    Comment = c.Comment,
+                    Usuario = c.User.FullName,
+                    DateComment = c.DateComment
+                })
+                .OrderBy(c => c.QuoteId)
+                .ToList();
+
+            ViewBag.QuoteId = id;
+            var name = User.Identity.Name;
+            User usr =  _context.Users.Where(u => u.UserName == name).FirstOrDefault();
+            ViewBag.UserName = name;
+            ViewBag.Usuario = usr.FullName;
+            //ViewBag.UserName = "@" + name.Substring(0, name.IndexOf("@"));
+
+
+
+            return View(comments);
+
+
         }
 
-        // POST: Quotes/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create( AddQuote model)
+        public async Task<IActionResult> AddOrEditComment(int QuoteId, QuoteCommentView model)
         {
-            Contact buyer = await _context.Contacts.FindAsync(model.BuyerContactId);
-            User createdBy = await _userHelper.GetUserAsync(model.CreatedBy);
-            Currency currency = await _context.Currencies.FindAsync(model.CurrencyId);  
-            Customer customer = await _context.Customers.FindAsync(model.CustomerId);
-
-
-            Quote quote = new Quote()
-            {
-                 Active = model.Active,
-
-                 Comments = model.Comments,
-                 CreatedBy = createdBy,
-                 Currency = currency,
-                 Customer  = customer,
-                 CustomerPO = model.CustomerPO,
-                 FinalUserId = model.FinalUserId,
-                 ModifiedBy = null,
-                 ModifyDate = model.ModifyDate,
-                 QuoteDate = model.QuoteDate,
-                 QuoteName = model.QuoteName,
-
-                 Tax = model.Tax,  
-                 validUntilDate = model.validUntilDate
-
-            };
-
             if (ModelState.IsValid)
             {
-                _context.Add(quote);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
-            }
-            return View(quote);
-        }
 
-        // GET: Quotes/Edit/5
-        public async Task<IActionResult> Edit(int? id)
-        {
-            if (id == null || _context.Quotes == null)
-            {
-                return NotFound();
-            }
-
-            var quote = await _context.Quotes.FindAsync(id);
-            if (quote == null)
-            {
-                return NotFound();
-            }
-            return View(quote);
-        }
-
-        // POST: Quotes/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("QuoteId,QuoteDate,QuoteName,Seller,FinalUserId,validUntilDate,ModifyDate,ModifiedBy,CustomerPO,Comments,Active,Tax")] Quote quote)
-        {
-            if (id != quote.QuoteId)
-            {
-                return NotFound();
-            }
-
-            if (ModelState.IsValid)
-            {
                 try
                 {
-                    _context.Update(quote);
-                    await _context.SaveChangesAsync();
+
+                        QuoteComment comment = new QuoteComment()
+                        {
+                            Quote = await _context.Quotes.FindAsync(QuoteId),
+                            Comment = model.Comment,
+                            DateComment = DateTime.Now,
+                            User = await _userHelper.GetUserAsync(User.Identity.Name)
+                        };
+                 
+                        _context.Add(comment);
+                        await _context.SaveChangesAsync();
+                        TempData["AddOrEditCommentResult"] = "true";
+                        TempData["AddOrEditCommentMessage"] = "El comentario fué agregado";
+
+                    return Json(new { isValid = true, html = ModalHelper.RenderRazorViewToString(this, "_ViewAllQuotes", _context.Quotes.ToList()) });
+
                 }
-                catch (DbUpdateConcurrencyException)
+                catch (DbUpdateException dbUpdateException)
                 {
-                    if (!QuoteExists(quote.QuoteId))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
+               
+                        ModelState.AddModelError(string.Empty, dbUpdateException.Message);
+                        return Json(new { isValid = false, html = ModalHelper.RenderRazorViewToString(this, "AddOrEditMessage", model) });
+  
                 }
-                return RedirectToAction(nameof(Index));
+
             }
-            return View(quote);
+            else
+            {
+                return Json(new { isValid = false, html = ModalHelper.RenderRazorViewToString(this, "AddOrdEditMessage", model) });
+            }
+
         }
 
-        // GET: Quotes/Delete/5
-        public async Task<IActionResult> Delete(int? id)
+        [HttpPost]
+        public async Task<IActionResult> DeleteComment(int id)
         {
-            if (id == null || _context.Quotes == null)
+            QuoteComment comment = await _context.QuoteComments.FindAsync(id);
+            try
             {
-                return NotFound();
+                _context.QuoteComments.Remove(comment);
+                await _context.SaveChangesAsync();
+                TempData["DeleteCommentResult"] = "true";
+                TempData["DeleteCommentMessage"] = "El comentario fué eliminado";
+                return Json(new { isValid = true, html = ModalHelper.RenderRazorViewToString(this, "_ViewAllQuotes", _context.Quotes.ToList()) });
+      
+
+            }
+            catch (Exception e)
+            {
+                TempData["DeleteCommentResult"] = "false";
+                TempData["EeleteCommentMessage"] = "El comentario no pudo ser eliminado error: " + e.Message;
+                return Json(new { isValid = false, html = ModalHelper.RenderRazorViewToString(this, "_ViewAllQuotes", _context.Quotes.ToList()) });
+
             }
 
-            var quote = await _context.Quotes
-                .FirstOrDefaultAsync(m => m.QuoteId == id);
-            if (quote == null)
-            {
-                return NotFound();
-            }
 
-            return View(quote);
         }
 
-        // POST: Quotes/Delete/5
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
-        {
-            if (_context.Quotes == null)
-            {
-                return Problem("Entity set 'SAGMContext.Quotes'  is null.");
-            }
-            var quote = await _context.Quotes.FindAsync(id);
-            if (quote != null)
-            {
-                _context.Quotes.Remove(quote);
-            }
-            
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
-        }
 
         public JsonResult GetBuyerContacts(int customerId)
         {
@@ -642,6 +690,155 @@ namespace SAGM.Controllers
             return Json(Contacts );
 
         }
+
+
+        public async Task<IActionResult> AddOrEditDetail(int id = 0, int detailid = 0)
+        {
+            //El Detalle siempre traerá un id de cotización ya que sea nuevo el detalle o actualización la Quote ya existe
+            QuoteDetailViewModel qdv = new QuoteDetailViewModel();
+            //Buscamos la cotización para pasar todos sus valores al Detalle
+            qdv.QuoteId = id;
+            qdv.QuoteDetailId = detailid;
+
+            //Pasamos el listado de unidades para que aparezca en un combo despues asignaremos un default si el 
+            //movimiento es un Edit si es un nuevo detalle entonces se quedeará como esta sin asignar el id de la unidad
+            List<SelectListItem> Unit = (List<SelectListItem>)await _comboHelper.GetComboUnitAsync();
+            qdv.Unit = Unit;
+
+            List<SelectListItem> Category = (List<SelectListItem>)await _comboHelper.GetComboCategoriesAsync();
+
+            qdv.Category = Category;
+
+            List<SelectListItem> MaterialType = (List<SelectListItem>)await _comboHelper.GetComboMaterialTypesAsync(0);
+
+            if (detailid == 0)
+            {
+              
+                return View(qdv);
+            }
+            else
+            {
+                Category category = await _context.Categories.FindAsync(id);
+                if (category == null)
+                {
+                    return NotFound();
+                }
+                return View(qdv);
+            }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> AddOrEditDetail(QuoteDetailViewModel model)
+        {
+
+      
+           
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    QuoteDetail qd = new QuoteDetail();
+                    qd.Quote = await _context.Quotes.FindAsync(model.QuoteId); ;
+                    qd.Description = model.Description;
+                    qd.Material = await _context.Materials.FindAsync(model.MaterialId);
+                    qd.Price = model.Price;
+                    qd.Quantity = model.Quantity;
+                    qd.Unit = await _context.Units.FindAsync(model.UnitId);
+                    if (model.QuoteDetailId != 0)
+                    {
+                        _context.Update(qd);
+                        await _context.SaveChangesAsync();
+                    }
+                    else
+                    {
+                        _context.Add(qd);
+                        await _context.SaveChangesAsync();
+                    }
+
+                    /*
+                      Nos traemos todos los detalles
+
+                     */
+                    List<QuoteDetail> list = new List<QuoteDetail>();
+                    list = _context.Quotes.FirstOrDefault(x => x.QuoteId == model.QuoteId).QuoteDetails.ToList();
+                    List<AllQuoteDetails> details = new List<AllQuoteDetails>().ToList();
+
+                        foreach (var detail in list)
+                        {
+                            AllQuoteDetails detailsv = new()
+                            {
+                                QuoteDetailId = detail.QuoteDetailId,
+                                Quote = detail.Quote,
+                                Description = detail.Description,
+                                Material = detail.Material,
+                                MaterialName = detail.Material.MaterialName,
+                                Price = detail.Price,
+                                Quantity = detail.Quantity,
+                                Unit = detail.Unit,
+                                UnitName = detail.Unit.UnitName
+
+                            };
+                            details.Add(detailsv);
+                        }
+
+                    
+                    return Json(new { isValid = true, html = ModalHelper.RenderRazorViewToString(this, "_ViewAllQuoteDetails", details) });
+                }
+                catch (Exception)
+                {
+
+                    return View(model);
+
+                }
+               
+               
+            }
+            else {
+
+                {
+                    List<SelectListItem> Unit = (List<SelectListItem>)await _comboHelper.GetComboUnitAsync();
+                    model.Unit = Unit;
+
+                    List<SelectListItem> Category = (List<SelectListItem>)await _comboHelper.GetComboCategoriesAsync();
+                    model.Category = Category;
+
+                    List<SelectListItem> MaterialType = (List<SelectListItem>)await _comboHelper.GetComboMaterialTypesAsync(model.CategoryId);
+                    model.MaterialType = MaterialType;
+
+                    List<SelectListItem> Material = (List<SelectListItem>)await _comboHelper.GetComboMaterialsAsync(model.MaterialTypeId);
+                    model.Material = Material;
+
+                    return Json(new { isValid = false, html = ModalHelper.RenderRazorViewToString(this, "AddOrEditDetail", model) });
+                }
+            }
+            
+        }
+
+        public JsonResult GetMaterialTypes(int categoryId)
+        {
+            Category category = _context.Categories
+                .Include(c => c.MaterialTypes)
+                .FirstOrDefault(c => c.CategoryId == categoryId);
+            if (category == null)
+            {
+                return null;
+            }
+
+            return Json(category.MaterialTypes.OrderBy(m => m.MaterialTypeName));
+        }
+
+        public JsonResult GetMaterials(int materialTypeId)
+        {
+            MaterialType materialtype = _context.MaterialTypes
+              .Include(s => s.Materials)
+              .FirstOrDefault(s => s.MaterialTypeId == materialTypeId);
+            if (materialtype == null)
+            {
+                return null;
+            }
+            return Json(materialtype.Materials.OrderBy(m => m.MaterialName));
+        }
+
 
         private bool QuoteExists(int id)
         {

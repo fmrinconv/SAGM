@@ -56,7 +56,9 @@ namespace SAGM.Data.Entities
         [Display(Name = "Usuario")]
         public string FullNameWithDocument => $"{FirstName} {LastName} - {Document}";
 
-        public ICollection<Quote> Quotes { get; set; }
+        public virtual ICollection<Quote> Quotes { get; set; }
+
+        public virtual ICollection<QuoteComment> QuoteComments { get; set; }
 
 
     }

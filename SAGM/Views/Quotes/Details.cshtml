@@ -1,84 +1,169 @@
-﻿@model SAGM.Data.Entities.Quote
+﻿@model SAGM.Models.QuoteViewModel
 
 @{
-    ViewData["Title"] = "Details";
+    ViewData["Title"] = "Detalle " + Model.QuoteName;
 }
-
-<h1>Details</h1>
-
+<link href="~/lib/datatables/css/responsive.datatables.min.css" rel="stylesheet" />
 <div>
-    <h4>Quote</h4>
-    <hr />
-    <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.QuoteDate)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.QuoteDate)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.QuoteName)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.QuoteName)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Seller)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Seller)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.FinalUserId)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.FinalUserId)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.validUntilDate)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.validUntilDate)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.ModifyDate)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.ModifyDate)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.ModifiedBy)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.ModifiedBy)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.CustomerPO)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.CustomerPO)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Comments)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Comments)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Active)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Active)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Tax)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Tax)
-        </dd>
-    </dl>
+    <div class="text-success bg-secondary bg-opacity-25 header">
+        <div class="row">
+            <div class="col-11"><i class="fa fa-file-invoice-dollar"></i><strong> Detalle de Cotización:  <b>@Html.DisplayFor(model => model.QuoteName)</b></strong></div>
+            <div class="col-1 text-end"><a asp-action="Index" title="Regresar" class="back"><i class="fa-solid fa-arrow-rotate-left" title="Regresar"></i></a></div>
+        </div>
+    </div>
+
+
+    <div class="contenido container-fluid">
+        <div class="row">
+            <div class="col-6">
+                <dl class="row">
+                    <dt class="col-sm-3">
+                        Documento
+                    </dt>
+                    <dd class="col-sm-9">
+                        @Html.DisplayFor(model => model.QuoteName)
+                    </dd>
+                    <dt class="col-sm-3">
+                        @Html.DisplayNameFor(model => model.Customer.CustomerNickName)
+                    </dt>
+                    <dd class="col-sm-9">
+                        @Html.DisplayFor(model => model.Customer.CustomerNickName)
+                    </dd>
+                    <dt class="col-sm-3">
+                        @Html.DisplayNameFor(model => model.SellerName)
+                    </dt>
+                    <dd class="col-sm-9">  
+                        @Html.DisplayFor(model => model.SellerName)
+                    </dd>
+                    <dt class="col-sm-3">
+                        @Html.DisplayNameFor(model => model.BuyerName)
+                    </dt>
+                    <dd class="col-sm-9">
+                        @Html.DisplayFor(model => model.BuyerName)
+                    </dd>
+                    <dt class="col-sm-3">
+                        Usuario
+                    </dt>
+                    <dd class="col-sm-9">
+                        @Html.DisplayFor(model => model.FinalUserName)
+                    </dd>
+                </dl>
+            </div>
+            <div class="col-6">
+                <dl class="row">
+
+                    <dt class="col-sm-3">
+                        @Html.DisplayNameFor(model => model.CustomerPO)
+                    </dt>
+                    <dd class="col-sm-9">
+                        @Html.DisplayFor(model => model.CustomerPO)
+                    </dd>
+                    <dt class="col-sm-3">
+                        @Html.DisplayNameFor(model => model.QuoteStatus.QuoteStatusName)
+                    </dt>
+                    <dd class="col-sm-9">
+                        @Html.DisplayFor(model => model.QuoteStatus.QuoteStatusName)
+                    </dd>
+                    <dt class="col-sm-3">
+                        Modificado
+                    </dt>
+                    <dd class="col-sm-9">
+                        @Html.DisplayFor(model => model.ModifyDate)
+                    </dd>
+                    
+                </dl>
+
+            </div>
+        </div>
+        
+    </div>
+
 </div>
-<div>
-    <a asp-action="Edit" asp-route-id="@Model?.QuoteId">Edit</a> |
-    <a asp-action="Index">Back to List</a>
+
+
+<div class="contenido card mt-2">
+    <div class="card-header text-success bg-secondary bg-opacity-25">
+        <i class="fa fa-file-invoice-dollar"></i><strong> Partidas</strong>
+        <a onclick="showInPopup('@Url.Action("AddOrEditDetail", "Quotes", new { id = Model.QuoteId, detailid=0 }, Context.Request.Scheme)','Agregar partida','bg-success')" class="btn btn-sm btn-outline-success"><i class="fa-solid fa-plus-circle" title="Agregar partida"></i></a>
+    </div>
+    <div class="card-body">
+        <div id="view-all" >
+            <input type="hidden" id="Result" name="Result" value="@ViewBag.Result" />
+                @await Html.PartialAsync("_ViewAllQuoteDetails.cshtml", Model)
+        </div>
+    </div>
 </div>
+
+<partial name="_AddOrEditDialog" />
+<partial name="_DeleteDialog" />
+@section Scripts{
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+
+<script src="~/js/showmodal.js"></script>
+<script src="~/js/jquery-3.7.0.js"></script>
+<script src="~/js/jquery.datatables.min.js"></script>
+<script src="~/js/datatables.responsive.min.js"></script>
+<script type="text/javascript">
+    var count = 0;
+    $(document).ready(function () {
+        if ($("#Result").val() == "true") {
+            $.notify('@Html.Raw(ViewBag.Message)', "success", { globalPosition: "top center" });
+        }
+        else if ($("#Result").val() == "false") {
+            $.notify('@Html.Raw(ViewBag.Message)', "error", { globalPosition: "top center" });
+        }
+            $('#TableQuoteDetails').DataTable(
+            {
+                "language": {
+                    "url": "/lib/datatables/Spanish.json"
+                },
+                "aLengthMenu": [
+                    [25, 50, 100, 200, -1],
+                    [25, 50, 100, 200, "Todos"]
+                ],
+                "columnDefs": [
+                    {
+                        "targets": 0,
+                        visible: false,
+                        orderable: false
+                    },
+                    {
+                        "targets": [1,2,8],
+                        className: 'dt-body-center',
+                        orderable: false,
+                        responsivePriority:3
+                    },
+                    {
+                        "targets": [3,4,5],
+                        className: 'dt-body-left',
+                        orderable: false,
+                        responsivePriority: 1
+                    },
+                    {
+                        "targets": [6,7],
+                        className: 'dt-body-right',
+                        orderable: false,
+                        responsivePriority: 2
+                    },
+                ],
+                "columns": [
+                        { "data": "QuoteDetailId" },
+                        { "data": "QuoteDetailId", "render": function (data) { count = count + 1; return count.toString(); } },
+                        { "data": "Quantity" },
+                        { "data": "Unit.UnitName" },
+                        { "data": "Material.MaterialName" },
+                        { "data": "Description" },
+                        { "data": "Price" },
+                        { "data": "Total" },
+                        { "data": "QuoteDetailId" }
+                ]
+            });
+            sc_deleteDialog.openModal('deleteItem', true, 'btnYesDelete', '/Quotes/DeleteDetail/', false);
+
+    });
+</script>
+
+  }

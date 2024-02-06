@@ -1,0 +1,76 @@
+﻿@model SAGM.Models.QuoteViewModel
+<div class="container">
+<table class="table table-responsive table-hover responsive" id="TableQuoteDetails" style="font-size:small; width:100%;">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.QuoteDetails.FirstOrDefault().QuoteDetailId )
+            </th>
+            <th style="text-align:center; width:7%;">&nbsp;&emsp;#</th>
+            <th style="text-align: center;">
+                @Html.DisplayNameFor(model => model.QuoteDetails.FirstOrDefault().Quantity)
+            </th>
+            <th style="text-align: left;">
+                U.Medida
+            </th>
+            <th style="text-align: left;">
+                @Html.DisplayNameFor(model => model.QuoteDetails.FirstOrDefault().Material.MaterialName)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.QuoteDetails.FirstOrDefault().Description)
+            </th>           
+            <th style="text-align: right;">
+                @Html.DisplayNameFor(model => model.QuoteDetails.FirstOrDefault().Price)
+            </th>
+            <th style="text-align: right;">
+                @Html.DisplayNameFor(model => model.QuoteDetails.FirstOrDefault().Total)
+            </th>
+            <th style="text-align: center;">
+                Acciones
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+
+            @foreach (var item in Model.QuoteDetails)
+            {
+                <tr>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.QuoteDetailId)
+                    </td>
+                    <td></td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Quantity)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Unit.UnitName)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Material.MaterialName)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Description)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Price)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Total)
+                    </td>
+                    <td>
+                        <a onclick="showInPopup('@Url.Action("AddOrEditDetail",
+                                                         "Quotes",
+                                                         new {id= item.Quote.QuoteId, detailid=item.QuoteDetailId},
+                                                         Context.Request.Scheme)',
+                                            'Editar contacto',
+                                             'bg-warning')" class="btn btn-sm btn-outline-warning"><i class="fa-solid fa-pencil-alt"></i></a>
+                        <button data-id="@item.QuoteDetailId" class="btn btn-sm btn-outline-danger deleteItem" data-bs-toggle="modal" data-bs-target="#deleteDialog"><i class="fa-solid fa-trash"></i></button>
+                    </td>
+                </tr>
+            }
+
+
+
+    </tbody>
+    </table>
+</div>

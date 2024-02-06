@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace SAGM.Migrations
 {
     /// <inheritdoc />
-    public partial class Quotes : Migration
+    public partial class snapshot : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -344,24 +344,6 @@ namespace SAGM.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Sellers",
-                columns: table => new
-                {
-                    SellerId = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Sellers", x => x.SellerId);
-                    table.ForeignKey(
-                        name: "FK_Sellers_AspNetUsers_UserId",
-                        column: x => x.UserId,
-                        principalTable: "AspNetUsers",
-                        principalColumn: "Id");
-                });
-
-            migrationBuilder.CreateTable(
                 name: "Contacts",
                 columns: table => new
                 {
@@ -395,19 +377,19 @@ namespace SAGM.Migrations
                     QuoteDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     QuoteName = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     CreatedById = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    SellerId = table.Column<int>(type: "int", nullable: false),
+                    Seller = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     CustomerId = table.Column<int>(type: "int", nullable: false),
                     BuyerContactId = table.Column<int>(type: "int", nullable: false),
-                    FinalUser = table.Column<int>(type: "int", nullable: false),
+                    FinalUserId = table.Column<int>(type: "int", nullable: false),
                     validUntilDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     ModifyDate = table.Column<DateTime>(type: "datetime2", nullable: true),
                     ModifiedBy = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: true),
                     CustomerPO = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: true),
+                    QuoteStatusId = table.Column<int>(type: "int", nullable: true),
                     CurrencyId = table.Column<int>(type: "int", nullable: true),
                     Comments = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Active = table.Column<bool>(type: "bit", nullable: false),
-                    Tax = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    QuoteStatusId = table.Column<int>(type: "int", nullable: true)
+                    Tax = table.Column<decimal>(type: "decimal(18,2)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -417,12 +399,6 @@ namespace SAGM.Migrations
                         column: x => x.CreatedById,
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_Quotes_Contacts_BuyerContactId",
-                        column: x => x.BuyerContactId,
-                        principalTable: "Contacts",
-                        principalColumn: "ContactId",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_Quotes_Currencies_CurrencyId",
@@ -440,11 +416,32 @@ namespace SAGM.Migrations
                         column: x => x.QuoteStatusId,
                         principalTable: "QuoteStatus",
                         principalColumn: "QuoteStatusId");
+                });
+
+            migrationBuilder.CreateTable(
+                name: "QuoteComments",
+                columns: table => new
+                {
+                    CommentId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    QuoteId = table.Column<int>(type: "int", nullable: true),
+                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: true),
+                    Comment = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    DateComment = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_QuoteComments", x => x.CommentId);
                     table.ForeignKey(
-                        name: "FK_Quotes_Sellers_SellerId",
-                        column: x => x.SellerId,
-                        principalTable: "Sellers",
-                        principalColumn: "SellerId",
+                        name: "FK_QuoteComments_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_QuoteComments_Quotes_QuoteId",
+                        column: x => x.QuoteId,
+                        principalTable: "Quotes",
+                        principalColumn: "QuoteId",
                         onDelete: ReferentialAction.Cascade);
                 });
 
@@ -597,6 +594,16 @@ namespace SAGM.Migrations
                 filter: "[CategoryId] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
+                name: "IX_QuoteComments_QuoteId",
+                table: "QuoteComments",
+                column: "QuoteId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_QuoteComments_UserId",
+                table: "QuoteComments",
+                column: "UserId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_QuoteDetails_MaterialId",
                 table: "QuoteDetails",
                 column: "MaterialId");
@@ -610,11 +617,6 @@ namespace SAGM.Migrations
                 name: "IX_QuoteDetails_UnitId",
                 table: "QuoteDetails",
                 column: "UnitId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Quotes_BuyerContactId",
-                table: "Quotes",
-                column: "BuyerContactId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Quotes_CreatedById",
@@ -635,16 +637,6 @@ namespace SAGM.Migrations
                 name: "IX_Quotes_QuoteStatusId",
                 table: "Quotes",
                 column: "QuoteStatusId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Quotes_SellerId",
-                table: "Quotes",
-                column: "SellerId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Sellers_UserId",
-                table: "Sellers",
-                column: "UserId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_States_CountryId",
@@ -678,6 +670,12 @@ namespace SAGM.Migrations
                 name: "AspNetUserTokens");
 
             migrationBuilder.DropTable(
+                name: "Contacts");
+
+            migrationBuilder.DropTable(
+                name: "QuoteComments");
+
+            migrationBuilder.DropTable(
                 name: "QuoteDetails");
 
             migrationBuilder.DropTable(
@@ -696,25 +694,19 @@ namespace SAGM.Migrations
                 name: "MaterialTypes");
 
             migrationBuilder.DropTable(
-                name: "Contacts");
+                name: "AspNetUsers");
 
             migrationBuilder.DropTable(
                 name: "Currencies");
 
             migrationBuilder.DropTable(
-                name: "QuoteStatus");
-
-            migrationBuilder.DropTable(
-                name: "Sellers");
-
-            migrationBuilder.DropTable(
-                name: "Categories");
-
-            migrationBuilder.DropTable(
                 name: "Customers");
 
             migrationBuilder.DropTable(
-                name: "AspNetUsers");
+                name: "QuoteStatus");
+
+            migrationBuilder.DropTable(
+                name: "Categories");
 
             migrationBuilder.DropTable(
                 name: "Cities");

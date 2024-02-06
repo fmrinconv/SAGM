@@ -145,5 +145,19 @@ namespace SAGM.Helpers
             return list;
         }
 
+        public async Task<IEnumerable<SelectListItem>> GetComboUnitAsync()
+        {
+
+            List<SelectListItem> list = await _context.Units.Select(u => new SelectListItem
+            {
+                Text = u.UnitName,
+                Value = u.UnitId.ToString()
+            })
+                .OrderBy(u => u.Text)
+                .ToListAsync();
+
+            list.Insert(0, new SelectListItem { Text = "[Seleccione una unidad...]", Value = "0" });
+            return list;
+        }
     }
 }

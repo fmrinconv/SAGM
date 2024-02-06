@@ -40,6 +40,7 @@ internal class Program
             options.AccessDeniedPath = "/Account/NotAuthorized";
         });
 
+
         //Inyeccion para la inicialización de la base de datos
         builder.Services.AddTransient<SeedDb>();
         builder.Services.AddScoped<IUserHelper, UserHelper>();
