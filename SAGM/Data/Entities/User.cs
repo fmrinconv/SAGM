@@ -33,10 +33,6 @@ namespace SAGM.Data.Entities
         [Required(ErrorMessage = "El campo {0} es obligatorio.")]
         public string Address { get; set; }
 
-        [Display(Name = "Teléfono")]
-        [MaxLength(20, ErrorMessage = "El campo {0} debe tener máximo {1} caractéres.")]
-        [Required(ErrorMessage = "El campo {0} es obligatorio.")]
-        public string PhoneNumber { get; set; }
 
         [Display(Name = "Foto")]
         public Guid ImageId { get; set; }

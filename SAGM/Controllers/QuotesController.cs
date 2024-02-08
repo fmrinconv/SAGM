@@ -1,27 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Data.Entity.SqlServer.Utilities;
-using System.Globalization;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.ModelBinding;
-using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.SqlServer.Server;
-using SAGM.Data;
-using SAGM.Data.Entities;
-using SAGM.Helpers;
-using SAGM.Models;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using SAGM.Data;
 using SAGM.Data.Entities;
-using SAGM.Enums;
 using SAGM.Helpers;
 using SAGM.Models;
+
 
 namespace SAGM.Controllers
 {

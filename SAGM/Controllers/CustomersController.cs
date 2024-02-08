@@ -326,7 +326,7 @@ namespace SAGM.Controllers
             catch (Exception e)
             {
                 TempData["CustomerDeleteResult"] = "false";
-                TempData["CustomerDeleteMessage"] = "El cliente no pudo ser eliminado ya que tiene registros de contactos ligados ";
+                TempData["CustomerDeleteMessage"] = "El cliente no pudo ser eliminado ya que tiene registros de contactos ligados " + e.Message;
                 return RedirectToAction(nameof(Index));
 
             }

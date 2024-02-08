@@ -12,6 +12,7 @@ namespace SAGM.Data
         { 
         }
 
+        public DbSet<Archive> Archives { get; set; }
         public DbSet<Country> Countries { get; set; }
         public DbSet<State> States { get; set; }
         public DbSet<City> Cities { get; set; }
@@ -55,5 +56,6 @@ namespace SAGM.Data
             modelBuilder.Entity<Contact>().HasIndex("Name", "LastName", "CustomerId").IsUnique();
             modelBuilder.Entity<Quote>().HasMany(q => q.QuoteComments).WithOne(q => q.Quote).OnDelete(DeleteBehavior.Cascade);
         }
+        public DbSet<SAGM.Data.Entities.Archive> Archive { get; set; }
     }
 }

@@ -421,7 +421,7 @@ namespace SAGM.Controllers
         { return View(); }
 
         [HttpPost]
-        public async Task<IActionResult> NotfyTest(int? id)
+        public IActionResult NotfyTest(int? id)
         {
             ViewBag.Result = "true";
             return View();

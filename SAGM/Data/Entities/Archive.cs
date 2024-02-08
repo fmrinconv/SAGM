@@ -8,17 +8,15 @@ namespace SAGM.Data.Entities
         public int ArchiveId { get; set; }
 
         [Display(Name = "Archivo")]
-        [MaxLength(100, ErrorMessage = "El campo {0} debe tener máximo {1} caractéres.")]
-        [Required(ErrorMessage = "El campo {0} es obligatorio.")]
-        public string ArchiveName { get; set; }
+        public IFormFile? ArchiveName { get; set; }
 
         [Display(Name = "Archivo")]
-        public Guid ImageId { get; set; }
+        public Guid ArchiveGuid { get; set; }
 
         // Rutas en app
         [Display(Name = "Archivo")]
-        public string ImageFullPath => ImageId == Guid.Empty
+        public string ImageFullPath => ArchiveGuid == Guid.Empty
             ? $"https://localhost:7060/images/noimage.png"
-            : $"https://almacenamientomanolorin1.blob.core.windows.net/users/{ImageId}";
+            : $"https://almacenamientomanolorin1.blob.core.windows.net/archives/{ArchiveGuid}";
     }
 }
