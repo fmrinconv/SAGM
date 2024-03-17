@@ -602,6 +602,7 @@ namespace SAGM.Controllers
             }
 
             return RedirectToAction(nameof(Details), new { id = materialtype.Category.CategoryId });
+       
 
         }
 

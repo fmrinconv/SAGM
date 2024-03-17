@@ -12,15 +12,15 @@ using SAGM.Data;
 namespace SAGM.Migrations
 {
     [DbContext(typeof(SAGMContext))]
-    [Migration("20240207204421_Initial")]
-    partial class Initial
+    [Migration("20240309003125_AddDetailComments")]
+    partial class AddDetailComments
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "7.0.13")
+                .HasAnnotation("ProductVersion", "8.0.1")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -156,6 +156,33 @@ namespace SAGM.Migrations
                     b.HasKey("UserId", "LoginProvider", "Name");
 
                     b.ToTable("AspNetUserTokens", (string)null);
+                });
+
+            modelBuilder.Entity("SAGM.Data.Entities.Archive", b =>
+                {
+                    b.Property<int>("ArchiveId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ArchiveId"));
+
+                    b.Property<Guid>("ArchiveGuid")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("ArchiveName")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("Entity")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("EntityId")
+                        .HasColumnType("int");
+
+                    b.HasKey("ArchiveId");
+
+                    b.ToTable("Archive");
                 });
 
             modelBuilder.Entity("SAGM.Data.Entities.Category", b =>
@@ -568,6 +595,36 @@ namespace SAGM.Migrations
                     b.ToTable("QuoteDetails");
                 });
 
+            modelBuilder.Entity("SAGM.Data.Entities.QuoteDetailComment", b =>
+                {
+                    b.Property<int>("CommentId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("CommentId"));
+
+                    b.Property<string>("Comment")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("DateComment")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("QuoteDetailId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("UserId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("CommentId");
+
+                    b.HasIndex("QuoteDetailId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("QuoteDetailComments");
+                });
+
             modelBuilder.Entity("SAGM.Data.Entities.QuoteStatus", b =>
                 {
                     b.Property<int>("QuoteStatusId")
@@ -895,6 +952,21 @@ namespace SAGM.Migrations
                     b.Navigation("Unit");
                 });
 
+            modelBuilder.Entity("SAGM.Data.Entities.QuoteDetailComment", b =>
+                {
+                    b.HasOne("SAGM.Data.Entities.QuoteDetail", "QuoteDetail")
+                        .WithMany("QuoteDetailComments")
+                        .HasForeignKey("QuoteDetailId");
+
+                    b.HasOne("SAGM.Data.Entities.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId");
+
+                    b.Navigation("QuoteDetail");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("SAGM.Data.Entities.State", b =>
                 {
                     b.HasOne("SAGM.Data.Entities.Country", "Country")
@@ -957,6 +1029,11 @@ namespace SAGM.Migrations
                     b.Navigation("QuoteComments");
 
                     b.Navigation("QuoteDetails");
+                });
+
+            modelBuilder.Entity("SAGM.Data.Entities.QuoteDetail", b =>
+                {
+                    b.Navigation("QuoteDetailComments");
                 });
 
             modelBuilder.Entity("SAGM.Data.Entities.QuoteStatus", b =>

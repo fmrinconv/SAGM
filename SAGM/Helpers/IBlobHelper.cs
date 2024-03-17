@@ -1,4 +1,6 @@
-﻿namespace SAGM.Helpers
+﻿using Azure.Storage.Blobs;
+using Microsoft.AspNetCore.Mvc.ActionConstraints;
+namespace SAGM.Helpers
 {
     public interface IBlobHelper
     {
@@ -9,5 +11,9 @@
         Task<Guid> UploadBlobAsync(string image, string containerName);
 
         Task DeleteBlobAsync(Guid id, string containerName);
+
+ 
+
+     
     }
 }

@@ -4,7 +4,7 @@
     <thead>
         <tr>
             <th>
-                @Html.DisplayNameFor(model => model.QuoteDetails.FirstOrDefault().QuoteDetailId )
+               
             </th>
             <th style="text-align:center; width:7%;">&nbsp;&emsp;#</th>
             <th style="text-align: center;">
@@ -25,52 +25,35 @@
             <th style="text-align: right;">
                 @Html.DisplayNameFor(model => model.QuoteDetails.FirstOrDefault().Total)
             </th>
+            <th style="text-align: right;">
+                @Html.DisplayNameFor(model => model.QuoteDetails.FirstOrDefault().ArchivesNumber)
+            </th>
             <th style="text-align: center;">
                 Acciones
             </th>
+            <th class="none">
+                 
+             </th>
         </tr>
     </thead>
     <tbody>
 
-            @foreach (var item in Model.QuoteDetails)
-            {
-                <tr>
-                    <td>
-                        @Html.DisplayFor(modelItem => item.QuoteDetailId)
-                    </td>
-                    <td></td>
-                    <td>
-                        @Html.DisplayFor(modelItem => item.Quantity)
-                    </td>
-                    <td>
-                        @Html.DisplayFor(modelItem => item.Unit.UnitName)
-                    </td>
-                    <td>
-                        @Html.DisplayFor(modelItem => item.Material.MaterialName)
-                    </td>
-                    <td>
-                        @Html.DisplayFor(modelItem => item.Description)
-                    </td>
-                    <td>
-                        @Html.DisplayFor(modelItem => item.Price)
-                    </td>
-                    <td>
-                        @Html.DisplayFor(modelItem => item.Total)
-                    </td>
-                    <td>
-                        <a onclick="showInPopup('@Url.Action("AddOrEditDetail",
-                                                         "Quotes",
-                                                         new {id= item.Quote.QuoteId, detailid=item.QuoteDetailId},
-                                                         Context.Request.Scheme)',
-                                            'Editar contacto',
-                                             'bg-warning')" class="btn btn-sm btn-outline-warning"><i class="fa-solid fa-pencil-alt"></i></a>
-                        <button data-id="@item.QuoteDetailId" class="btn btn-sm btn-outline-danger deleteItem" data-bs-toggle="modal" data-bs-target="#deleteDialog"><i class="fa-solid fa-trash"></i></button>
-                    </td>
-                </tr>
-            }
-
-
 
     </tbody>
+    <tfoot>
+        <tr>
+            <th></th>
+            <th></th>
+            <th></th>
+            <th></th>
+            <th></th>
+            <th></th>
+            <th></th>
+            <th style="padding:unset; padding-right:5px;"></th>
+            <th></th>
+            <th></th>
+            <th></th>
+        </tr>
+    </tfoot>
     </table>
 </div>

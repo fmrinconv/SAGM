@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using SAGM.Data;
 using SAGM.Data.Entities;
 using SAGM.Helpers;
+using System.Text.Json.Serialization;
 
 
 internal class Program
@@ -47,6 +48,9 @@ internal class Program
         builder.Services.AddScoped<IComboHelper, ComboHelper>();
         builder.Services.AddScoped<IBlobHelper, BlobHelper>();
         builder.Services.AddScoped<IMailHelper, MailHelper>();
+        builder.Services.AddScoped<IReportHelper, ReportHelper>();
+        builder.Services.AddControllers().AddJsonOptions(x => x.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);
+
         builder.Services.AddRazorPages().AddRazorRuntimeCompilation();
         
         var app = builder.Build();

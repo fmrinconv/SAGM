@@ -12,8 +12,8 @@ using SAGM.Data;
 namespace SAGM.Migrations
 {
     [DbContext(typeof(SAGMContext))]
-    [Migration("20240208001426_Archives")]
-    partial class Archives
+    [Migration("20240210190818_ArchiveUpdate")]
+    partial class ArchiveUpdate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -166,13 +166,19 @@ namespace SAGM.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ArchiveId"));
 
+                    b.Property<Guid>("ArchiveGuid")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<string>("ArchiveName")
                         .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
 
-                    b.Property<Guid>("ImageId")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<string>("Entity")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("EntityId")
+                        .HasColumnType("int");
 
                     b.HasKey("ArchiveId");
 

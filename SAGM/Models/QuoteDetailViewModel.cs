@@ -60,9 +60,10 @@ namespace SAGM.Models
         [Display(Name = "Material")]
         public int MaterialId { get; set; }
 
+        [Display(Name = "Archivos")]
+        public ICollection<Archive> Archives { get; set; }
 
-       
-
-
+        [Display(Name = "Archivos")]
+        public int ArchivesNumber => Archives == null ? 0 : Archives.Count;
     }
 }

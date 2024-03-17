@@ -1,6 +1,7 @@
 ﻿using Microsoft.WindowsAzure.Storage;
 using Microsoft.WindowsAzure.Storage.Blob;
 using System.Xml.Linq;
+using static Azure.Core.HttpHeader;
 
 namespace SAGM.Helpers
 {
@@ -54,7 +55,8 @@ namespace SAGM.Helpers
             return name;
         }
 
+ 
 
-
+   
     }
 }

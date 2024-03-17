@@ -12,6 +12,36 @@ namespace SAGM.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
+                name: "Archive",
+                columns: table => new
+                {
+                    ArchiveId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    ArchiveName = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
+                    ArchiveGuid = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Archive", x => x.ArchiveId);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "ArchiveEntities",
+                columns: table => new
+                {
+                    ArchiveEntityId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    ArchiveId = table.Column<int>(type: "int", nullable: false),
+                    ArchiveGuid = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Entity = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    EntityId = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ArchiveEntities", x => x.ArchiveEntityId);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "AspNetRoles",
                 columns: table => new
                 {
@@ -654,6 +684,12 @@ namespace SAGM.Migrations
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropTable(
+                name: "Archive");
+
+            migrationBuilder.DropTable(
+                name: "ArchiveEntities");
+
             migrationBuilder.DropTable(
                 name: "AspNetRoleClaims");
 

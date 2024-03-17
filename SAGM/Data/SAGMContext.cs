@@ -37,6 +37,8 @@ namespace SAGM.Data
 
         public DbSet<QuoteComment> QuoteComments { get; set; }
 
+        public DbSet<QuoteDetailComment> QuoteDetailComments { get; set; }
+
 
         internal static IConfiguration GetService(Type type)
         {

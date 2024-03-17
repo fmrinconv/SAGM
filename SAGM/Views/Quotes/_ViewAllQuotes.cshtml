@@ -11,18 +11,17 @@
 
 </style>
 
-<table class="table table-hover table-responsive compact row-border" id="TableQuotes" style="font-size:x-small;">
+<table class="table table-responsive table-hover responsive" id="TableQuotes" style="font-size:small; width:100%;">
     <thead>
         <tr>
-            <th></th>
             <th align="right" >
                 #
             </th>
             <th style="text-align:left;">
                 Cotización
             </th>
-            <th style="text-align:left;">
-                @Html.DisplayNameFor(model => model.Customer.CustomerNickName)
+            <th align="left">
+                Cliente
             </th>
             <th style="text-align:left;">
                 Contacto
@@ -39,6 +38,20 @@
             <th style="text-align:left;">
                 @Html.DisplayNameFor(model => model.Seller)
             </th>
+
+            <th>
+                @Html.DisplayNameFor(model => model.CustomerPO)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Active)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.QuoteStatus.QuoteStatusName)
+            </th>
+            <th>Acción</th>
+            <th>
+                @Html.DisplayNameFor(model => model.Tax)
+            </th>
             <th>
                 @Html.DisplayNameFor(model => model.ModifyDate)
             </th>
@@ -46,87 +59,20 @@
                 @Html.DisplayNameFor(model => model.ModifiedBy)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.CustomerPO)
-            </th>
-            <th>
                 @Html.DisplayNameFor(model => model.Comments)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Active)
+                Archivos en partidas:
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Tax)
+                Archivos de cotización:
             </th>
-            <th>
-                @Html.DisplayNameFor(model => model.QuoteStatus.QuoteStatusName)
+            <th >
+                Partidas
             </th>
-            <th>Acción</th>
         </tr>
     </thead>
     <tbody>
-        @foreach (var item in Model)
-        {
-            <tr>
-                <td></td>
-                <td></td>
-                <td>
-                    <a asp-action="Details" asp-controller="Quotes" asp-route-Id="@item.QuoteId">@Html.DisplayFor(modelItem => item.QuoteName)</a>
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Customer.CustomerNickName)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.FinalUser)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.BuyerContact)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.QuoteDate)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.validUntilDate)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Seller)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.ModifyDate)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.ModifiedBy)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.CustomerPO)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Comments)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Active)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Tax) 
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.QuoteStatus.QuoteStatusName)
-                </td>
-                <td>
-                    <a onclick="showInPopup('@Url.Action("EditQuote",
-                                                         "Quotes",
-                                                         new {id= item.QuoteId },
-                                                         Context.Request.Scheme)',
-                                            'Editar cotización @item.QuoteName' ,
-                                             'bg-warning')" class="btn btn-sm btn-outline-warning"><i class="fa-solid fa-pencil-alt" title="Editar encabezado"></i></a>
-                    <a onclick="showInPopup('@Url.Action("AddOrEditComment",
-                                                         "Quotes",
-                                                         new {id= item.QuoteId },
-                                                         Context.Request.Scheme)',
-                                            'Hacer comentario' ,
-                                             'bg-primary')" class="btn btn-sm btn-outline-primary"><i class="fa fa-comments" title="Comentarios"></i></a>
-@*                    <button data-id="@item.QuoteId" class="btn btn-sm btn-outline-danger deleteItem" data-bs-toggle="modal" data-bs-target="#deleteDialog"><i class="fa-solid fa-trash"></i></button>*@
-                </td>
-            </tr>
-        }
+
     </tbody>
     </table>

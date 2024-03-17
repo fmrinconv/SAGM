@@ -30,8 +30,7 @@ namespace SAGM.Data.Entities
 
         public Unit Unit { get; set; }
 
-       
-
+        public ICollection<QuoteDetailComment> QuoteDetailComments { get; set; }
 
 
     }

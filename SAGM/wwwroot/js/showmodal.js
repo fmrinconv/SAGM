@@ -7,6 +7,7 @@
             $('#form-modal .modal-header').removeClass("text-white");
             $('#form-modal .modal-header').removeClass("bg-warning");
             $('#form-modal .modal-header').removeClass("text-black");
+            $('#form-modal .modal-header').removeClass("bg-danger");
             
             $('#form-modal .modal-header').addClass(classname);
             if (classname == "bg-primary" ) {
@@ -14,6 +15,11 @@
             }   
             else if (classname == "bg-warning") {   
                 $('#form-modal .modal-header').addClass("text-black");
+            }
+            else if (classname == "bg-secondary") {
+                $('#form-modal .modal-header').removeClass("bg-secondary");
+                $('#form-modal .modal-header').addClass("text-danger");
+                $('#form-modal .modal-header').css("background-color", "gainsboro")
             }
             else {
                 $('#form-modal .modal-header').addClass("text-white");
@@ -25,6 +31,12 @@
             else if (title == "Hacer comentario")
             {
                 $('#form-modal .modal-icon').addClass("fa fa-comments");
+            }
+            else if (title == "Agregar archivos") {
+                $('#form-modal .modal-icon').addClass("fa fa-file-alt");
+            }
+            else if (title == "Eliminar archivo") {
+                $('#form-modal .modal-icon').addClass("fa fa-triangle-exclamation");
             }
             else {
                 $('#form-modal .modal-icon').addClass("fa fa-globe");

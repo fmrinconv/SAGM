@@ -4,12 +4,15 @@
 @{
     ViewData["Title"] = "Cotizaciones";
 }
-
+<link href="~/lib/datatables/css/responsive.datatables.min.css" rel="stylesheet" />
 <style>
    select,  input[type="search"] {
         border: 1px solid gray;
         padding: .1em .1em;
         border-radius: .4em;
+    }
+    th{
+        background-color:orange;
     }
 </style>
 <div class="container-fluid">
@@ -38,6 +41,7 @@
     <script type="text/javascript">
         var count = 0;
         var dataTable;
+        var quoteid;
         function parseJsonDate(jsonDateString) {
             return new Date(parseInt(jsonDateString.replace('/Date(', '')));
         }
@@ -50,6 +54,11 @@
             }
             dataTable = $('#TableQuotes').DataTable(
                 {
+                    "ajax": {
+                        "url": '/Quotes/GetQuotes' ,
+                        "type": "GET",
+                        "datatype": "json"
+                    },
                     "language": {
                         "url": "/lib/datatables/Spanish.json"
                     },
@@ -57,43 +66,68 @@
                         [25, 50, 100, 200, -1],
                         [25, 50, 100, 200, "Todos"]
                     ],
+                    responsive: true,
                     "columnDefs": [
                         {
                             "targets": 0,
-                            className: 'dt-body-center'
+                            className: 'dt-body-center dt-body-nowrap',
+                            responsivePriority: 1
                         },
                         {
-                            "targets": [5, 6, 9, 10,11,12,14],
-                            visible: false
+                            "targets": 1,
+                            className: 'dt-body-left dt-body-nowrap',
+                            responsivePriority: 1
                         },
                         {
-                            "targets": [2, 3, 4, 5, 6, 7, 8],
-                            "orderable": true,
-                            className: 'dt-body-left'
+                            "targets": [2,3],
+                            className: 'dt-body-left dt-body-nowrap',
+                            responsivePriority: 1
                         },
                         {
-                            "targets": [13],
-                            className: 'dt-body-center'
+                            "targets": [5,6],
+                            className: 'dt-body-center dt-body-nowrap',
+                            responsivePriority: 2
                         },
                         {
-                            "targets": 5,
-                            "orderable": false,
-                            className: 'dt-body-left'
+                            "targets": [7],
+                            className: 'dt-body-center dt-body-nowrap',
+                            responsivePriority: 3
+                        },
+                        {
+                            "targets": [8,9],
+                            className: 'dt-body-center dt-body-nowrap',
+                            responsivePriority: 4
+                        }, 
+                        {
+                            "targets": 11,
+                            className: 'dt-body-center dt-body-nowrap',
+                            responsivePriority: 1   
+                        },
+                        {
+                            "targets": 18,
+                            className: 'dt-body-center dt-body-nowrap',
+                            responsivePriority: 4
                         }],
                     "columns": [
                         {
-                            "className": 'details-control word-break:break-all',
-                            "orderable": false,
-                            "data": null,
-                            "defaultContent": ''
+                            "data": "quoteId", 
+                            "render": 
+                                function (data) { 
+                                    quoteid = data; 
+                                    count = count + 1; 
+                                    return count.toString(); }
                         },
-                        { "data": "Id", "render": function (data) { count = count + 1; return count.toString(); } },
-                        { "data": "QuoteName" },
-                        { "data": "Customer.CustomerNickName" },
-                        { "data": "FinalUserId" },
-                        { "data": "BuyerContactId" },
+                        { "data": "quoteName", "render": 
+                                function (data) {
+                                    var result = '<a href=/Quotes/Details/' + quoteid + "> " + data + "</a>";
+                                    return result;
+                                                } 
+                        },
+                        { "data": "customerNickName" },
+                        { "data": "finalUser" },
+                        { "data": "buyerContact" },
                         {
-                            "data": "QuoteDate",
+                            "data": "quoteDate",
                             "render":
                                 function (data) {
                                     var date = new Date(data);
@@ -114,84 +148,128 @@
                                     return year + "-" + (month.toString().length > 1 ? month : "0" + month) + "-" + (day.toString().length > 1 ? day : "0" + day);
                                 }
                         },
-                        { "data": "Seller" },
-                        { "data": "ModifyDate" },
-                        { "data": "ModifiedBy" },
-                        { "data": "CustomerPO" },
-                        { "data": "Comments" },
-                        { "data": "Active" },
-                        { "data": "Tax" },
-                        { "data": "QuoteStatusName" },
-                        { "data": "Id" }
+                        { "data": "seller"},
+                       
+                        { "data": "customerPO" },
+
+                        {
+                            "data": "active",
+                            "render":
+                                function (data) {
+                                    var result = "";
+                                  
+                                    if (data == true) {
+                                        result += "<input type='checkbox' checked onclick='return false;' />";
+                                    }
+                                    else {
+                                        result += "<input type='checkbox' onclick='return false;'/>";
+                                    }
+                                    return result;
+                                }
+                        },
+                        
+                        { "data": "quoteStatusName" },
+                        { "data": "quoteId", 
+                          "render": 
+                          function (data) {
+                            var result = "";
+                                result += "<a onclick=\"showInPopup('/Quotes/EditQuote?id=" + data + "','Editar\ cotización','bg-warning')\" ";
+                                result += "class='btn btn-sm btn-outline-warning'><i class='fa-solid fa-pencil-alt'></i></a>";
+                                result += "<a onclick=\"showInPopup('/Archives/AddArchive?entityid=" + data + "&Entity=Quote','Agregar\ archivos','bg-primary')\" ";
+                                result += "class='btn btn-sm btn-outline-primary'><i title='Subir archivo' class='fa-solid fa-file-circle-plus'></i></a>";
+                                result += "<a onclick=\"showInPopup('/Quotes/AddOrEditComment?id=" + data + "','Agregar\ comentario','bg-primary')\" ";
+                                result += "class='btn btn-sm btn-outline-primary'><i class='fa-solid fa-comments'></i></a>";
+                            return result;
+
+                        } },
+                        { "data": "tax", 
+                        "render": 
+                            function (data) { 
+                                var result = "";
+                                result += data.toString() + "%";
+                                return result; } 
+                        },
+                        { "data": "modifyDate" },
+                        { "data": "modifiedBy" },
+                        { "data": "comments" },
+                        { "data": "archivesNumber" },
+                        {
+                            "data": "archivesChain",
+                            "render": function (data) {
+                                var result = "";
+
+                                if (data.length > 0) {
+                                    result += "<div><table style='border: 1px solid;'><tr class='bg-secondary bg-opacity-25'>"
+                                    result += "<th>Archivos</th>";
+                                    result += "<th>Acción</th>";
+
+                                    var arrFiles = data.split("|");
+
+                                    for (var i = 0; i < arrFiles.length; i++) {
+                                        var file = arrFiles[i].split(",");
+                                        var guid = file[0];
+                                        var filename = file[1];
+                                        var id = file[2];
+
+                                        var filetype = filename.split(".");
+                                        var type = filetype[0];
+
+                                        result += "<tr><td class='archive'>" + filename + "<td>";
+                                        result += "<a title='Descargar' class='btn btn-sm btn-outline-primary' href='#' onclick=\"downloadFile('" + guid + "','" + filename + "')\"> <i class='fa fa-download'></i><strong></a>";
+                                        // result += "<a onclick=deleteArchive('" + id + "') class= 'btn btn-sm btn-outline-danger' > <i class='fa fa-trash' title = 'Eliminar archivo' > </i></a >";
+                                        result += "<a onclick=\"showInPopup('/Archives/Delete?id=" + id + "','Eliminar\ archivo','bg-secondary')\"";
+                                        result += "class='btn btn-sm btn-outline-danger'><i title='Eliminar archivo' class='fa fa-trash'></i></a>";
+
+
+                                        result += "</td></tr>";
+
+                                    };
+                                    result += "</table></div>";
+                                }
+                                else {
+                                    esult += "<span>No hay archivos anexos en la cotización</span>";
+                                }
+
+                                return result;
+                            }
+                        },
+                          {
+                            "data": "quoteDetails",
+                            "render":
+                                function (data) {
+                                    var result = "";
+                                    
+                                    if (data.length !=0) {
+                                        result = "<div><table style='border: 1px solid;'><tr class='bg-secondary bg-opacity-25'>"
+                                        result += "<th>Cantidad</th>";
+                                        result += "<th>Material</th>";
+                                        result += "<th>Descripción</th>";
+                                        result += "<th>Precio</th></tr>";
+                                        for (var i = 0; i < data.length; i++) {
+                                            result += "<tr><td>" + data[i].quantity + "</td>";
+                                            result += "<td>" + data[i].material + "</td>";
+                                            result += "<td>" + data[i].description + "</td>";
+                                            result += "<td style='text-align:right'>" + Intl.NumberFormat('es-MX').format(data[i].price) + "</td></tr>";
+                                        };
+                                        result += "</table></div>";
+                                    }
+                                    else { 
+                                        result ='No hay partidas'
+                                    }
+                                    return result;
+                                }
+                        }
+                       
+             
                     ]
                 });
-            $('#TableQuotes tbody').on('click', 'td.details-control', function () {
-                var tr = $(this).closest('tr');
-                var row = dataTable.row(tr);
-
-                if (row.child.isShown()) {
-                    // This row is already open - close it
-                    row.child.hide();
-                    tr.removeClass('shown');
-                }
-                else {
-                    // Open this row
-                    row.child(format(row.data())).show();
-                    tr.addClass('shown');
-
-                }
-            });
-            sc_deleteDialog.openModal('deleteItem', true, 'btnYesDelete', '/Users/Delete/', false);
+     
+  
         });
 
-        function format(d) {
-
-            var date = new Date(d.validUntilDate);
-            var day = date.getDate();
-            var month = date.getMonth() + 1;
-            var year = date.getFullYear();
-            var validuntil = year + "-" + (month.toString().length > 1 ? month : "0" + month) + "-" + (day.toString().length > 1 ? day : "0" + day);
-
-            var modifydate = "NA";
-            if (d.ModifyDate != "")
-            {
-                date = new Date(d.ModifyDate);
-                day = date.getDate();
-                month = date.getMonth() + 1;
-                year = date.getFullYear();
-                modifydate = year + "-" + (month.toString().length > 1 ? month : "0" + month) + "-" + (day.toString().length > 1 ? day : "0" + day);
-            }
-
-            var modifiedby = "NA";
-            if (d.ModifiedBy != "")
-            {
-                modifiedby = d.ModifiedBy;
-            }
-
-            return (
-                '<dl>' +
-                '<dt>Vigencia:</dt>' +
-                '<dd>' +
-                validuntil +
-                '</dd>' +
-                '<dt>Modificó:</dt>' +
-                '<dd>' +
-                modifiedby +
-                '</dd>' +
-                '<dt>Fecha modificación:</dt>' +
-                '<dd>' +
-                 modifydate +
-                '</dd>' +
-                '<dt>Iva:</dt>' +
-                '<dd>' +
-                d.Tax +
-                '</dd>' +
-                '<dt>Comentarios:</dt>' +
-                '<dd>' +
-                d.Comments +
-                '</dd>' +
-                '</dl>'
-            );
+        function downloadFile(guid, filename) {
+            var popout = window.open("/Quotes/DownloadFile/?id=" + guid + "&filename=" + filename, "_blank");
+            return false;
         }
     </script>
     }

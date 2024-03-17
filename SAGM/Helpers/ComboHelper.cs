@@ -121,7 +121,6 @@ namespace SAGM.Helpers
             return list;
         }
 
-
         public async Task<IEnumerable<SelectListItem>> GetComboContactCustomersAsync(int customerId)
         {
 
@@ -157,6 +156,28 @@ namespace SAGM.Helpers
                 .ToListAsync();
 
             list.Insert(0, new SelectListItem { Text = "[Seleccione una unidad...]", Value = "0" });
+            return list;
+        }
+
+        public async Task<IEnumerable<SelectListItem>> GetComboQuoteStatus(int selectedindex=0)
+        {
+            List<SelectListItem> list = await _context.QuoteStatus.Select(s => new SelectListItem
+            {
+                Text = s.QuoteStatusName,
+                Value = s.QuoteStatusId.ToString()
+             
+            })
+               .OrderBy(s => s.Text)
+               .ToListAsync();
+
+            foreach (var item in list)
+            {
+                if (item.Value == selectedindex.ToString())
+                {
+                    item.Selected = true;
+                }
+            }
+
             return list;
         }
     }

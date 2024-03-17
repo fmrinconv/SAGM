@@ -1,13 +1,11 @@
 ﻿using SAGM.Data.Entities;
-using System.ComponentModel.DataAnnotations;
 using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Text.Json.Serialization;
-using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace SAGM.Models
 {
-    public class QuoteViewModel
+    public class QuoteViewIndexModel
     {
         public int QuoteId { get; set; }
 
@@ -21,36 +19,23 @@ namespace SAGM.Models
 
 
         [Display(Name = "Creo")]
-        [Required(ErrorMessage = "El campo {0} es obligatorio.")]
-        public User CreatedBy { get; set; }
+        public string CreatedBy { get; set; }
 
         [Display(Name = "Vendedor")]
         [Required(ErrorMessage = "El campo {0} es obligatorio.")]
         public string Seller { get; set; }
 
-        [Display(Name = "Vendedor")]
-        [Required(ErrorMessage = "El campo {0} es obligatorio.")]
-        public string SellerName { get; set; }
-
-
-
         [Display(Name = "Cliente")]
         [Required(ErrorMessage = "El campo {0} es obligatorio.")]
-        public Customer Customer { get; set; }
+        public String CustomerNickName { get; set; }
 
         [Display(Name = "Comprador")]
         [Required(ErrorMessage = "El campo {0} es obligatorio.")]
-        public int BuyerContactId { get; set; }
-
-        [Display(Name = "Comprador")]
-        public string BuyerName { get; set; }
+        public string BuyerContact { get; set; }
 
         [Display(Name = "Usuario")]
         [Required(ErrorMessage = "El campo {0} es obligatorio.")]
-        public int FinalUserId { get; set; } //Es el id de un contacto
-
-        [Display(Name = "Usuario Final")]
-        public string FinalUserName { get; set; }
+        public string FinalUser { get; set; } //Es el id de un contacto
 
         [Display(Name = "Fecha vigencia")]
         [Required(ErrorMessage = "El campo {0} es obligatorio.")]
@@ -69,20 +54,15 @@ namespace SAGM.Models
         [Display(Name = "OC Cliente")]
         public string? CustomerPO { get; set; }
 
-        public int QuoteStatusId { get; set; }
-
         [Display(Name = "Estatus")]
-        [JsonIgnore]
-        public IEnumerable<SelectListItem> QuoteStatus { get; set; }
 
-
+        public string QuoteStatusName { get; set; }
 
         [Display(Name = "Moneda")]
         public Currency Currency { get; set; }
 
         [Display(Name = "Comentarios")]
         public string? Comments { get; set; }
-
 
         [Display(Name = "Activa")]
         [DefaultValue(true)]
@@ -93,9 +73,12 @@ namespace SAGM.Models
         [Required(ErrorMessage = "El campo {0} es obligatorio.")]
         public decimal Tax { get; set; }
 
-   
+        public ICollection<QuoteDetailViewIndexModel> QuoteDetails { get; set; }
 
-        public ICollection<AllQuoteDetails> QuoteDetails { get; set; }
-        public ICollection<QuoteComment> QuoteComments { get; set; }
+        public int ArchivesNumber { get; set; }
+
+        public string ArchivesChain { get; set; }
+
+
     }
 }
