@@ -180,5 +180,21 @@ namespace SAGM.Helpers
 
             return list;
         }
+
+
+        public async Task<IEnumerable<SelectListItem>> GetComboCurrenciesAsync(int selectedindex = 0)
+        {
+
+            List<SelectListItem> list = await _context.Currencies.Select(c => new SelectListItem
+            {
+                Text = c.Curr,
+                Value = c.CurrencyId.ToString()
+            })
+                .OrderBy(u => u.Text)
+                .ToListAsync();
+
+            list.Insert(0, new SelectListItem { Text = "[Seleccione una moneda...]", Value = "0" });
+            return list;
+        }
     }
 }

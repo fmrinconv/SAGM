@@ -38,6 +38,11 @@
                     <select asp-for="SellerId" asp-items="Model.Sellers" class="form-control" id="SellerId"></select>
                     <span asp-validation-for="SellerId" class="text-danger"></span>
                 </div>
+                <div class="form-group">
+                    <label asp-for="CurrencyId" class="control-label"></label>
+                    <select asp-for="CurrencyId" asp-items="Model.Currency" class="form-control" id="QuoteStatusId"></select>
+                    <span asp-validation-for="CurrencyId" class="text-danger"></span>
+                </div>
                 <div class="form-group form-check">
                     <label class="form-check-label">
                         <input class="form-check-input" asp-for="Active" /> @Html.DisplayNameFor(model => model.Active)

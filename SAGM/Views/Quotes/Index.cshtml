@@ -18,8 +18,22 @@
 <div class="container-fluid">
     <div class="card mt-2">
         <div class="card-header text-success bg-secondary bg-opacity-25">
-            <i class="fa fa-file-invoice-dollar"></i><strong>Cotizaciones</strong>
-            <a onclick="showInPopup('@Url.Action("AddQuote", "Quotes", new { id = "" }, Context.Request.Scheme)' , 'Crear cotización @DateTime.Now.ToString(" yyyyMMdd")-XXX','bg-success')" class="btn btn-sm btn-outline-success" title="Crear cotización"><i class="fa fa-plus-circle"></i></a>
+            <table>
+                <tr>
+                    <td>
+                        <i class="fa fa-file-invoice-dollar"></i><strong>Cotizaciones</strong>
+                        <a onclick="showInPopup('@Url.Action("AddQuote", "Quotes", new { id = "" }, Context.Request.Scheme)' , 'Crear cotización @DateTime.Now.ToString(" yyyyMMdd")-XXX','bg-success')" class="btn btn-sm btn-outline-success" title="Crear cotización"><i class="fa fa-plus-circle"></i></a>
+                    </td>
+                    <td>
+                        <a onclick="Export()" class="btn btn-sm btn-outline-primary"><i class="fa-solid fa-file-arrow-down"></i></a>
+                        
+                    </td>
+                </tr>
+            </table>
+               
+               
+             
+           
         </div>  
         <div class="card-body">
             <div id="view-all">
@@ -84,24 +98,39 @@
                             responsivePriority: 1
                         },
                         {
-                            "targets": [5,6],
+                            "targets": 6,
                             className: 'dt-body-center dt-body-nowrap',
-                            responsivePriority: 2
+                            responsivePriority: 4
                         },
                         {
-                            "targets": [7],
+                            "targets": [5,7],
                             className: 'dt-body-center dt-body-nowrap',
                             responsivePriority: 3
                         },
                         {
-                            "targets": [8,9],
+                            "targets": 8,
+                            className: 'dt-body-center dt-body-nowrap',
+                            responsivePriority: 4
+                        },
+                        {
+                            "targets": [9],
+                            className: 'dt-body-right dt-body-nowrap',
+                            responsivePriority: 1
+                        },
+                        {
+                            "targets": 10,
                             className: 'dt-body-center dt-body-nowrap',
                             responsivePriority: 4
                         }, 
                         {
                             "targets": 11,
-                            className: 'dt-body-center dt-body-nowrap',
+                            className: 'dt-body-left dt-body-nowrap',
                             responsivePriority: 1   
+                        },
+                        {
+                            "targets": 13,
+                            className: 'dt-body-left dt-body-nowrap',
+                            responsivePriority: 1
                         },
                         {
                             "targets": 18,
@@ -149,9 +178,10 @@
                                 }
                         },
                         { "data": "seller"},
+                        { "data": "currency" },
                        
                         { "data": "customerPO" },
-
+                        { "data": "total", "render": $.fn.dataTable.render.number(',', '.', 2) },
                         {
                             "data": "active",
                             "render":
@@ -173,12 +203,17 @@
                           "render": 
                           function (data) {
                             var result = "";
-                                result += "<a onclick=\"showInPopup('/Quotes/EditQuote?id=" + data + "','Editar\ cotización','bg-warning')\" ";
-                                result += "class='btn btn-sm btn-outline-warning'><i class='fa-solid fa-pencil-alt'></i></a>";
-                                result += "<a onclick=\"showInPopup('/Archives/AddArchive?entityid=" + data + "&Entity=Quote','Agregar\ archivos','bg-primary')\" ";
+                                result += "<a title='Editar cotización' onclick=\"showInPopup('/Quotes/EditQuote?id=" + data + "','Editar\ cotización','bg-warning')\" ";
+                                result += "class='btn btn-sm btn-outline-warning'><i title='Editar cotización' class='fa-solid fa-pencil-alt'></i></a>";
+
+                                result += "<a title='Copiar cotización' onclick=\"showInPopup('/Quotes/CopyQuote?id=" + data + "','Copiar\ cotización','bg-warning')\" ";
+                                result += "class='btn btn-sm btn-outline-success'><i title='Copiar cotización' class='fa fa-copy'></i></a>";
+
+                                result += "<a title='Subir archivo' onclick=\"showInPopup('/Archives/AddArchive?entityid=" + data + "&Entity=Quote','Agregar\ archivos','bg-primary')\" ";
                                 result += "class='btn btn-sm btn-outline-primary'><i title='Subir archivo' class='fa-solid fa-file-circle-plus'></i></a>";
-                                result += "<a onclick=\"showInPopup('/Quotes/AddOrEditComment?id=" + data + "','Agregar\ comentario','bg-primary')\" ";
-                                result += "class='btn btn-sm btn-outline-primary'><i class='fa-solid fa-comments'></i></a>";
+
+                                result += "<a title='Comentarios' onclick=\"showInPopup('/Quotes/AddOrEditComment?id=" + data + "','Agregar\ comentario','bg-primary')\" ";
+                                result += "class='btn btn-sm btn-outline-secondary'><i title='Comentarios' class='fa-solid fa-comments'></i></a>";
                             return result;
 
                         } },
@@ -227,7 +262,7 @@
                                     result += "</table></div>";
                                 }
                                 else {
-                                    esult += "<span>No hay archivos anexos en la cotización</span>";
+                                    result += "<span>No hay archivos anexos en la cotización</span>";
                                 }
 
                                 return result;
@@ -259,6 +294,7 @@
                                     return result;
                                 }
                         }
+                        
                        
              
                     ]
@@ -266,9 +302,13 @@
      
   
         });
-
         function downloadFile(guid, filename) {
             var popout = window.open("/Quotes/DownloadFile/?id=" + guid + "&filename=" + filename, "_blank");
+            return false;
+        }
+
+        function Export() {
+            var popout = window.open("/Quotes/Export/", "_blank");
             return false;
         }
     </script>

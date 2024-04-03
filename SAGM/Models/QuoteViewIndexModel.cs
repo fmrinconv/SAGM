@@ -59,7 +59,7 @@ namespace SAGM.Models
         public string QuoteStatusName { get; set; }
 
         [Display(Name = "Moneda")]
-        public Currency Currency { get; set; }
+        public string Currency { get; set; }
 
         [Display(Name = "Comentarios")]
         public string? Comments { get; set; }
@@ -78,6 +78,8 @@ namespace SAGM.Models
         public int ArchivesNumber { get; set; }
 
         public string ArchivesChain { get; set; }
+
+        public decimal total => QuoteDetails.Count == 0 ? 0 : QuoteDetails.Sum(q => q.Price * q.Quantity);
 
 
     }

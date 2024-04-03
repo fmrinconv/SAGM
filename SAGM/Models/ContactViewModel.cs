@@ -43,7 +43,7 @@ namespace SAGM.Models
         //TODO Rutas en app
         [Display(Name = "Foto")]
         public string ImageFullPath => ImageId == Guid.Empty
-            ? $"https://localhost:7060/images/noimage.png"
+            ? $"https://localhost:44345/images/noimage.png"
             : $"https://almacenamientomanolorin1.blob.core.windows.net/contacts/{ImageId}";
 
         [Display(Name = "Activo")]

@@ -25,6 +25,7 @@ namespace SAGM.Data
             await CheckRolesAsync();
             await CheckUserAsync("1010", "Francisco Manuel", "Rincón Vargas", "admin@simaqap.com", "811 027 95 00", "tolon 300", UserType.Usuario);
             await CheckUserAsync("2020", "Usuario", "de pruebas", "user@simaqap.com", "811 027 95 00", "tolon 300", UserType.Usuario);
+            await CheckCurrenciesAsync();
 
 
             User user = await _userHelper.GetUserAsync("admin@simaqap.com");
@@ -3632,6 +3633,17 @@ namespace SAGM.Data
                 _context.Units.Add(new Unit { UnitName = "EA", Active = true });
                 await _context.SaveChangesAsync();
             } 
+        }
+
+        private async Task CheckCurrenciesAsync()
+        {
+            if (!_context.Currencies.Any())
+            {
+                _context.Currencies.Add(new Currency { Curr = "MXN" });
+                _context.Currencies.Add(new Currency { Curr = "USD" });
+                _context.Currencies.Add(new Currency { Curr = "CAD" });
+                await _context.SaveChangesAsync();
+            }
         }
 
         private async Task CheckQuoteStatus()

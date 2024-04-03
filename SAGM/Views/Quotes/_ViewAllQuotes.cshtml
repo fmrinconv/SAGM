@@ -11,7 +11,7 @@
 
 </style>
 
-<table class="table table-responsive table-hover responsive" id="TableQuotes" style="font-size:small; width:100%;">
+<table class="table table-responsive table-hover responsive display" id="TableQuotes" style="font-size:small; width:100%;">
     <thead>
         <tr>
             <th align="right" >
@@ -38,9 +38,15 @@
             <th style="text-align:left;">
                 @Html.DisplayNameFor(model => model.Seller)
             </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Currency)
+            </th>
 
             <th>
                 @Html.DisplayNameFor(model => model.CustomerPO)
+            </th>
+            <th>
+                Subtotal
             </th>
             <th>
                 @Html.DisplayNameFor(model => model.Active)

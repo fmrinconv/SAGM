@@ -15,12 +15,17 @@ namespace SAGM.Controllers
         private readonly SAGMContext _context;
         private readonly IComboHelper _comboHelper;
         private readonly IBlobHelper _blobHelper;
+        private readonly IConfiguration _configuration;
+        private string hostpath;
 
-        public CustomersController(SAGMContext context, IComboHelper comboHelper, IBlobHelper blobHelper)
+        public CustomersController(SAGMContext context, IComboHelper comboHelper, IBlobHelper blobHelper, IConfiguration configuration)
         {
             _context = context;
             _comboHelper = comboHelper;
-           _blobHelper = blobHelper;
+            _blobHelper = blobHelper;
+            _configuration = configuration;
+            hostpath = _configuration["UrlPath:path"] + "images/noimage.png";
+         
         }
 
         public async Task<IActionResult> Index()
@@ -274,6 +279,11 @@ namespace SAGM.Controllers
 
             foreach (var item in contacts)
             {
+                if (item.ImageId == Guid.Empty)
+                {
+               
+                   
+                };
                 ContactViewModel cvm = new()
                 {
                     Active = item.Active,
@@ -301,7 +311,7 @@ namespace SAGM.Controllers
             cust.CustomerId = customer.CustomerId;
             cust.CustomerName = customer.CustomerName;
             cust.CustomerNickName = customer?.CustomerNickName;
-            cust.ImageId = cust.ImageId;
+            cust.ImageId = customer.ImageId;
             cust.PhoneNumber = customer.PhoneNumber;    
             cust.PostalCode = customer.PostalCode;
             cust.TaxId = customer.TaxId;

@@ -16,6 +16,8 @@ using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.Blazor;
 using System.IO;
 using static SAGM.Helpers.ModalHelper;
 using Microsoft.Reporting.Map.WebForms.BingMaps;
+using System.Data;
+using ClosedXML.Excel;
 
 
 namespace SAGM.Controllers
@@ -119,11 +121,7 @@ namespace SAGM.Controllers
                 TempData.Remove("ArchiveDeleteMessage");
             }
 
-
             return View();
-           
-            
-
               
         }
 
@@ -136,6 +134,7 @@ namespace SAGM.Controllers
                  .ThenInclude(d => d.Material)
                  .Include(q => q.Customer)
                  .Include(q => q.QuoteStatus)
+                 .Include(q => q.Currency)
                  .OrderByDescending(q => q.QuoteId)
                  .ToListAsync();
 
@@ -189,7 +188,7 @@ namespace SAGM.Controllers
                     BuyerContact = $"{buyercontact.Name} {buyercontact.LastName}",
                     Comments = q.Comments,
                     CreatedBy = q.CreatedBy.FullName,
-                    Currency = q.Currency,
+                    Currency = q.Currency.Curr,
                     CustomerNickName = q.Customer.CustomerNickName,
                     CustomerPO = q.CustomerPO,
                     FinalUser = $"{finaluser.Name} {finaluser.LastName}",
@@ -210,8 +209,98 @@ namespace SAGM.Controllers
  
             return Json(new {data= lquotes});
         }
-            // GET: Quotes/Details/5
-            [HttpGet]
+
+
+        public async Task<List<Quote>> GetDataQuotes()
+        {
+            List<Quote> quotes =await _context.Quotes
+                .Include(q => q.QuoteDetails)
+                .ThenInclude(d => d.Material)
+                .Include(q => q.Customer)
+                .Include(q => q.QuoteStatus)
+                .OrderByDescending(q => q.QuoteId)
+                .ToListAsync();
+            return quotes;
+        }
+
+        public async Task<FileResult> Export()
+        {
+
+            DataTable dt = new DataTable("QuoteResult");
+            dt.Columns.AddRange(new DataColumn[14] { 
+                                            new DataColumn("Cotización",Type.GetType("System.String")),
+                                            new DataColumn("Cliente",Type.GetType("System.String")),
+                                            new DataColumn("Usuario",Type.GetType("System.String")),
+                                            new DataColumn("Activa",Type.GetType("System.Boolean")),
+                                            new DataColumn("Comprador"),
+                                            new DataColumn("Creó"),
+                                            new DataColumn("Moneda"),
+                                            new DataColumn("OC-Cliente"),
+                                            new DataColumn("Vendedor"),
+                                            new DataColumn("Material"),
+                                            new DataColumn("Descripción"),
+                                            new DataColumn("Cantidad",Type.GetType("System.Decimal")),
+                                            new DataColumn("Unidad"),
+                                            new DataColumn("Precio",Type.GetType("System.Decimal"))
+                                            });
+
+            List<Quote> quotes = await _context.Quotes
+               .Include(q => q.QuoteDetails).ThenInclude(d => d.Material)
+               .Include(q => q.QuoteDetails).ThenInclude(d => d.Unit)
+               .Include(q => q.Customer)
+               .Include(q => q.QuoteStatus)
+               .Include(q => q.Currency)
+               .OrderByDescending(q => q.QuoteId)
+               .ToListAsync();
+
+            foreach (Quote quote in quotes)
+            {
+                string seller = _userHelper.GetUserAsync(quote.Seller).Result.FullName.ToString();
+                Contact buyercontact =  _context.Contacts.Find(quote.BuyerContactId);
+                Contact finaluser = _context.Contacts.Find(quote.FinalUserId);
+                foreach (QuoteDetail qd in quote.QuoteDetails)
+                {
+                    dt.Rows.Add(quote.QuoteName,
+                                quote.Customer.CustomerNickName,
+                                $"{finaluser.Name} {finaluser.LastName}",
+                                quote.Active.ToString(),
+                                $"{buyercontact.Name} {buyercontact.LastName}",
+                                quote.CreatedBy,
+                                quote.Currency.Curr,
+                                quote.CustomerPO,
+                                quote.Seller,
+                                qd.Material.MaterialName,
+                                qd.Description,
+                                qd.Quantity,
+                                qd.Unit.UnitName,
+                                qd.Price
+                                ); ;
+                }
+            }
+
+            try
+            {
+                using (XLWorkbook wb = new XLWorkbook())
+                {
+                    wb.Worksheets.Add(dt,"Cotizaciones");
+                    using (MemoryStream stream = new MemoryStream())
+                    {
+                        string exportfilename = $"Quote{DateTime.Now.ToString("yyyyMMddHHmmss")}.xlsx";
+                        wb.SaveAs(stream);
+                        return File(stream.ToArray(), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", exportfilename);
+                    }
+                }
+            }
+            catch (Exception)
+            {
+                return null;
+            }
+
+        }
+
+
+        // GET: Quotes/Details/5
+        [HttpGet]
         public async Task<IActionResult> Details(int? id, int? quoteDetilId)
             {
 
@@ -259,7 +348,6 @@ namespace SAGM.Controllers
 
 
             }
-
 
 
             if (id == null || _context.Quotes == null)
@@ -418,6 +506,7 @@ namespace SAGM.Controllers
                   .ToList();
 
             sellers = (List<SelectListItem>)(from u in users join s in sellerlist on u.Value equals s.Value select u).ToList();
+            List<SelectListItem> currencies = (List<SelectListItem>)await _comboHelper.GetComboCurrenciesAsync(0);
 
             AddQuote quote = new AddQuote()
             { 
@@ -431,6 +520,8 @@ namespace SAGM.Controllers
                 Tax = 16,
                 Active = true,
                 ModifiedBy = (List<SelectListItem>)await _userHelper.GetAllUsersAsync(),
+                CurrencyId = 0,
+                Currency = currencies
             };
  
             return View(quote);
@@ -488,7 +579,7 @@ namespace SAGM.Controllers
                             BuyerContactId = model.BuyerContactId,
                             Comments = model.Comments,
                             CreatedBy = createdBy,
-                            Currency = currency,
+                            Currency = await _context.Currencies.FindAsync(model.CurrencyId),
                             Customer = customer,
                             CustomerPO = model.CustomerPO,
                             FinalUserId = model.FinalUserId,
@@ -501,7 +592,7 @@ namespace SAGM.Controllers
                             validUntilDate = model.validUntilDate,
                             QuoteStatus = quotestatus,
 
-                        };
+                    };
                         _context.Add(quote);
                         await _context.SaveChangesAsync();
                         TempData["AddQuoteResult"] = "true";
@@ -595,6 +686,7 @@ namespace SAGM.Controllers
             Quote quote = await _context.Quotes
                 .Include(q => q.Customer)
                 .Include(q => q.QuoteStatus)
+                .Include(q => q.Currency)
                 .FirstOrDefaultAsync( q => q.QuoteId == id);
 
             //-----------------------
@@ -603,9 +695,7 @@ namespace SAGM.Controllers
             List<SelectListItem> users = new List<SelectListItem>();
             List<SelectListItem> sellers = new List<SelectListItem>();
             List<SelectListItem> quotestatus = new List<SelectListItem>();
-
-
-
+   
             users = _context.Users
                    .Where(u => u.EmailConfirmed == true)
                    .Select(u => new SelectListItem
@@ -621,6 +711,7 @@ namespace SAGM.Controllers
             List<SelectListItem> customers = (List<SelectListItem>)await _comboHelper.GetComboCustomersAsync();
             List<SelectListItem> customerbuyercontacts = (List<SelectListItem>)await _comboHelper.GetComboContactCustomersAsync(quote.Customer.CustomerId);
             List<SelectListItem> customerfinalcontacts = (List<SelectListItem>)await _comboHelper.GetComboContactCustomersAsync(quote.Customer.CustomerId);
+            List<SelectListItem> currencies = (List<SelectListItem>)await _comboHelper.GetComboCurrenciesAsync();
 
             quotestatus = _context.QuoteStatus
                 .Select(q => new SelectListItem { 
@@ -650,8 +741,10 @@ namespace SAGM.Controllers
                 QuoteStatus = quotestatus,
                 QuoteStatusId = quote.QuoteStatus.QuoteStatusId,
                 ModifyDate = quote.ModifyDate,
-                Comments = quote.Comments
-               
+                Comments = quote.Comments,
+                CurrencyId = quote.Currency.CurrencyId,
+                Currency = currencies
+
             };
 
             return View(editquote);
@@ -668,7 +761,7 @@ namespace SAGM.Controllers
                 {
                         Customer customer = await _context.Customers.FindAsync(model.CustomerId);
                         Quote quote = _context.Quotes.Find(model.QuoteId);
-                        QuoteStatus quotestatus = _context.QuoteStatus.Find(2);//Estatus 2 es en modificación
+                        QuoteStatus quotestatus = _context.QuoteStatus.Find(model.QuoteStatusId);//Estatus 2 es en modificación
 
                         quote.Active = model.Active;
                         quote.BuyerContactId = model.BuyerContactId;
@@ -683,6 +776,7 @@ namespace SAGM.Controllers
                         quote.QuoteName = model.QuoteName;
                         quote.Tax = model.Tax;
                         quote.validUntilDate = model.validUntilDate;
+                        quote.Currency = await _context.Currencies.FindAsync(model.CurrencyId);
                         quote.CreatedBy = await _userHelper.GetUserAsync(model.CreatedBy);
                         quote.QuoteStatus = quotestatus;
                         _context.Update(quote);
@@ -887,6 +981,9 @@ namespace SAGM.Controllers
 
                 try
                 {
+                    QuoteDetail qd = await _context.QuoteDetails
+                        .Include(q => q.Quote)
+                        .FirstOrDefaultAsync(q => q.QuoteDetailId == model.QuoteDetailId);
 
                     QuoteDetailComment comment = new QuoteDetailComment()
                     {
@@ -901,7 +998,7 @@ namespace SAGM.Controllers
                     TempData["AddOrEditDetailCommentResult"] = "true";
                     TempData["AddOrEditDetailCommentMessage"] = "El comentario fué agregado";
 
-                    return Json(new { isValid = true, html = ModalHelper.RenderRazorViewToString(this, "_ViewAllQuoteDetails", _context.QuoteDetails.ToList()) });
+                    return Json(new { isValid = true, html = ModalHelper.RenderRazorViewToString(this, "_ViewAllQuoteDetails", _context.QuoteDetails.Where(q => q.Quote.QuoteId == qd.Quote.QuoteId).ToList()) });
 
                 }
                 catch (DbUpdateException dbUpdateException)
@@ -1223,22 +1320,7 @@ namespace SAGM.Controllers
             return Json(materialtype.Materials.OrderBy(m => m.MaterialName));
         }
 
-        //public async Task<IActionResult> DeleteArchive(int? id)
-        //{
-        //    if (id == null)
-        //    {
-        //        return NotFound();
-        //    }
 
-        //    var archive = await _context.Archives
-        //        .FirstOrDefaultAsync(m => m.ArchiveId == id);
-        //    if (archive == null)
-        //    {
-        //        return NotFound();
-        //    }
-
-        //    return View(archive);
-        //}
 
         public async Task< FileResult> PrintReport(int QuoteId) {
 
@@ -1318,7 +1400,190 @@ namespace SAGM.Controllers
 
         }
 
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ChangeStatus(int id, int statusid)
+        {
+            Quote quote = await _context.Quotes
+                 .Include(q => q.Customer)
+                 .Include(q => q.QuoteStatus)
+                 .FirstOrDefaultAsync(m => m.QuoteId == id);
+            try
+            {
 
+                quote.QuoteStatus.QuoteStatusId = statusid;
+                _context.Update(quote);
+                await _context.SaveChangesAsync();  
+
+
+                TempData["ChangeStatusResult"] = "true";
+                TempData["ChangeStatustMessage"] = "El estatus fué actualizado";
+
+                return Json(new { isValid = true, html = ModalHelper.RenderRazorViewToString(this, "_ViewAllQuoteDetails", _context.QuoteDetails.Where(q => q.Quote.QuoteId == quote.QuoteId).ToList()) });
+
+            }
+            catch (DbUpdateException dbUpdateException)
+            {
+
+                ModelState.AddModelError(string.Empty, dbUpdateException.Message);
+
+                return Json(new { isValid = false, html = ModalHelper.RenderRazorViewToString(this, "_ViewAllQuoteDetails", _context.QuoteDetails.Where(q => q.Quote.QuoteId == quote.QuoteId).ToList()) });
+
+            }
+
+        }
+
+
+        [HttpGet]
+        public async Task<IActionResult> CopyQuote(int id)
+        {
+            Quote quote = await _context.Quotes.FirstOrDefaultAsync(q => q.QuoteId == id);
+            CopyQuote cquote = new CopyQuote();
+            cquote.QuoteId = quote.QuoteId;
+            cquote.QuoteName = quote.QuoteName;
+            cquote.copyfilesdetails = false;
+            cquote.copyfilesheader = false;
+            return View(cquote);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> CopyQuote(CopyQuote model)
+        {
+
+            ////cotización de la que se basa la nueva
+            ///
+            Quote oldquote = await _context.Quotes
+                .Include(q => q.QuoteDetails).ThenInclude(q => q.Material)
+                .Include(q => q.QuoteDetails).ThenInclude(q => q.Unit)
+                .Include(q => q.Customer)
+                .FirstOrDefaultAsync(q => q.QuoteId == model.QuoteId);
+
+       
+
+            //Formamos el nombre
+            String quotename = DateTime.Now.ToString("yyyyMMdd"); //Variable formadora de nombre de coti
+            String Lastnumber = ""; //Ultimo numero consecutivo de la cotización
+            String strnumber = "";
+            int Consec = 0;
+
+            ///Por default dejamos 10 dias de vigencia
+            TimeSpan validuntildate = new TimeSpan(10, 0, 0, 0); //Diez dias de vigencia por defecto
+
+
+            quotename = "COT-" + quotename;
+
+            // -------------------------
+
+            Quote Lastquote = await _context.Quotes.Where(q => q.QuoteName.Substring(0, 11) == quotename.Substring(0, 11)).OrderBy(q => q.QuoteId).LastOrDefaultAsync();//Ultima cotizacion
+
+            if (Lastquote != null)
+            {
+                Lastnumber = Lastquote.QuoteName.Substring(13, 3);
+                Consec = Int32.Parse(Lastnumber);
+            }
+            else
+            {
+                Lastnumber = "000";
+                Consec = Int32.Parse(Lastnumber);
+            }
+
+            Consec +=  1;
+
+            strnumber = $"000{Consec}";
+
+            quotename = quotename + "-" + strnumber.Substring(strnumber.Length - 3, 3);
+
+            //-----------------------
+
+            User createdBy = await _userHelper.GetUserAsync(User.Identity.Name);
+            QuoteStatus quotestatus = await _context.QuoteStatus.FindAsync(1);//El primer estatus es creada
+
+            Quote quote = new Quote()
+            {
+                Active = true,
+                BuyerContactId = oldquote.BuyerContactId,
+                Comments = oldquote.Comments,
+                CreatedBy = createdBy,
+                Currency = oldquote.Currency,
+                Customer = oldquote.Customer,
+                CustomerPO = oldquote.CustomerPO,
+                FinalUserId = oldquote.FinalUserId,
+                ModifiedBy = null,
+                ModifyDate = null,
+                QuoteDate = DateTime.Now,
+                QuoteName = quotename,
+                Seller = oldquote.Seller,
+                Tax = oldquote.Tax,
+                validUntilDate = DateTime.Now.Add(validuntildate),
+                QuoteStatus = quotestatus,
+
+            };
+            _context.Add(quote);
+            await _context.SaveChangesAsync();
+
+            foreach (QuoteDetail oqd in oldquote.QuoteDetails) {
+                QuoteDetail qd = new QuoteDetail();
+                qd.Quote = quote;
+                qd.Description = oqd.Description;
+                qd.Material = oqd.Material;
+                qd.Price = oqd.Price;
+                qd.Quantity = oqd.Quantity;
+                qd.Unit = oqd.Unit;
+                _context.Add(qd);
+                await _context.SaveChangesAsync();
+                //Agregaremos todos los archivos ligados a cada detalles si fue palomeado el checkbox de model.copyfilesdetails
+
+                if (model.copyfilesdetails == true)
+                {
+                    List<Archive> archives = _context.Archives.Where(a => a.Entity == "QuoteDetail" && a.EntityId == oqd.QuoteDetailId).ToList();
+
+                    foreach (Archive arch in archives)
+                    {
+                        
+                        Guid archiveguid = Guid.Empty;
+
+                        archiveguid = await _blobHelper.CopyBlobAsync(arch.ArchiveGuid, "archives");
+
+                        Archive archive = new Archive();
+                        archive.ArchiveGuid = archiveguid;
+                        archive.Entity = arch.Entity;
+                        archive.EntityId = qd.QuoteDetailId;
+                        archive.ArchiveName = arch.ArchiveName;
+                        _context.Add(archive);
+                        await _context.SaveChangesAsync();
+                    }
+                   
+                }
+               
+            }
+            
+
+            //Si se eligio copiar archivos de cabecera los copiamos a la nueva Cotizacion
+
+            if (model.copyfilesheader == true)
+            {
+                List<Archive> qarchives = _context.Archives.Where(a => a.Entity == "Quote" && a.EntityId == oldquote.QuoteId).ToList();
+
+                foreach (Archive a in qarchives)
+                {
+                    Guid archiveguid = Guid.Empty;
+                    archiveguid = await _blobHelper.CopyBlobAsync(a.ArchiveGuid, "archives");
+                    Archive archive = new Archive();
+                    archive.ArchiveGuid = archiveguid;
+                    archive.Entity = a.Entity;
+                    archive.EntityId = quote.QuoteId;
+                    archive.ArchiveName = a.ArchiveName;
+                    _context.Add(archive);
+                    await _context.SaveChangesAsync();
+
+                }
+                
+            }
+
+            TempData["CopyQuoteResult"] = "true";
+            TempData["CopyQuoteMessage"] = "La Cotización fué copiada";
+            return RedirectToAction("Index", "Quotes", new { id = quote.QuoteId });
+        }
         private bool QuoteExists(int id)
         {
           return _context.Quotes.Any(e => e.QuoteId == id);

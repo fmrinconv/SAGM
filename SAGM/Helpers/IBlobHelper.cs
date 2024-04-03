@@ -12,6 +12,7 @@ namespace SAGM.Helpers
 
         Task DeleteBlobAsync(Guid id, string containerName);
 
+        Task<Guid> CopyBlobAsync(Guid id, string containerName);
  
 
      

@@ -72,7 +72,10 @@ namespace SAGM.Models
         public int QuoteStatusId { get; set; }
 
         [Display(Name = "Moneda")]
-        public string CurrencyId { get; set; }
+        public IEnumerable<SelectListItem> Currency { get; set; }
+
+        [Display(Name = "Moneda")]
+        public int CurrencyId { get; set; }
 
         [Display(Name = "Comentarios")]
         public string? Comments { get; set; }

@@ -54,16 +54,17 @@
             <div class="col-6">
                 <dl class="row">
                     <dt class="col-sm-3">
-                        Documento
-                    </dt>
-                    <dd class="col-sm-9">
-                        @Html.DisplayFor(model => model.QuoteName)
-                    </dd>
-                    <dt class="col-sm-3">
                         @Html.DisplayNameFor(model => model.Customer.CustomerNickName)
                     </dt>
                     <dd class="col-sm-9">
                         @Html.DisplayFor(model => model.Customer.CustomerNickName)
+                        <img src="@Model.Customer.ImageFullPath" style="width:50px; height:50px; border-radius:50%;" class="zoom" />
+                    </dd>
+                    <dt class="col-sm-3">
+                        Documento
+                    </dt>
+                    <dd class="col-sm-9">
+                        @Html.DisplayFor(model => model.QuoteName)
                     </dd>
                     <dt class="col-sm-3">
                         @Html.DisplayNameFor(model => model.SellerName)
@@ -99,7 +100,7 @@
                     </dt>
                     <dd class="col-sm-9">
                         <div class="form-group">
-                            <select asp-for="QuoteStatusId" asp-items="Model.QuoteStatus" class="form-control" id="QuoteStatusId"></select>
+                            <select asp-for="QuoteStatusId" asp-items="Model.QuoteStatus" class="form-control" id="QuoteStatusId" onchange="changestatus(this.value905);"></select>
                             <span asp-validation-for="QuoteStatusId" class="text-danger"></span>
                         </div>
                     </dd>
@@ -109,7 +110,6 @@
                     <dd class="col-sm-9">
                         @Html.DisplayFor(model => model.ModifyDate)
                     </dd>
-                    <dt>&nbsp;</dt>
                     <dd>
                         <a onclick="PrintReport('@Model.QuoteId')" class="btn btn-primary"><i title='Imprimir cotización' class='fa-solid fa-print'></i></a>
                     </dd>
@@ -154,6 +154,7 @@
         var Popup, dataTable, detailid;
             var rolex;
         var subototal = 0;
+
         $(document).ready(function () {
 
             if ($("#Result").val() == "true") {
@@ -308,7 +309,7 @@
                                     result += "class='btn btn-sm btn-outline-primary'><i title='Agregar archivos' class='fa-solid fa-file-circle-plus'></i></a>";
 
                                     result += "<a title='Comentarios' onclick=\"showInPopup('/Quotes/AddOrEditDetailComment?id=" + data + "','Agregar\ comentario','bg-primary')\" ";
-                                    result += "class='btn btn-sm btn-outline-primary'><i class='fa-solid fa-comments' title='Comentarios'></i></a>";
+                                    result += "class='btn btn-sm btn-outline-secondary'><i class='fa-solid fa-comments' title='Comentarios'></i></a>";
 
                                     result += "<a title='Eliminar partida' onclick=\"showInPopup('/Quotes/DeleteQuoteDetail?id=" + data + "','Eliminar\ partida','bg-danger')\"";
                                     result += "class='btn btn-sm btn-outline-danger'><i title='Eliminar partida' class='fa-solid fa-trash'></i></a>";
@@ -359,12 +360,7 @@
                         }
                     ]
                 });
-
-       
-
         });
-
-
         function actualiza() {
             
                 dataTable.ajax.reload();
@@ -386,24 +382,20 @@
                             });
                         
                             dataTable.ajax.reload()
-                            setTimeout('ejecuta(' + $("#IndexID").val() + ')', 1100);
                             //Popup.dialog('close');
                         }
 
                     }
                 })
-            }
-
+        };
         function downloadFile(guid, filename) {
                 var popout = window.open("/Quotes/DownloadFile/?id=" + guid + "&filename=" + filename, "_blank");
                 return false;
-            }
-
+        };
         function PrintReport(quoteid) {
                 var popout = window.open("/Quotes/PrintReport/?QuoteId=" + quoteid, "_blank");
                 return false;
         }
-
         function PopupForm(url, msg) {
                 var formDiv = $('<div/>');
                 $.get(url)
@@ -430,30 +422,49 @@
                         });
                     });
             }
-
         function CopyDetail(quotedetailId) {
-                $.ajax({
-                    type: "Post",
-                    url: "/Quotes/CopyDetail/",
-                    dataType: 'json',
-                    data: { quoteDetailId: quotedetailId },
-                    success: function (data) {
+            $.ajax({
+                type: "Post",
+                url: "/Quotes/CopyDetail/",
+                dataType: 'json',
+                data: { quoteDetailId: quotedetailId },
+                success: function (data) {
 
-                        if (data = "success") {
-                            $.notify("Partida copiada", {
-                                globalPosition: "top center",
-                                className: "success"
-                            });
+                    if (data = "success") {
+                        $.notify("Partida copiada", {
+                            globalPosition: "top center",
+                            className: "success"
+                        });
 
-                            dataTable.ajax.reload()
-                            setTimeout('ejecuta(' + $("#IndexID").val() + ')', 2100);
-                            //Popup.dialog('close');
-                        }
-
+                        dataTable.ajax.reload()
+                        setTimeout('ejecuta(' + $("#IndexID").val() + ')', 2100);
+                        //Popup.dialog('close');
                     }
-                })
-            }
 
+                }
+            });
+        };
+        function changestatus(statusid) {
+            var id = $("#QuoteId").val();
+            $.ajax({
+                type: "Post",
+                url: "/Quotes/ChangeStatus/",
+                dataType: 'json',
+                data: { id: id, statusid: statusid },
+                success: function (data) {
+
+                    if (data.isValid == true) {
+                        $.notify("Estatus modificado", {
+                            globalPosition: "top center",
+                            className: "success"
+                        });
+                        //setTimeout('window.document.reload()', 1100);
+                        //Popup.dialog('close');
+                    }
+
+                }
+            });
+        };
 
    
     </script>

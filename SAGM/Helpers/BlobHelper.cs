@@ -55,8 +55,15 @@ namespace SAGM.Helpers
             return name;
         }
 
- 
+        public async Task<Guid> CopyBlobAsync(Guid id, string containerName)
+        {
+            Guid name = Guid.NewGuid();
+            CloudBlobContainer container = _blobClient.GetContainerReference(containerName);
+            CloudBlockBlob source = container.GetBlockBlobReference($"{id}");
+            CloudBlockBlob target = container.GetBlockBlobReference($"{name}");
 
-   
+            await target.StartCopyAsync(source);
+            return name;
+        }
     }
 }

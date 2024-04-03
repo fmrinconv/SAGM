@@ -66,10 +66,12 @@ namespace SAGM.Models
         [Display(Name = "Foto")]
         public Guid ImageId { get; set; }
 
+        public string? httproute { get; set; }
+
         //TODO Rutas en app
         [Display(Name = "Foto")]
         public string ImageFullPath => ImageId == Guid.Empty
-            ? $"https://localhost:7060/images/noimage.png"
+            ? $"https://localhost:44345/images/noimage.png"
             : $"https://almacenamientomanolorin1.blob.core.windows.net/customers/{ImageId}";
 
         [Display(Name = "Image")]

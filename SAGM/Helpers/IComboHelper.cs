@@ -24,5 +24,7 @@ namespace SAGM.Helpers
         Task<IEnumerable<SelectListItem>> GetComboUnitAsync();
 
         Task<IEnumerable<SelectListItem>> GetComboQuoteStatus(int selectedindex = 0);
+
+        Task<IEnumerable<SelectListItem>> GetComboCurrenciesAsync(int selectedindex = 0);
     }
 }

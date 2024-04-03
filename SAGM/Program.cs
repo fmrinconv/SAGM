@@ -52,6 +52,7 @@ internal class Program
         builder.Services.AddControllers().AddJsonOptions(x => x.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);
 
         builder.Services.AddRazorPages().AddRazorRuntimeCompilation();
+
         
         var app = builder.Build();
 

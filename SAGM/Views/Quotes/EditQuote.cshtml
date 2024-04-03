@@ -46,6 +46,16 @@
                     <select asp-for="SellerId" asp-items="Model.Sellers" class="form-control" id="SellerId"></select>
                     <span asp-validation-for="SellerId" class="text-danger"></span>
                 </div>
+                <div class="form-group">
+                    <label asp-for="QuoteStatusId" class="control-label"></label>
+                    <select asp-for="QuoteStatusId" asp-items="Model.QuoteStatus" class="form-control" id="QuoteStatusId"></select>
+                    <span asp-validation-for="QuoteStatusId" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="CurrencyId" class="control-label"></label>
+                    <select asp-for="CurrencyId" asp-items="Model.Currency" class="form-control" id="QuoteStatusId"></select>
+                    <span asp-validation-for="CurrencyId" class="text-danger"></span>
+                </div>
                 <div class="form-group form-check">
                     <label class="form-check-label">
                         <input class="form-check-input" asp-for="Active" /> @Html.DisplayNameFor(model => model.Active)
@@ -75,20 +85,14 @@
                     <span asp-validation-for="CustomerPO" class="text-danger"></span>
                 </div>
                 <div class="form-group">
-                    <label asp-for="Comments" class="control-label"></label>
-                    <textarea asp-for="Comments" class="form-control"></textarea>
-                    <span asp-validation-for="Comments" class="text-danger"></span>
-                </div>
-
-                <div class="form-group">
                     <label asp-for="Tax" class="control-label"></label>
                     <input asp-for="Tax" class="form-control" />
                     <span asp-validation-for="Tax" class="text-danger"></span>
                 </div>
                 <div class="form-group">
-                    <label asp-for="QuoteStatusId" class="control-label"></label>
-                    <select asp-for="QuoteStatusId" asp-items="Model.QuoteStatus" class="form-control" id="QuoteStatusId"></select>
-                    <span asp-validation-for="QuoteStatusId" class="text-danger"></span>
+                    <label asp-for="Comments" class="control-label"></label>
+                    <textarea asp-for="Comments" class="form-control"></textarea>
+                    <span asp-validation-for="Comments" class="text-danger"></span>
                 </div>
             </div>
         </div>
