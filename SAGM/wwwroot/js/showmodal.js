@@ -35,8 +35,20 @@
             else if (title == "Agregar archivos") {
                 $('#form-modal .modal-icon').addClass("fa fa-file-alt");
             }
+            else if (title == "Crear Orden de trabajo") {
+                $('#form-modal .modal-icon').addClass("fa fa-share-from-square");
+            }
+            else if (title == "Editar Orden de trabajo") {
+                $('#form-modal .modal-icon').addClass("fa fa-wrench");
+            }
             else if (title == "Eliminar archivo") {
                 $('#form-modal .modal-icon').addClass("fa fa-triangle-exclamation");
+            }
+            else if (title == "Agregar proceso") {
+                $('#form-modal .modal-icon').addClass("fa-solid fa-gear");
+            }
+            else if (title == "Eliminar proceso") {
+                $('#form-modal .modal-icon').addClass("fa-solid fa-gear");
             }
             else {
                 $('#form-modal .modal-icon').addClass("fa fa-globe");

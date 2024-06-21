@@ -389,6 +389,36 @@ namespace SAGM.Migrations
                     b.ToTable("Customers");
                 });
 
+            modelBuilder.Entity("SAGM.Data.Entities.Machine", b =>
+                {
+                    b.Property<int>("MachineId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("MachineId"));
+
+                    b.Property<bool>("Active")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("MachineName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<int?>("ProcessId")
+                        .HasColumnType("int");
+
+                    b.HasKey("MachineId");
+
+                    b.HasIndex("ProcessId");
+
+                    b.HasIndex("MachineName", "ProcessId")
+                        .IsUnique()
+                        .HasFilter("[ProcessId] IS NOT NULL");
+
+                    b.ToTable("Machines");
+                });
+
             modelBuilder.Entity("SAGM.Data.Entities.Material", b =>
                 {
                     b.Property<int>("MaterialId")
@@ -449,6 +479,30 @@ namespace SAGM.Migrations
                     b.ToTable("MaterialTypes");
                 });
 
+            modelBuilder.Entity("SAGM.Data.Entities.Process", b =>
+                {
+                    b.Property<int>("ProcessId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ProcessId"));
+
+                    b.Property<bool>("Active")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("ProcessName")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.HasKey("ProcessId");
+
+                    b.HasIndex("ProcessName")
+                        .IsUnique();
+
+                    b.ToTable("Processes");
+                });
+
             modelBuilder.Entity("SAGM.Data.Entities.Quote", b =>
                 {
                     b.Property<int>("QuoteId")
@@ -479,6 +533,9 @@ namespace SAGM.Migrations
                     b.Property<string>("CustomerPO")
                         .HasMaxLength(128)
                         .HasColumnType("nvarchar(128)");
+
+                    b.Property<decimal>("ExchangeRate")
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<int>("FinalUserId")
                         .HasColumnType("int");
@@ -785,6 +842,250 @@ namespace SAGM.Migrations
                     b.ToTable("AspNetUsers", (string)null);
                 });
 
+            modelBuilder.Entity("SAGM.Data.Entities.WorkOrder", b =>
+                {
+                    b.Property<int>("WorkOrderId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("WorkOrderId"));
+
+                    b.Property<bool>("Active")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("BuyerContactId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Comments")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("CreatedById")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<int?>("CurrencyId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("CustomerId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("CustomerPO")
+                        .HasMaxLength(128)
+                        .HasColumnType("nvarchar(128)");
+
+                    b.Property<decimal>("ExchangeRate")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("FinalUserId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("ModifiedBy")
+                        .HasMaxLength(128)
+                        .HasColumnType("nvarchar(128)");
+
+                    b.Property<DateTime?>("ModifyDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("PromiseDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("QuoteId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Seller")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<decimal>("Tax")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<DateTime>("WorkOrderDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("WorkOrderName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("WorkOrderStatusId")
+                        .HasColumnType("int");
+
+                    b.HasKey("WorkOrderId");
+
+                    b.HasIndex("CreatedById");
+
+                    b.HasIndex("CurrencyId");
+
+                    b.HasIndex("CustomerId");
+
+                    b.HasIndex("WorkOrderStatusId");
+
+                    b.ToTable("WorkOrders");
+                });
+
+            modelBuilder.Entity("SAGM.Data.Entities.WorkOrderComment", b =>
+                {
+                    b.Property<int>("CommentId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("CommentId"));
+
+                    b.Property<string>("Comment")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("DateComment")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("UserId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<int?>("WorkOrderId")
+                        .HasColumnType("int");
+
+                    b.HasKey("CommentId");
+
+                    b.HasIndex("UserId");
+
+                    b.HasIndex("WorkOrderId");
+
+                    b.ToTable("WorkOrderComments");
+                });
+
+            modelBuilder.Entity("SAGM.Data.Entities.WorkOrderDetail", b =>
+                {
+                    b.Property<int>("WorkOrderDetailId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("WorkOrderDetailId"));
+
+                    b.Property<bool>("Completed")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<decimal>("Invoiced")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("Machined")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int?>("MaterialId")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("Price")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("Quantity")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("RawMaterial")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("Shipped")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("TT")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int?>("UnitId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("WorkOrderId")
+                        .HasColumnType("int");
+
+                    b.HasKey("WorkOrderDetailId");
+
+                    b.HasIndex("MaterialId");
+
+                    b.HasIndex("UnitId");
+
+                    b.HasIndex("WorkOrderId");
+
+                    b.ToTable("WorkOrderDetails");
+                });
+
+            modelBuilder.Entity("SAGM.Data.Entities.WorkOrderDetailComment", b =>
+                {
+                    b.Property<int>("CommentId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("CommentId"));
+
+                    b.Property<string>("Comment")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("DateComment")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("UserId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<int?>("WorkOrderDetailId")
+                        .HasColumnType("int");
+
+                    b.HasKey("CommentId");
+
+                    b.HasIndex("UserId");
+
+                    b.HasIndex("WorkOrderDetailId");
+
+                    b.ToTable("WorkOrderDetailComments");
+                });
+
+            modelBuilder.Entity("SAGM.Data.Entities.WorkOrderDetailProcess", b =>
+                {
+                    b.Property<int>("WorkOrderDetailProcessId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("WorkOrderDetailProcessId"));
+
+                    b.Property<int?>("MachineId")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("Quantity")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int?>("UnitId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("WorkOrderDetailId")
+                        .HasColumnType("int");
+
+                    b.HasKey("WorkOrderDetailProcessId");
+
+                    b.HasIndex("MachineId");
+
+                    b.HasIndex("UnitId");
+
+                    b.HasIndex("WorkOrderDetailId");
+
+                    b.ToTable("WorkOrderDetailProcesses");
+                });
+
+            modelBuilder.Entity("SAGM.Data.Entities.WorkOrderStatus", b =>
+                {
+                    b.Property<int>("WorkOrderStatusId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("WorkOrderStatusId"));
+
+                    b.Property<string>("WorkOrderStatusName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("WorkOrderStatusId");
+
+                    b.ToTable("WorkOrderStatus");
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
                 {
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
@@ -861,6 +1162,15 @@ namespace SAGM.Migrations
                         .HasForeignKey("CityId");
 
                     b.Navigation("City");
+                });
+
+            modelBuilder.Entity("SAGM.Data.Entities.Machine", b =>
+                {
+                    b.HasOne("SAGM.Data.Entities.Process", "Process")
+                        .WithMany("Machines")
+                        .HasForeignKey("ProcessId");
+
+                    b.Navigation("Process");
                 });
 
             modelBuilder.Entity("SAGM.Data.Entities.Material", b =>
@@ -982,6 +1292,109 @@ namespace SAGM.Migrations
                     b.Navigation("City");
                 });
 
+            modelBuilder.Entity("SAGM.Data.Entities.WorkOrder", b =>
+                {
+                    b.HasOne("SAGM.Data.Entities.User", "CreatedBy")
+                        .WithMany()
+                        .HasForeignKey("CreatedById")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("SAGM.Data.Entities.Currency", "Currency")
+                        .WithMany()
+                        .HasForeignKey("CurrencyId");
+
+                    b.HasOne("SAGM.Data.Entities.Customer", "Customer")
+                        .WithMany()
+                        .HasForeignKey("CustomerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("SAGM.Data.Entities.WorkOrderStatus", "WorkOrderStatus")
+                        .WithMany("WorkOrder")
+                        .HasForeignKey("WorkOrderStatusId");
+
+                    b.Navigation("CreatedBy");
+
+                    b.Navigation("Currency");
+
+                    b.Navigation("Customer");
+
+                    b.Navigation("WorkOrderStatus");
+                });
+
+            modelBuilder.Entity("SAGM.Data.Entities.WorkOrderComment", b =>
+                {
+                    b.HasOne("SAGM.Data.Entities.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId");
+
+                    b.HasOne("SAGM.Data.Entities.WorkOrder", "WorkOrder")
+                        .WithMany("WorkOrderComments")
+                        .HasForeignKey("WorkOrderId");
+
+                    b.Navigation("User");
+
+                    b.Navigation("WorkOrder");
+                });
+
+            modelBuilder.Entity("SAGM.Data.Entities.WorkOrderDetail", b =>
+                {
+                    b.HasOne("SAGM.Data.Entities.Material", "Material")
+                        .WithMany()
+                        .HasForeignKey("MaterialId");
+
+                    b.HasOne("SAGM.Data.Entities.Unit", "Unit")
+                        .WithMany("WorkOrderDetails")
+                        .HasForeignKey("UnitId");
+
+                    b.HasOne("SAGM.Data.Entities.WorkOrder", "WorkOrder")
+                        .WithMany("WorkOrderDetails")
+                        .HasForeignKey("WorkOrderId");
+
+                    b.Navigation("Material");
+
+                    b.Navigation("Unit");
+
+                    b.Navigation("WorkOrder");
+                });
+
+            modelBuilder.Entity("SAGM.Data.Entities.WorkOrderDetailComment", b =>
+                {
+                    b.HasOne("SAGM.Data.Entities.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId");
+
+                    b.HasOne("SAGM.Data.Entities.WorkOrderDetail", "WorkOrderDetail")
+                        .WithMany("WorkOrderDetailComments")
+                        .HasForeignKey("WorkOrderDetailId");
+
+                    b.Navigation("User");
+
+                    b.Navigation("WorkOrderDetail");
+                });
+
+            modelBuilder.Entity("SAGM.Data.Entities.WorkOrderDetailProcess", b =>
+                {
+                    b.HasOne("SAGM.Data.Entities.Machine", "Machine")
+                        .WithMany("WorkOrderDetailsProcesses")
+                        .HasForeignKey("MachineId");
+
+                    b.HasOne("SAGM.Data.Entities.Unit", "Unit")
+                        .WithMany("WorkOrderDetailsProcesses")
+                        .HasForeignKey("UnitId");
+
+                    b.HasOne("SAGM.Data.Entities.WorkOrderDetail", "WorkOrderDetail")
+                        .WithMany("WorkOrderDetailProcess")
+                        .HasForeignKey("WorkOrderDetailId");
+
+                    b.Navigation("Machine");
+
+                    b.Navigation("Unit");
+
+                    b.Navigation("WorkOrderDetail");
+                });
+
             modelBuilder.Entity("SAGM.Data.Entities.Category", b =>
                 {
                     b.Navigation("MaterialTypes");
@@ -1011,6 +1424,11 @@ namespace SAGM.Migrations
                     b.Navigation("Quotes");
                 });
 
+            modelBuilder.Entity("SAGM.Data.Entities.Machine", b =>
+                {
+                    b.Navigation("WorkOrderDetailsProcesses");
+                });
+
             modelBuilder.Entity("SAGM.Data.Entities.Material", b =>
                 {
                     b.Navigation("QuoteDetails");
@@ -1019,6 +1437,11 @@ namespace SAGM.Migrations
             modelBuilder.Entity("SAGM.Data.Entities.MaterialType", b =>
                 {
                     b.Navigation("Materials");
+                });
+
+            modelBuilder.Entity("SAGM.Data.Entities.Process", b =>
+                {
+                    b.Navigation("Machines");
                 });
 
             modelBuilder.Entity("SAGM.Data.Entities.Quote", b =>
@@ -1046,6 +1469,10 @@ namespace SAGM.Migrations
             modelBuilder.Entity("SAGM.Data.Entities.Unit", b =>
                 {
                     b.Navigation("QuoteDetails");
+
+                    b.Navigation("WorkOrderDetails");
+
+                    b.Navigation("WorkOrderDetailsProcesses");
                 });
 
             modelBuilder.Entity("SAGM.Data.Entities.User", b =>
@@ -1053,6 +1480,25 @@ namespace SAGM.Migrations
                     b.Navigation("QuoteComments");
 
                     b.Navigation("Quotes");
+                });
+
+            modelBuilder.Entity("SAGM.Data.Entities.WorkOrder", b =>
+                {
+                    b.Navigation("WorkOrderComments");
+
+                    b.Navigation("WorkOrderDetails");
+                });
+
+            modelBuilder.Entity("SAGM.Data.Entities.WorkOrderDetail", b =>
+                {
+                    b.Navigation("WorkOrderDetailComments");
+
+                    b.Navigation("WorkOrderDetailProcess");
+                });
+
+            modelBuilder.Entity("SAGM.Data.Entities.WorkOrderStatus", b =>
+                {
+                    b.Navigation("WorkOrder");
                 });
 #pragma warning restore 612, 618
         }

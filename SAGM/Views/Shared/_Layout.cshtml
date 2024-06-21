@@ -20,7 +20,7 @@
 
 
     .login {
-        color: orange !important;
+        color: white !important;
     }
 
     .home:hover {
@@ -41,6 +41,10 @@
             background-color: green;
             color: white;
         }
+
+    .dropdown-divider{
+        color:white;
+    }
 </style>
 <html lang="es-mx">
 
@@ -81,9 +85,23 @@
                                         <a class="nav-link dropdown-toggle text-success" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                                             <b>Ventas</b>
                                         </a>
-                                        <ul class="dropdown-menu" style="background-color: #cccccc;">
+                                        <ul class="dropdown-menu" style="background-color: #121247; border-color: silver" >
                                             <li class="nav-item" style="margin-left:3px;">
                                                 <a class="text-decoration-none text-success"  asp-controller="Quotes" asp-action="Index"> <i class="fa fa-file-invoice-dollar"></i>  <strong>Cotizaciones</strong></a>
+                                            </li>
+
+                                        </ul>
+                                    </li>
+                                    <li class="nav-item dropdown">
+                                        <a class="nav-link dropdown-toggle text-warning" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                            <b>Operación</b>
+                                        </a>
+                                        <ul class="dropdown-menu" style="background-color: #121247; border-color: silver">
+                                            <li class="nav-item" style="margin-left:3px;">
+                                                <a class="text-decoration-none text-warning" asp-controller="WorkOrders" asp-action="WorkLoad"> <i class="fa-regular fa-hourglass-half"></i>  <strong>Carga</strong></a>
+                                            </li>
+                                            <li class="nav-item" style="margin-left:3px;">
+                                                <a class="text-decoration-none text-warning" asp-controller="WorkOrders" asp-action="Index"> <i class="fa fa-wrench"></i>  <strong>OTs</strong></a>
                                             </li>
 
                                         </ul>
@@ -92,7 +110,7 @@
                                         <a class="nav-link dropdown-toggle text-danger" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                                             <b>Compras</b>
                                         </a>
-                                        <ul class="dropdown-menu" style="background-color: #cccccc;">
+                                        <ul class="dropdown-menu" style="background-color: #121247; border-color: silver">
                                             <li class="nav-item" style="margin-left:3px;">
                                                 <a class="text-decoration-none text-danger" asp-controller="Quotes" asp-action="Index"> <i class="fa fa-money-check-dollar"></i>  <strong>Ordenes </strong></a>
                                             </li>
@@ -103,7 +121,7 @@
                                         <a class="nav-link dropdown-toggle text-primary" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                                             <b>Catálogos</b>
                                         </a>
-                                        <ul class="dropdown-menu" style="background-color: #cccccc;">
+                                        <ul class="dropdown-menu" style="background-color: #121247; border-color: silver">
                                                 <li class="nav-item" style="margin-left:3px;">
                                                     <a class="text-decoration-none"  asp-controller="Countries" asp-action="Index"> <i class="fa fa-globe"></i>  <strong>Países</strong></a>
                                                 </li>
@@ -113,16 +131,21 @@
                                                 <li class="nav-item" style="margin-left:3px;">
                                                     <a class="text-decoration-none" asp-area="" asp-controller="Customers" asp-action="Index"><i class="fa fa-users-gear"></i> <strong>Clientes</strong></a>
                                                 </li>
-                                            
-
                                             <li><hr class="dropdown-divider"></li>
-                                                <li class="nav-item" style="margin-left:3px;">
-                                                    <a class="text-decoration-none" asp-area="" asp-controller="Users" asp-action="Index"><i class="fa fa-users-line"></i>  <strong>Usuarios</strong></a>
-                                                </li>
-                                                @if (User.IsInRole("Admin"))
+                                               
+                                            @if (User.IsInRole("Administrador"))
                                                 {
                                                     <li class="nav-item" style="margin-left:3px;">
+                                                        <a class="text-decoration-none" asp-area="" asp-controller="Processes" asp-action="Index"><i class="fa fa-gear"></i>  <strong>Procesos</strong></a>
+                                                    </li>
+                                                    <li class="nav-item" style="margin-left:3px;">
+                                                        <a class="text-decoration-none" asp-area="" asp-controller="Units" asp-action="Index"><i class="fa fa-tint"></i>  <strong>Unidades</strong></a>
+                                                    </li>
+                                                    <li class="nav-item" style="margin-left:3px;">
                                                         <a class="text-decoration-none" asp-area="" asp-controller="Sellers" asp-action="Index">&nbsp;<i class="fa fa-user-tie"></i>  <strong>Vendedores</strong></a>
+                                                    </li>
+                                                    <li class="nav-item" style="margin-left:3px;">
+                                                        <a class="text-decoration-none" asp-area="" asp-controller="Users" asp-action="Index"><i class="fa fa-users-line"></i>  <strong>Usuarios</strong></a>
                                                     </li>
                                                 }
                                             </ul>
@@ -135,7 +158,7 @@
                             <ul class="nav navbar-nav navbar-right">
                                 @if (User.Identity.IsAuthenticated)
                                 {
-                                    <li class="nav-item">
+                                    <li class="nav-item" style="border-left: solid 1px white;">
                                         <a class="nav-link login" asp-area="" asp-controller="Account" asp-action="ChangeUser"><b>@User.Identity.Name</b></a>
                                     </li>
                                     <li >

@@ -1,0 +1,218 @@
+﻿@model SAGM.Models.WorkOrderDetailViewModel
+@{
+    ViewData["Title"] = "Partida";
+    Layout = null;
+}
+
+<style>
+    .selectcascade {
+        background-color:#808080;
+    }
+</style>
+<div class="container smfont">
+    <form asp-action="AddOrEditDetail" autocomplete="off"  onsubmit="return jQueryAjaxPost(this);">
+        <input type="hidden" asp-for="WorkOrderId" />
+        <input type="hidden" asp-for="WorkOrderDetailId" />
+        <div class="box-body">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <label asp-for="UnitId" class="control-label"></label>
+                <select asp-for="UnitId" asp-items="Model.Unit " class="form-control" id="UnitId"></select>
+                <span asp-validation-for="UnitId" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="CategoryId" class="control-label"></label>
+                <select asp-for="CategoryId" asp-items="Model.Category" class="form-control" id="CategoryId"></select>
+                <span asp-validation-for="CategoryId" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="MaterialTypeId" class="control-label"></label>
+                <select asp-for="MaterialTypeId" asp-items="Model.MaterialType" class="form-control" id="MaterialTypeId"></select>
+                <span asp-validation-for="MaterialTypeId" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="MaterialId" class="control-label"></label>
+                <select asp-for="MaterialId" asp-items="Model.Material" class="form-control" id="MaterialId"></select>
+                <span asp-validation-for="MaterialId" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <span class="required">*</span>
+                <label asp-for="Quantity" class="control-label"></label>
+                <input asp-for="Quantity" class="form-control smfont" />
+                <span asp-validation-for="Quantity" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <span class="required">*</span>
+                <label asp-for="Price" class="control-label"></label>
+                <input asp-for="Price" class="form-control smfont" />
+                <span asp-validation-for="Price" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <span class="required">*</span>
+                <label asp-for="RawMaterial" class="control-label"></label>
+                <input asp-for="RawMaterial" class="form-control smfont" />
+                <span asp-validation-for="RawMaterial" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <span class="required">*</span>
+                <label asp-for="TT" class="control-label"></label>
+                <input asp-for="TT" class="form-control smfont" />
+                <span asp-validation-for="TT" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <span class="required">*</span>
+                <label asp-for="Machined" class="control-label"></label>
+                <input asp-for="Machined" class="form-control smfont" />
+                <span asp-validation-for="Machined" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <span class="required">*</span>
+                <label asp-for="Invoiced" class="control-label"></label>
+                <input asp-for="Invoiced" class="form-control smfont" />
+                <span asp-validation-for="Invoiced" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+            <span class="required">*</span>
+            <label asp-for="Shipped" class="control-label"></label>
+            <input asp-for="Shipped" class="form-control smfont" />
+            <span asp-validation-for="Shipped" class="text-danger"></span>
+        </div>
+            <div class="form-group">
+                <span class="required">*</span>
+                <label asp-for="Description" class="control-label"></label>
+                  <textarea asp-for="Description" class="form-control"></textarea>
+                <span asp-validation-for="Description" class="text-danger"></span>
+            </div>
+            <br />
+
+            
+        </div>
+        <div class="modal-footer">
+            <div class="col text-center">
+                <button type="button" class="btn btn-sm btn-primary" data-bs-dismiss="modal"><i class="fa fa-ban"></i> Cancelar</button>
+                <button type="submit" class="btn btn-sm btn-success"><i class="fa fa-save"></i> Guardar</button>
+            </div>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+
+    
+}
+
+<script type="text/javascript">
+    $(document).ready(function () {
+
+        if ($("#Quantity").val() == "0.00")
+        {
+            $("#Quantity").val("0");
+        };
+       
+        if($("#Price").val() == "0.00")
+        {
+            $("#Price").val("0");
+        };
+
+        $("#CategoryId").change(function () {
+            loading();
+            //Vaciamos el select del Tipo de Material y lo ponemos cargando
+            $("#MaterialTypeId").empty();
+            $("#MaterialTypeId").append('<option value="0">Cargando...</option>');
+            $("#MaterialId").empty();
+            $("#MaterialId").append('<option value="0">Cargando...</option>');
+            $.ajax({
+                type: 'POST',
+                url: '@Url.Action("GetMaterialTypes")',
+                dataType: 'json',
+                data: { categoryId: $("#CategoryId").val() },
+                /*Para que esto funcione correctamente y se pueda serializar
+                 es necesario que en la definicion de Data.Entities de "MaterialTypes"" en el campo "Category" exista el [JsonIgnore]*/ 
+                success: function (Materialtypes) {
+                    $.each(Materialtypes, function (i, materialtype) {
+                        $("#MaterialTypeId").append('<option value="'
+                            + materialtype.materialTypeId+ '">'
+                            + materialtype.materialTypeName + '</option>');
+                    });
+                },
+                error: function (jqxhr, status, exception) {
+
+                        alert('Exception:', exception);
+                }
+            });
+            setTimeout(loaded,500);
+            return false;
+        })
+
+        $("#MaterialTypeId").change(function () {
+            loading2();
+            $("#MaterialId").empty();
+            $("#MaterialId").append('<option value="0">[Cargando...]</option>');
+            $.ajax({
+                type: 'POST',
+                url: '@Url.Action("GetMaterials")',
+                dataType: 'json',
+                data: { materialTypeId: $("#MaterialTypeId").val() },
+                success: function (materials) {
+                    $.each(materials, function (i, material) {
+                        $("#MaterialId").append('<option value="'
+                            + material.materialId + '">'
+                            + material.materialName + '</option>');
+                    });
+                },
+                error: function (ex) {
+                    alert('Failed to retrieve materials.' + ex);
+                }
+            });
+            setTimeout(loaded2, 500);
+            return false;
+        })
+
+    });
+
+    function loading(){
+        $("#CategoryId").addClass("selectcascade");
+        $("#CategoryId").prop('disabled', 'disabled');
+        $("#MaterialTypeId").addClass("selectcascade");
+        $("#MaterialTypeId").prop('disabled', 'disabled');
+        $("#MaterialId").addClass("selectcascade");
+        $("#MaterialId").prop('disabled', 'disabled');
+
+    }
+
+    function loaded()
+    {
+        
+        $("#CategoryId").removeAttr("disabled");
+        $("#CategoryId").removeClass("selectcascade");
+        $("#MaterialTypeId").removeAttr("disabled");
+        $("#MaterialTypeId").removeClass("selectcascade");
+        $("#MaterialId").removeAttr("disabled");
+        $("#MaterialId").removeClass("selectcascade");
+        ///una vez cargado la opción cargando le cambiamos el texto por Seleccion un tipo de material
+        $("#MaterialTypeId").find("option:selected").text('[Selecciona un tipo de material...]');
+        $("#MaterialId").find("option:selected").text('[Selecciona un material...]');
+    }
+
+    function loading2() {
+        $("#MaterialTypeId").addClass("selectcascade");
+        $("#MaterialTypeId").prop('disabled', 'disabled');
+        $("#MaterialId").addClass("selectcascade");
+        $("#MaterialId").prop('disabled', 'disabled');
+    }
+
+    function loaded2() {
+
+        $("#MaterialTypeId").removeAttr("disabled");
+        $("#MaterialTypeId").removeClass("selectcascade");
+        $("#MaterialId").removeAttr("disabled");
+        $("#MaterialId").removeClass("selectcascade");
+        ///una vez cargado la opción cargando le cambiamos el texto por Seleccion un tipo de material
+        $("#MaterialId").find("option:selected").text('[Selecciona un material...]');
+    }
+</script>
+
+

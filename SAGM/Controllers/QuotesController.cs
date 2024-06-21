@@ -15,9 +15,11 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.Blazor;
 using System.IO;
 using static SAGM.Helpers.ModalHelper;
-using Microsoft.Reporting.Map.WebForms.BingMaps;
+
 using System.Data;
 using ClosedXML.Excel;
+using DocumentFormat.OpenXml.Wordprocessing;
+using DocumentFormat.OpenXml.Office2010.Excel;
 
 
 namespace SAGM.Controllers
@@ -119,6 +121,14 @@ namespace SAGM.Controllers
                 ViewBag.Message = TempData["ArchiveDeleteMessage"].ToString();
                 TempData.Remove("ArchiveDeleteResult");
                 TempData.Remove("ArchiveDeleteMessage");
+            }
+
+            if (TempData["CreateWorkOrderResult"] != null)
+            {
+                ViewBag.Result = TempData["CreateWorkOrderResult"].ToString();
+                ViewBag.Message = TempData["CreateWorkOrderMessage"].ToString();
+                TempData.Remove("CreateWorkOrderResult");
+                TempData.Remove("CreateWorkOrderMessage");
             }
 
             return View();
@@ -357,8 +367,13 @@ namespace SAGM.Controllers
 
             var quote = await _context.Quotes
                 .Include(q => q.Customer)
+                .Include(q => q.QuoteDetails)
                 .Include(q => q.QuoteStatus)
+                .Include(q => q.Currency)
                 .FirstOrDefaultAsync(m => m.QuoteId == id);
+
+            ViewBag.DetailsCount = quote.QuoteDetails.Count();
+
             if (quote == null)
             {
                 return NotFound();
@@ -506,7 +521,7 @@ namespace SAGM.Controllers
                   .ToList();
 
             sellers = (List<SelectListItem>)(from u in users join s in sellerlist on u.Value equals s.Value select u).ToList();
-            List<SelectListItem> currencies = (List<SelectListItem>)await _comboHelper.GetComboCurrenciesAsync(0);
+            List<SelectListItem> currencies = (List<SelectListItem>)await _comboHelper.GetComboCurrenciesAsync(1);
 
             AddQuote quote = new AddQuote()
             { 
@@ -520,7 +535,7 @@ namespace SAGM.Controllers
                 Tax = 16,
                 Active = true,
                 ModifiedBy = (List<SelectListItem>)await _userHelper.GetAllUsersAsync(),
-                CurrencyId = 0,
+                CurrencyId = 1,
                 Currency = currencies
             };
  
@@ -547,20 +562,20 @@ namespace SAGM.Controllers
 
                         // -------------------------
 
-                        Quote Lastquote = await _context.Quotes.Where(q => q.QuoteName.Substring(0,11) == quotename).OrderBy(q => q.QuoteId).LastOrDefaultAsync();//Ultima cotizacion
+                        Quote Lastquote = await _context.Quotes.Where(q => q.QuoteName.Substring(0,12) == quotename).OrderBy(q => q.QuoteId).LastOrDefaultAsync();//Ultima cotizacion
 
                         if (Lastquote != null)
                         {
-                            Lastnumber = Lastquote.QuoteName.Substring(8, 3);
-                            Consec = Int32.Parse(Lastnumber);
+                            Lastnumber = Lastquote.QuoteName.Substring(13, 3);
+                            Consec = Int32.Parse(Lastnumber) + 1;
                         }
                         else
                         {
-                            Lastnumber = "000";
+                            Lastnumber = "001";
                             Consec = Int32.Parse(Lastnumber);
                         }
 
-                        Lastnumber += 1;
+                        Lastnumber = Consec.ToString();
 
                         strnumber = $"000{Lastnumber}";
 
@@ -755,12 +770,27 @@ namespace SAGM.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> EditQuote(EditQuote model)
         {
-            if (ModelState.IsValid)
+            Quote quote = await _context.Quotes
+                .Include(q => q.QuoteDetails)
+                .Include(q => q.Customer)
+                .Include(q => q.QuoteStatus)
+                .Include(q => q.Currency)
+                .FirstOrDefaultAsync(q => q.QuoteId == model.QuoteId);
+
+            bool validToChangeWin = true; //bandera que indica que tiene partidas y puede recibir el cambio de estatus a Ganada
+
+            if (quote.QuoteDetails.Count == 0 && model.QuoteStatusId == 5)//Esta condición es la única que puede detener el cambio de estatus
             {
+                validToChangeWin = false;
+            }
+
+            if (ModelState.IsValid && validToChangeWin)
+            {
+               
                 try
                 {
                         Customer customer = await _context.Customers.FindAsync(model.CustomerId);
-                        Quote quote = _context.Quotes.Find(model.QuoteId);
+                       
                         QuoteStatus quotestatus = _context.QuoteStatus.Find(model.QuoteStatusId);//Estatus 2 es en modificación
 
                         quote.Active = model.Active;
@@ -798,13 +828,13 @@ namespace SAGM.Controllers
             }
             else
             {
-                
-                //-----------------------
+
+
 
                 List<SelectListItem> sellerlist = (List<SelectListItem>)await _userHelper.GetSellersAsync();
                 List<SelectListItem> users = new List<SelectListItem>();
                 List<SelectListItem> sellers = new List<SelectListItem>();
-
+                List<SelectListItem> quotestatus = new List<SelectListItem>();
 
                 users = _context.Users
                        .Where(u => u.EmailConfirmed == true)
@@ -819,28 +849,52 @@ namespace SAGM.Controllers
                 sellers = (List<SelectListItem>)(from u in users join s in sellerlist on u.Value equals s.Value select u).ToList();
 
                 List<SelectListItem> customers = (List<SelectListItem>)await _comboHelper.GetComboCustomersAsync();
-                List<SelectListItem> customerbuyercontacts = (List<SelectListItem>)await _comboHelper.GetComboContactCustomersAsync(model.CustomerId);
-                List<SelectListItem> customerfinalcontacts = (List<SelectListItem>)await _comboHelper.GetComboContactCustomersAsync(model.CustomerId);
+                List<SelectListItem> customerbuyercontacts = (List<SelectListItem>)await _comboHelper.GetComboContactCustomersAsync(quote.Customer.CustomerId);
+                List<SelectListItem> customerfinalcontacts = (List<SelectListItem>)await _comboHelper.GetComboContactCustomersAsync(quote.Customer.CustomerId);
+                List<SelectListItem> currencies = (List<SelectListItem>)await _comboHelper.GetComboCurrenciesAsync();
+
+                quotestatus = _context.QuoteStatus
+                    .Select(q => new SelectListItem
+                    {
+                        Text = q.QuoteStatusName,
+                        Value = q.QuoteStatusId.ToString()
+                    }).OrderBy(c => c.Value).ToList();
 
 
                 EditQuote editquote = new EditQuote()
                 {
-                    QuoteName = model.QuoteName,
-                    QuoteDate = model.QuoteDate,
-                    validUntilDate = model.validUntilDate,
+                    QuoteId = quote.QuoteId,
+                    QuoteName = quote.QuoteName,
+                    QuoteDate = quote.QuoteDate,
+                    validUntilDate = quote.validUntilDate,
                     Customers = customers,
-                    CustomerId = model.CustomerId,
+                    CustomerId = quote.Customer.CustomerId,
                     CustomerBuyerContacts = customerbuyercontacts,
-                    BuyerContactId = model.BuyerContactId,
+                    BuyerContactId = quote.BuyerContactId,
                     CustomerFinalContacts = customerfinalcontacts,
-                    FinalUserId = model.FinalUserId,
+                    FinalUserId = quote.FinalUserId,
+                    CustomerPO = quote.CustomerPO,
                     Sellers = sellers,
-                    Tax = model.Tax,
-                    Active = true,
+                    Tax = quote.Tax,
+                    Active = quote.Active,
                     ModifiedBy = (List<SelectListItem>)await _userHelper.GetAllUsersAsync(),
+                    ModifiedById = quote.ModifiedBy,
+                    QuoteStatus = quotestatus,
+                    QuoteStatusId = quote.QuoteStatus.QuoteStatusId,
+                    ModifyDate = quote.ModifyDate,
+                    Comments = quote.Comments,
+                    CurrencyId = quote.Currency.CurrencyId,
+                    Currency = currencies
+
                 };
 
-                return Json(new { isValid = false, html = ModalHelper.RenderRazorViewToString(this, "EditQuote", model) });
+                if (validToChangeWin == false)
+                {
+                    ModelState.AddModelError(string.Empty, "La cotización no tiene partidas para poderla dar por ganada");
+                }
+              
+
+                return Json(new { isValid = false, html = ModalHelper.RenderRazorViewToString(this, "EditQuote", editquote) });
             }
 
         }
@@ -1297,7 +1351,7 @@ namespace SAGM.Controllers
 
         public JsonResult GetMaterialTypes(int categoryId)
         {
-            Category category = _context.Categories
+            Data.Entities.Category category = _context.Categories
                 .Include(c => c.MaterialTypes)
                 .FirstOrDefault(c => c.CategoryId == categoryId);
             if (category == null)
@@ -1583,6 +1637,103 @@ namespace SAGM.Controllers
             TempData["CopyQuoteResult"] = "true";
             TempData["CopyQuoteMessage"] = "La Cotización fué copiada";
             return RedirectToAction("Index", "Quotes", new { id = quote.QuoteId });
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> CreateWorkOrder(int id)
+        {
+            Quote quote = await _context.Quotes
+               .FindAsync(id);
+            return View(quote);
+        }
+
+
+        [HttpPost]
+        public async Task<IActionResult> CreateWorkOrder(Quote model)
+        {
+            Quote quote = await _context.Quotes
+               .Include(q => q.QuoteDetails).ThenInclude(q => q.Material)
+               .Include(q => q.QuoteDetails).ThenInclude(q => q.Unit)
+               .Include(q => q.QuoteDetails).ThenInclude(q => q.Unit)
+               .Include(q => q.Currency)
+               .Include(q => q.Customer)
+               .FirstOrDefaultAsync(q => q.QuoteId == model.QuoteId);
+
+
+
+            String workordername = DateTime.Now.ToString("yyyyMMdd"); //Variable formadora de nombre de coti
+            String Lastnumber = ""; //Ultimo numero consecutivo de la cotización
+            String strnumber = "";
+            int Consec = 0;
+
+
+            workordername = "OT-" + workordername;
+
+            // -------------------------
+
+            WorkOrder LastWO = await _context.WorkOrders.Where(q => q.WorkOrderName.Substring(0, 1) == workordername).OrderBy(w => w.WorkOrderId).LastOrDefaultAsync();//Ultima cotizacion
+
+            if (LastWO != null)
+            {
+                Lastnumber = LastWO.WorkOrderName.Substring(7, 3);
+                Consec = Int32.Parse(Lastnumber);
+            }
+            else
+            {
+                Lastnumber = "000";
+                Consec = Int32.Parse(Lastnumber);
+            }
+
+            Lastnumber += 1;
+
+            strnumber = $"000{Lastnumber}";
+
+            workordername = workordername + "-" + strnumber.Substring(strnumber.Length - 3, 3);
+
+
+            ///--------------------------
+
+            WorkOrder workOrder = new WorkOrder();
+            workOrder.Active = true;
+            workOrder.BuyerContactId = quote.BuyerContactId;
+            workOrder.Comments = quote.Comments;
+            workOrder.CreatedBy = await _userHelper.GetUserAsync(User.Identity.Name);
+            workOrder.Currency = quote.Currency;
+            workOrder.ExchangeRate = quote.ExchangeRate;
+            workOrder.Customer = quote.Customer;
+            workOrder.CustomerPO = quote.CustomerPO;
+            workOrder.QuoteId = quote.QuoteId;
+            workOrder.FinalUserId = quote.FinalUserId;
+            workOrder.Seller = quote.Seller;
+            workOrder.Tax = quote.Tax;
+            workOrder.WorkOrderDate = DateTime.Now;
+            workOrder.WorkOrderName = workordername;
+            workOrder.WorkOrderStatus = await _context.WorkOrderStatus.FindAsync(1);
+            
+            _context.Add(workOrder);
+            await _context.SaveChangesAsync();
+
+            foreach (QuoteDetail qd in quote.QuoteDetails) 
+            { 
+                WorkOrderDetail wod = new WorkOrderDetail();
+                wod.Description = qd.Description;
+                wod.Material = qd.Material;
+                wod.Price = qd.Price;
+                wod.Quantity = qd.Quantity; 
+                wod.Unit = qd.Unit;
+                wod.WorkOrder = workOrder;
+                _context.Add(wod);
+                await _context.SaveChangesAsync();  
+
+            };
+
+            quote.QuoteStatus = await _context.QuoteStatus.FindAsync(7);
+            await _context.SaveChangesAsync();
+
+            TempData["CreateWorkOrderResult"] = "true";
+            TempData["CreateWorkOrderMessage"] = $"La Orden de trabajo {workordername} fué creada";
+
+            return RedirectToAction("Index", "Quotes");
         }
         private bool QuoteExists(int id)
         {

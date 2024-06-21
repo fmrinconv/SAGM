@@ -78,6 +78,23 @@ namespace SAGM.Controllers
 
                     return RedirectToAction("Index", "Quotes", new { id = q.QuoteId });
 
+                case "WorkOrder":
+                    TempData["AddArchiveResult"] = "true";
+                    TempData["AddArchiveMessage"] = "La carga de archivos se ha completado con éxito";
+                    WorkOrder w = await _context.WorkOrders
+                                        .FirstOrDefaultAsync(w => w.WorkOrderId == archive.EntityId);
+
+                    return RedirectToAction("Index", "WorkOrders", new { id = w.WorkOrderId });
+
+                case "WorkOrderDetail":
+                    TempData["AddArchiveResult"] = "true";
+                    TempData["AddArchiveMessage"] = "La carga de archivos se ha completado con éxito";
+                    WorkOrderDetail wd = await _context.WorkOrderDetails
+                                        .Include(wd => wd.WorkOrder)
+                                        .FirstOrDefaultAsync(wd => wd.WorkOrderDetailId == archive.EntityId);
+
+                    return RedirectToAction("Details", "WorkOrders", new { id = wd.WorkOrder.WorkOrderId, workOrderId = wd.WorkOrderDetailId });
+
                 default:
                     break;
             }
@@ -266,6 +283,16 @@ namespace SAGM.Controllers
                                                    .FirstOrDefaultAsync(q => q.QuoteId == id);
                         returnentityId = quote.QuoteId;
                         controller = "Quotes";
+                        action = "Index";
+                        break;
+                    }
+                case "WorkOrder":
+                    {
+                        var id = archive.EntityId; ///Este es el Id de la cotizacion pero tenmos que enviar el id de la Quote
+                        var workorder = await _context.WorkOrders
+                                                   .FirstOrDefaultAsync(w => w.WorkOrderId == id);
+                        returnentityId = workorder.WorkOrderId;
+                        controller = "WorkOrders";
                         action = "Index";
                         break;
                     }

@@ -1,0 +1,90 @@
+﻿@model SAGM.Data.Entities.WorkOrder
+
+@{
+    ViewData["Title"] = "Create";
+}
+
+<h1>Create</h1>
+
+<h4>WorkOrder</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="Create">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <label asp-for="QuoteId" class="control-label"></label>
+                <input asp-for="QuoteId" class="form-control" />
+                <span asp-validation-for="QuoteId" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="WorkOrderDate" class="control-label"></label>
+                <input asp-for="WorkOrderDate" class="form-control" />
+                <span asp-validation-for="WorkOrderDate" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="WorkOrderName" class="control-label"></label>
+                <input asp-for="WorkOrderName" class="form-control" />
+                <span asp-validation-for="WorkOrderName" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Seller" class="control-label"></label>
+                <input asp-for="Seller" class="form-control" />
+                <span asp-validation-for="Seller" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="BuyerContactId" class="control-label"></label>
+                <input asp-for="BuyerContactId" class="form-control" />
+                <span asp-validation-for="BuyerContactId" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="FinalUserId" class="control-label"></label>
+                <input asp-for="FinalUserId" class="form-control" />
+                <span asp-validation-for="FinalUserId" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="PromiseDate" class="control-label"></label>
+                <input asp-for="PromiseDate" class="form-control" />
+                <span asp-validation-for="PromiseDate" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="ModifyDate" class="control-label"></label>
+                <input asp-for="ModifyDate" class="form-control" />
+                <span asp-validation-for="ModifyDate" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="ModifiedBy" class="control-label"></label>
+                <input asp-for="ModifiedBy" class="form-control" />
+                <span asp-validation-for="ModifiedBy" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="CustomerPO" class="control-label"></label>
+                <input asp-for="CustomerPO" class="form-control" />
+                <span asp-validation-for="CustomerPO" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Comments" class="control-label"></label>
+                <input asp-for="Comments" class="form-control" />
+                <span asp-validation-for="Comments" class="text-danger"></span>
+            </div>
+            <div class="form-group form-check">
+                <label class="form-check-label">
+                    <input class="form-check-input" asp-for="Active" /> @Html.DisplayNameFor(model => model.Active)
+                </label>
+            </div>
+            <div class="form-group">
+                <label asp-for="Tax" class="control-label"></label>
+                <input asp-for="Tax" class="form-control" />
+                <span asp-validation-for="Tax" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Create" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>
+

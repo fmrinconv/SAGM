@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Reporting.NETCore;
 
+
 namespace SAGM.Controllers
 {
     public class ReportsController : Controller

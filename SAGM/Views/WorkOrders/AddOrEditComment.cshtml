@@ -1,0 +1,164 @@
+﻿@model IEnumerable<SAGM.Models.WorkOrderCommentView>
+@{
+    Layout = null;
+
+
+    <style>
+        .ui-widget-header, .ui-state-default, ui-button {
+            background: #6a9dd4;
+            border: 1px solid silver;
+            color: white;
+            font-weight: bold;
+            font-size: small;
+        }
+
+        .field-validation-error {
+            font-size: small;
+        }
+
+        .control-label {
+            font-size: small;
+        }
+
+        input {
+            font-size: small !important;
+        }
+
+        select {
+            font-size: small !important;
+        }
+
+        hr {
+            margin: 0.1em 0.1em 0.1em 0.1em;
+            border-color: #3b6d78;
+        }
+
+        textarea {
+            height: 80px !important;
+            font-size: small !important;
+        }
+
+        .rendondo {
+            border-radius: 5px;
+            background: #FFFFFF;
+            border: solid 1px gray;
+        }
+
+        .comment {
+            font-size: small !important;
+        }
+
+        .user {
+            font-size: small;
+            font-weight: bold;
+            color: #3b6d78;
+            margin: 0.1em 0.1em 0.1em 0.1em;
+        }
+        .useract {
+            font-size: small;
+            font-weight: bold;
+            color: #f47921;
+            margin: 0.1em 0.1em 0.1em 0.1em;
+        }
+
+        .date {
+            font-size: xx-small;
+            color: #3b6d78;
+            margin-top: 4px;
+        }
+    </style>
+    <link href="//cdn.datatables.net/1.10.19/css/jquery.dataTables.min.css" rel="stylesheet" />
+    <link href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.13.16/css/bootstrap-select.css" />
+
+}
+
+@using (Html.BeginForm("DeleteComment", "WorkOrders", FormMethod.Post, new { onsubmit = "return jQueryAjaxPost(this);" }))
+{
+ <input type="text" id="id" name="id" value="0" style="display:none;">
+<table>
+    @foreach (var item in Model)
+    {
+        if (item.UserName == ViewBag.UserName)
+        {
+            <tr id="tr_@item.CommentId.ToString()">
+                <td colspan="3">
+                    <div class="form-group rendondo">
+                        <div class="form-inline">
+                            <label class="useract">&nbsp;@Html.DisplayFor(modelItem => item.Usuario)</label>
+                            <label class="date small">&nbsp;(@Html.DisplayFor(modelItem => item.DateComment))</label>
+                            <button type="submit" onclick="return setvalue('@item.CommentId.ToString()')" class="border-0 btn-sm"><i class='fa fa-trash' style="color:red"></i></button>
+                        </div>
+                        <hr />
+                        <label class="comment col-sm-10">@Html.DisplayFor(modelItem => item.Comment)</label>
+                    </div>
+                </td>
+                <td width="25%"></td>
+            </tr>
+        }
+        else
+        {
+            <tr>
+                <td width="25%"></td>
+                <td colspan="3">
+                    <div class="form-group rendondo">
+                        <div class="form-inline">
+                            <label class="user">&nbsp;@Html.DisplayFor(modelItem => item.Usuario)</label>
+                            <label class="date small">&nbsp;(@Html.DisplayFor(modelItem => item.DateComment))</label>
+                        </div>
+                        <hr />
+                        <label class="comment col-sm-10">@Html.DisplayFor(modelItem => item.Comment)</label>
+
+                    </div>
+                </td>
+
+            </tr>
+        }
+    }
+</table>
+}
+
+@using (Html.BeginForm("AddOrEditComment", "WorkOrders", FormMethod.Post, new { onsubmit = "return jQueryAjaxPost(this);" }))
+
+{
+
+    <input type="text" id="WorkOrderId" name="WorkOrderId" value="@ViewBag.WorkOrderId" style="display:none;">
+    <input type="text" id="DateComment" name="DateComment" value="" style="display:none;">
+    <div class="form-group">
+        <label id="usrname" style="color:#f47921; font-size:small;">@ViewBag.Usuario</label>&nbsp;<i class='fa fa-comments' style="color:#f47921"></i>
+        <textarea id="Comment" name="Comment" class="form-control"></textarea>
+    </div>
+            
+    <div class="modal-footer">
+        <div class="col text-center">
+            <button type="button" class="btn btn-sm btn-primary" data-bs-dismiss="modal"><i class="fa fa-ban"></i> Cancelar</button>
+            <button type="submit" class="btn btn-sm btn-success"><i class="fa fa-save"></i> Guardar</button>
+        </div>
+    </div>
+
+}
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+
+}
+
+<script>
+    $(document).ready(function () {
+        const dt = new Date();
+        dt.setMinutes(dt.getMinutes() - dt.getTimezoneOffset());
+        $("#DateComment").val(dt.toISOString().slice(0, 16));
+
+    })
+
+    function setvalue(val)
+    {
+        $("#id").val(val);
+        return true;
+    }
+
+
+</script>
+

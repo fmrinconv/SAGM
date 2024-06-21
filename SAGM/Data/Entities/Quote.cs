@@ -63,6 +63,11 @@ namespace SAGM.Data.Entities
         [Display(Name = "Moneda")]
         public Currency Currency { get; set; }
 
+        [Column(TypeName = "decimal(18,2)")]
+        [Display(Name = "Tipo de cambio")]
+        [Required(ErrorMessage = "El campo {0} es obligatorio.")]
+        public decimal ExchangeRate { get; set; } = 1;
+
         [Display(Name = "Comentarios")]
         public string? Comments { get; set; }
 

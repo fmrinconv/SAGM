@@ -1,0 +1,358 @@
+﻿@model IEnumerable<SAGM.Models.AllWorkOrders>
+
+
+@{
+    ViewData["Title"] = "Ordenes de trabajo";
+}
+<link href="~/lib/datatables/css/responsive.datatables.min.css" rel="stylesheet" />
+<style>
+   select,  input[type="search"] {
+        border: 1px solid gray;
+        padding: .1em .1em;
+        border-radius: .4em;
+    }
+    th{
+        background-color:silver;
+    }
+    .text-warning{
+        color: #f1a11e !important;
+    }
+</style>
+<div class="container-fluid">
+    <div class="card mt-2">
+        <div class="card-header text-warning bg-secondary bg-opacity-25">
+            <table>
+                <tr>
+                    <td>
+                        <i class="fa fa-wrench"></i><strong>&nbsp;Ordenes de trabajo</strong>
+                        <a onclick="showInPopup('@Url.Action("AddWorkOrder", "WorkOrders", new { id = "" }, Context.Request.Scheme)' , 'Crear Orden de trabajo @DateTime.Now.ToString(" yyyyMMdd")-XXX','bg-success')" class="btn btn-sm btn-outline-success" title="Crear Orden de trabajo"><i class="fa fa-plus-circle"></i></a>
+                    </td>
+                    <td>
+                        <a onclick="Export()" class="btn btn-sm btn-outline-primary"><i class="fa-solid fa-file-arrow-down"></i></a>
+                    </td>
+                </tr>
+            </table>           
+        </div>  
+        <div class="card-body">
+            <div id="view-all">
+                <input type="hidden" id="Result" name="Result" value="@ViewBag.Result" />
+                @await Html.PartialAsync("_ViewAllWorkOrders", Model)
+            </div>
+        </div>
+    </div>
+</div>
+
+<partial name="_AddOrEditDialog" />
+<partial name="_DeleteDialog" />
+@section Scripts{
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script src="~/js/showmodal.js"></script>
+    <script type="text/javascript">
+        var count = 0;
+        var dataTable;
+        var quoteid;
+        function parseJsonDate(jsonDateString) {
+            return new Date(parseInt(jsonDateString.replace('/Date(', '')));
+        }
+        $(document).ready(function () {
+            if ($("#Result").val() == "true") {
+                $.notify('@Html.Raw(ViewBag.Message)', "success", { globalPosition: "top left" });
+            }
+            else {
+                $.notify('@Html.Raw(ViewBag.Message)', "error", { globalPosition: "top left" });
+            }
+            dataTable = $('#TableWorkOrders').DataTable(
+                {
+                    "ajax": {
+                        "url": '/WorkOrders/GetWorkOrders' ,
+                        "type": "GET",
+                        "datatype": "json"
+                    },
+                    "language": {
+                        "url": "/lib/datatables/Spanish.json"
+                    },
+                    "aLengthMenu": [
+                        [25, 50, 100, 200, -1],
+                        [25, 50, 100, 200, "Todos"]
+                    ],
+                    responsive: true,
+                    "columnDefs": [
+                        {
+                            "targets": 0,
+                            className: 'dt-body-center dt-body-nowrap',
+                            responsivePriority: 1
+                        },
+                        {
+                            "targets": 1,
+                            className: 'dt-body-left dt-body-nowrap',
+                            responsivePriority: 1,
+                            visible: false
+                        },
+                        {
+                            "targets": 2,
+                            className: 'dt-body-left dt-body-nowrap',
+                            responsivePriority: 1,
+                            
+                        },
+                        {
+                            "targets": 3,
+                            className: 'dt-body-left dt-body-nowrap',
+                            responsivePriority: 1
+                        },
+                        {
+                            "targets": [4,5],
+                            className: 'dt-body-left dt-body-nowrap',
+                            responsivePriority: 1
+                        },
+                        {
+                            "targets": 8,
+                            className: 'dt-body-center dt-body-nowrap',
+                            responsivePriority: 4
+                        },
+                        {
+                            "targets": [7,9],
+                            className: 'dt-body-center dt-body-nowrap',
+                            responsivePriority: 3
+                        },
+                        {
+                            "targets": [10,11],
+                            className: 'dt-body-center dt-body-nowrap',
+                            responsivePriority: 4
+                        },
+                        {
+                            "targets": [12],
+                            className: 'dt-body-right dt-body-nowrap',
+                            responsivePriority: 1
+                        },
+                        {
+                            "targets": 13,
+                            className: 'dt-body-center dt-body-nowrap',
+                            responsivePriority: 4
+                        }, 
+                        {
+                            "targets": 15,
+                            className: 'dt-body-left dt-body-nowrap',
+                            responsivePriority: 1   
+                        },
+                        {
+                            "targets": 16,
+                            className: 'dt-body-left dt-body-nowrap',
+                            responsivePriority: 1
+                        },
+                        {
+                            "targets": 21,
+                            className: 'dt-body-center dt-body-nowrap',
+                            responsivePriority: 4
+                        }],
+                    "columns": [
+                        {
+                            "data": "workOrderId", 
+                            "render": 
+                                function (data) { 
+                                    workorderid = data; 
+                                    count = count + 1; 
+                                    return count.toString(); }
+                        },
+                        {
+                                     
+                            "data": "quoteId",
+                            "render":
+                                function (data) {
+                                    quoteid = data;
+                                    return quoteid;
+                                }
+                        },
+                        { "data": "workOrderName", "render": 
+                                function (data) {
+                                    var result = '<a href=/WorkOrders/Details/' + workorderid + "> " + data + "</a>";
+                                    return result;
+                                                } 
+                        },
+                        {
+                            "data": "quoteName", "render":
+                                function (data) {
+                                    var result = '<a href=/Quotes/Details/' + quoteid + "> " + data + "</a>";
+                                    return result;
+                                }
+                        },
+                        { "data": "customerNickName" },
+                        { "data": "finalUser" },
+                        { "data": "buyerContact" },
+                        {
+                            "data": "workOrderDate",
+                            "render":
+                                function (data) {
+                                    var date = new Date(data);
+                                    var day = date.getDate();
+                                    var month = date.getMonth()+1;
+                                    var year = date.getFullYear();
+                                    return year + "-" + (month.toString().length > 1 ? month : "0" + month) + "-" + (day.toString().length > 1 ? day : "0" + day);
+                                }
+                        },
+                        {
+                            "data": "promiseDate",
+                            "render":
+                                function (data) {
+                                    if (data != null) {
+                                        var date = new Date(data);
+                                        var day = date.getDate();
+                                        var month = date.getMonth() + 1;
+                                        var year = date.getFullYear();
+                                        return year + "-" + (month.toString().length > 1 ? month : "0" + month) + "-" + (day.toString().length > 1 ? day : "0" + day);
+                                    }
+                                    else {
+                                        return "";
+                                    }
+                                   
+                                }
+                        },
+                        { "data": "seller"},
+                        { "data": "currency" },
+                        { "data": "exchangeRate", "render": $.fn.dataTable.render.number(',', '.', 2) },
+                        { "data": "customerPO" },
+                        { "data": "total", "render": $.fn.dataTable.render.number(',', '.', 2) },
+                        {
+                            "data": "active",
+                            "render":
+                                function (data) {
+                                    var result = "";
+                                  
+                                    if (data == true) {
+                                        result += "<input type='checkbox' checked onclick='return false;' />";
+                                    }
+                                    else {
+                                        result += "<input type='checkbox' onclick='return false;'/>";
+                                    }
+                                    return result;
+                                }
+                        },
+                        
+                        { "data": "workOrderStatusName" },
+                        { "data": "workOrderId", 
+                          "render": 
+                          function (data) {
+                            var result = "";
+                                result += "<a title='Editar Orden de trabajo' onclick=\"showInPopup('/WorkOrders/EditWorkOrder?id=" + data + "','Editar\ Orden de trabajo','bg-warning')\" ";
+                                result += "class='btn btn-sm btn-outline-warning'><i title='Editar Orden de trabajo' class='fa-solid fa-pencil-alt'></i></a>";
+
+                                result += "<a title='Subir archivo' onclick=\"showInPopup('/Archives/AddArchive?entityid=" + data + "&Entity=WorkOrder','Agregar\ archivos','bg-primary')\" ";
+                                result += "class='btn btn-sm btn-outline-primary'><i title='Subir archivo' class='fa-solid fa-file-circle-plus'></i></a>";
+
+                                result += "<a title='Comentarios' onclick=\"showInPopup('/WorkOrders/AddOrEditComment?id=" + data + "','Agregar\ comentario','bg-primary')\" ";
+                                result += "class='btn btn-sm btn-outline-secondary'><i title='Comentarios' class='fa-solid fa-comments'></i></a>";
+                            return result;
+
+                        } },
+                        { "data": "tax", 
+                        "render": 
+                            function (data) { 
+                                var result = "";
+                                result += data.toString() + "%";
+                                return result; } 
+                        },
+                        { "data": "modifyDate" },
+                        { "data": "modifiedBy" },
+                        { "data": "comments" },
+                        { "data": "archivesNumber" },
+                        {
+                            "data": "archivesChain",
+                            "render": function (data) {
+                                var result = "";
+
+                                if (data.length > 0) {
+                                    result += "<div><table style='border: 1px solid;'><tr class='bg-secondary bg-opacity-25'>"
+                                    result += "<th>Archivos</th>";
+                                    result += "<th>Acción</th>";
+
+                                    var arrFiles = data.split("|");
+
+                                    for (var i = 0; i < arrFiles.length; i++) {
+                                        var file = arrFiles[i].split(",");
+                                        var guid = file[0];
+                                        var filename = file[1];
+                                        var id = file[2];
+
+                                        var filetype = filename.split(".");
+                                        var type = filetype[0];
+
+                                        result += "<tr><td class='archive'>" + filename + "<td>";
+                                        result += "<a title='Descargar' class='btn btn-sm btn-outline-primary' href='#' onclick=\"downloadFile('" + guid + "','" + filename + "')\"> <i class='fa fa-download'></i><strong></a>";
+                                        // result += "<a onclick=deleteArchive('" + id + "') class= 'btn btn-sm btn-outline-danger' > <i class='fa fa-trash' title = 'Eliminar archivo' > </i></a >";
+                                        result += "<a onclick=\"showInPopup('/Archives/Delete?id=" + id + "','Eliminar\ archivo','bg-secondary')\"";
+                                        result += "class='btn btn-sm btn-outline-danger'><i title='Eliminar archivo' class='fa fa-trash'></i></a>";
+
+
+                                        result += "</td></tr>";
+
+                                    };
+                                    result += "</table></div>";
+                                }
+                                else {
+                                    result += "<span>No hay archivos anexos en la cotización</span>";
+                                }
+
+                                return result;
+                            }
+                        },
+                          {
+                            "data": "workOrderDetails",
+                            "render":
+                                function (data) {
+                                    var result = "";
+                                    
+                                    if (data.length !=0) {
+                                        result += "<div><table style='border: 1px solid;'><tr class='bg-secondary bg-opacity-25'>";
+                                        result += "<th>Cant</th>";
+                                        result += "<th>Material</th>";
+                                        result += "<th>Desc</th>";
+                                        result += "<th>Precio</th>";
+                                        result += "<th>MP</th>";
+                                        result += "<th>Maquinadas</th>";
+                                        result += "<th>TT</th>";
+                                        result += "<th>Embarcadas</th>";
+                                        result += "<th>Facturadas</th></tr>";
+                                        for (var i = 0; i < data.length; i++) {
+                                            result += "<tr><td>" + data[i].quantity + "</td>";
+                                            result += "<td>" + data[i].material + "</td>";
+                                            result += "<td>" + data[i].description + "</td>";
+                                            result += "<td style='text-align:right'>" + Intl.NumberFormat('es-MX').format(data[i].price) + "</td>";
+                                            result += "<td>" + data[i].rawMaterial + "</td>";
+                                            result += "<td>" + data[i].machined + "</td>";
+                                            result += "<td>" + data[i].tt + "</td>";
+                                            result += "<td>" + data[i].shipped + "</td>";
+                                            result += "<td>" + data[i].invoiced + "</td></tr>";
+                                        };
+                                        result += "</table></div>";
+                                    }
+                                    else { 
+                                        result ='No hay partidas'
+                                    }
+                                    return result;
+                                }
+                        }
+                        
+                       
+             
+                    ]
+                });
+     
+  
+        });
+        function downloadFile(guid, filename) {
+            var popout = window.open("/WorkOrders/DownloadFile/?id=" + guid + "&filename=" + filename, "_blank");
+            return false;
+        }
+
+        function Export() {
+            var popout = window.open("/WorkOrders/Export/", "_blank");
+            return false;
+        }
+    </script>
+    }
+
+
+
+

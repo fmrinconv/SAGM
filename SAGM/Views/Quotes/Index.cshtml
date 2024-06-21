@@ -12,7 +12,8 @@
         border-radius: .4em;
     }
     th{
-        background-color:orange;
+        background-color: silver;
+        color:black;
     }
 </style>
 <div class="container-fluid">
@@ -66,6 +67,7 @@
             else {
                 $.notify('@Html.Raw(ViewBag.Message)', "error", { globalPosition: "top left" });
             }
+            
             dataTable = $('#TableQuotes').DataTable(
                 {
                     "ajax": {
@@ -123,7 +125,7 @@
                             responsivePriority: 4
                         }, 
                         {
-                            "targets": 11,
+                            "targets": 12,
                             className: 'dt-body-left dt-body-nowrap',
                             responsivePriority: 1   
                         },

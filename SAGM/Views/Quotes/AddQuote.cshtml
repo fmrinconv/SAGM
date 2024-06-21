@@ -7,7 +7,6 @@
 
 <div class="container smfont">  
     <form asp-action="AddQuote" autocomplete="off" onsubmit="return jQueryAjaxPost(this);">
-        <input type="button" value="click" onclick="test()" />
     <div class="row">
         <div class="col-md-6">
                 <div asp-validation-summary="ModelOnly" class="text-danger"></div>
@@ -42,6 +41,11 @@
                     <label asp-for="CurrencyId" class="control-label"></label>
                     <select asp-for="CurrencyId" asp-items="Model.Currency" class="form-control" id="QuoteStatusId"></select>
                     <span asp-validation-for="CurrencyId" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="ExchangeRate" class="control-label"></label>
+                    <input asp-for="ExchangeRate" class="form-control" />
+                    <span asp-validation-for="ExchangeRate" class="text-danger"></span>
                 </div>
                 <div class="form-group form-check">
                     <label class="form-check-label">
@@ -147,8 +151,4 @@
         $('#FinalUserId').removeAttr('style');
     }
 
-    function test(){
-        var contenido= $('#form-modal .modal-title').html();
-        alert(contenido.substring(0, 16));
-    }
 </script>

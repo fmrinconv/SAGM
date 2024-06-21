@@ -1,0 +1,50 @@
+﻿@model IEnumerable<SAGM.Data.Entities.Process>
+
+
+<table class="table table-hover table-responsive compact row-border" id="TableProcesses" style="font-size:small;">
+    <colgroup>
+        <col span="1" />
+        <col span="1" />
+        <col span="1" />
+        <col span="1" />
+        <col span="1" />
+    </colgroup>
+    <thead>
+        <tr>
+            <th style="text-align:center;">&nbsp;&emsp;#</th>
+            <th>
+                @Html.DisplayNameFor(model => model.ProcessName)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.MachineNumber)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Active)
+            </th>
+            <th>
+               Acciones
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td></td>
+                <td>
+                    <a asp-action="Details" asp-controller="Processes" asp-route-Id="@item.ProcessId">@Html.DisplayFor(modelItem => item.ProcessName)</a>
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.MachineNumber)
+                </td>
+                <td>
+                    @Html.CheckBoxFor(modelItem => item.Active, new { @id = "chkDeleted", @disabled = "true", @title="notitle"})
+                </td>
+                <td>
+                    <a onclick="showInPopup('@Url.Action("AddOrEdit", "Processes", new { id = item.ProcessId }, Context.Request.Scheme)' , 'Actualizar proceso')" class="btn btn-sm btn-outline-warning"><i class="fa fa-pencil-alt"></i> </a>
+                    <button data-id="@item.ProcessId" class="btn btn-sm btn-outline-danger deleteItem" data-bs-toggle="modal" data-bs-target="#deleteDialog" title="Eliminar"><i class="fa fa-trash"></i></button>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

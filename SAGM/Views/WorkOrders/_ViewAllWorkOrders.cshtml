@@ -1,0 +1,92 @@
+﻿@model IEnumerable<SAGM.Models.AllWorkOrders>
+<style>
+    td.details-control {
+        background: url('images/det_open.png') no-repeat center center;
+        cursor: pointer;
+    }
+
+    tr.shown td.details-control {
+        background: url('images/det_close.png') no-repeat center center;
+    }
+
+</style>
+
+<table class="table table-responsive table-hover responsive display" id="TableWorkOrders" style="font-size:small; width:100%;">
+    <thead>
+        <tr>
+            <th align="right" >
+                #
+            </th>
+            <th style="text-align:left;">
+                QuoteId
+            </th>
+            <th style="text-align:center;">
+                OT
+            </th>
+            <th align="left">
+                Cotización
+            </th>
+            <th style="text-align:center;">
+                Cliente
+            </th>
+            <th style="text-align:left;">
+                Contacto
+            </th>
+            <th style="text-align:left;">
+                Comprador
+            </th>
+            <th style="text-align:left;">
+                Fecha
+            </th>
+            <th style="text-align:left;">
+                Fecha compromiso
+            </th>
+            <th style="text-align:left;">
+                @Html.DisplayNameFor(model => model.Seller)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Currency)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.ExchangeRate)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.CustomerPO)
+            </th>
+            <th>
+                Subtotal
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Active)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.WorkOrderStatus.WorkOrderStatusName)
+            </th>
+            <th>Acción</th>
+            <th>
+                @Html.DisplayNameFor(model => model.Tax)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.ModifyDate)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.ModifiedBy)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Comments)
+            </th>
+            <th>
+                Archivos en partidas:
+            </th>
+            <th>
+                Archivos de OT:
+            </th>
+            <th >
+                Partidas
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+
+    </tbody>
+    </table>

@@ -362,7 +362,7 @@ namespace SAGM.Controllers
             }
             else
             {
-                return Json(new { isValid = false, html = ModalHelper.RenderRazorViewToString(this, "EditMaterialType", model) });
+                return Json(new { isValid = false, html = ModalHelper.RenderRazorViewToString(this, "EditState", model) });
 
             }
             return View(model);

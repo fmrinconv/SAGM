@@ -39,6 +39,20 @@ namespace SAGM.Data
 
         public DbSet<QuoteDetailComment> QuoteDetailComments { get; set; }
 
+        public DbSet<WorkOrder> WorkOrders { get; set; }
+        public DbSet<WorkOrderDetail> WorkOrderDetails { get; set; }
+
+        public DbSet<WorkOrderStatus> WorkOrderStatus { get; set; }
+
+        public DbSet<WorkOrderComment> WorkOrderComments { get; set; }
+        public DbSet<WorkOrderDetailComment> WorkOrderDetailComments { get; set; }
+
+        public DbSet<Process> Processes { get; set; }
+
+        public DbSet<Machine> Machines { get; set; }
+
+        public DbSet<WorkOrderDetailProcess> WorkOrderDetailProcesses { get; set; }
+
 
         internal static IConfiguration GetService(Type type)
         {
@@ -57,6 +71,8 @@ namespace SAGM.Data
             modelBuilder.Entity<Material>().HasIndex("MaterialName", "MaterialTypeId").IsUnique();
             modelBuilder.Entity<Contact>().HasIndex("Name", "LastName", "CustomerId").IsUnique();
             modelBuilder.Entity<Quote>().HasMany(q => q.QuoteComments).WithOne(q => q.Quote).OnDelete(DeleteBehavior.Cascade);
+            modelBuilder.Entity<Process>().HasIndex(p => p.ProcessName).IsUnique();
+            modelBuilder.Entity<Machine>().HasIndex("MachineName", "ProcessId").IsUnique();
         }
         public DbSet<SAGM.Data.Entities.Archive> Archive { get; set; }
     }

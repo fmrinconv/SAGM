@@ -144,7 +144,7 @@ namespace SAGM.Helpers
             return list;
         }
 
-        public async Task<IEnumerable<SelectListItem>> GetComboUnitAsync()
+        public async Task<IEnumerable<SelectListItem>> GetComboUnitAsync(int selectedindex = 0)
         {
 
             List<SelectListItem> list = await _context.Units.Select(u => new SelectListItem
@@ -156,6 +156,14 @@ namespace SAGM.Helpers
                 .ToListAsync();
 
             list.Insert(0, new SelectListItem { Text = "[Seleccione una unidad...]", Value = "0" });
+            foreach (var item in list)
+            {
+                if (item.Value == selectedindex.ToString())
+                {
+                    item.Selected = true;
+                }
+            }
+
             return list;
         }
 
@@ -166,6 +174,28 @@ namespace SAGM.Helpers
                 Text = s.QuoteStatusName,
                 Value = s.QuoteStatusId.ToString()
              
+            })
+               .OrderBy(s => s.Text)
+               .ToListAsync();
+
+            foreach (var item in list)
+            {
+                if (item.Value == selectedindex.ToString())
+                {
+                    item.Selected = true;
+                }
+            }
+
+            return list;
+        }
+
+        public async Task<IEnumerable<SelectListItem>> GetComboWorkOrderStatus(int selectedindex = 0)
+        {
+            List<SelectListItem> list = await _context.WorkOrderStatus.Select(s => new SelectListItem
+            {
+                Text = s.WorkOrderStatusName,
+                Value = s.WorkOrderStatusId.ToString()
+
             })
                .OrderBy(s => s.Text)
                .ToListAsync();
@@ -194,6 +224,59 @@ namespace SAGM.Helpers
                 .ToListAsync();
 
             list.Insert(0, new SelectListItem { Text = "[Seleccione una moneda...]", Value = "0" });
+
+            foreach (var item in list)
+            {
+                if (item.Value == selectedindex.ToString())
+                {
+                    item.Selected = true;
+                }
+            }
+            return list;
+        }
+
+        public async Task<IEnumerable<SelectListItem>> GetComboProcessAsync(int selectedindex = 0)
+        {
+            List<SelectListItem> list = await _context.Processes.Select(p => new SelectListItem
+            {
+                Text = p.ProcessName,
+                Value = p.ProcessId.ToString()  
+            })
+                .OrderBy(p => p.Text)
+                .ToListAsync();
+
+            list.Insert(0, new SelectListItem { Text = "[Seleccione un proceso...]", Value = "0" });
+
+            foreach (var item in list)
+            {
+                if (item.Value == selectedindex.ToString())
+                {
+                    item.Selected = true;
+                }
+            }
+            return list;
+        }
+
+        public async Task<IEnumerable<SelectListItem>> GetComboMachinesAsync(int selectedindex = 0)
+        {
+            List<SelectListItem> list = await _context.Machines.Select(m => new SelectListItem
+            {
+                Text = m.MachineName,
+                Value = m.MachineId.ToString()
+
+            })
+               .OrderBy(m => m.Text)
+               .ToListAsync();
+
+            list.Insert(0, new SelectListItem { Text = "[Seleccione la máquina...]", Value = "0" });
+
+            foreach (var item in list)
+            {
+                if (item.Value == selectedindex.ToString())
+                {
+                    item.Selected = true;
+                }
+            }
             return list;
         }
     }

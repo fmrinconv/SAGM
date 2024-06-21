@@ -1,0 +1,77 @@
+﻿@model IEnumerable<SAGM.Data.Entities.Process>
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+
+<div class="container-fluid">
+    <div class="card mt-2">
+        <div class="card-header text-primary bg-secondary bg-opacity-25">
+            <i class="fa fa-gear"></i>  <strong>Procesos</strong>
+            <a onclick="showInPopup('@Url.Action("AddOrEdit", "Processes", new { id = 0 }, Context.Request.Scheme)' , 'Nuevo Proceso','bg-primary')" class="btn btn-sm btn-outline-primary" title="Agregar proceso"><i class="fa fa-plus-circle"></i></a>
+        </div>
+        <div class="card-body">
+            <div id="view-all">
+                <input type="hidden" id="Result" name="Result" value="@ViewBag.Result" />
+
+                @await Html.PartialAsync("_ViewAllProcesses", Model)
+            </div>
+        </div>
+    </div>
+</div>
+
+<partial name="_AddOrEditDialog" />
+<partial name="_DeleteDialog" />
+@section Scripts{
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+<script src="~/js/showmodal.js"></script>
+    <script type="text/javascript">
+        var count = 0;
+        $(document).ready(function () {
+            if ($("#Result").val() == "true") {
+                $.notify('@Html.Raw(ViewBag.Message)', "success", { globalPosition: "top left" });
+            }
+            else {
+                $.notify('@Html.Raw(ViewBag.Message)', "error", { globalPosition: "top left" });
+            }
+            $('#TableProcesses').DataTable(
+                {
+                    "language": {
+                    "url": "/lib/datatables/Spanish.json"
+                    },
+                    "aLengthMenu": [
+                        [25, 50, 100, 200, -1],
+                        [25, 50, 100, 200, "Todos"]
+                    ],
+                    "columnDefs": [
+                    {
+                        "targets": 0,
+                        className: 'dt-body-center'
+                    },
+                    {
+                        "targets": [2,3],
+                        "orderable": true,
+                        className: 'dt-body-center'
+                    },
+                    {
+                        "targets": 4,
+                        "orderable": false,
+                        className: 'dt-body-left'
+                    }],
+                    "columns": [
+                        { "data": "ProcessId", "render": function (data) { count = count + 1; return count.toString(); } },
+                        { "data": "ProcessName" },
+                        { "data": "MachinesNumber" },
+                        { "data": "Active" },
+                        { "data": "ProcessId" }
+                    ]
+                });
+            sc_deleteDialog.openModal('deleteItem', true, 'btnYesDelete', '/Processes/Delete/', false);
+
+        });
+    </script>
+    }

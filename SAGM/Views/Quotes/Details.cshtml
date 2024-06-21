@@ -27,7 +27,7 @@
     }
 
     th {
-        background-color: orange;
+        background-color: mediumseagreen;
         color: black;
     }
 
@@ -88,6 +88,18 @@
             </div>
             <div class="col-6">
                 <dl class="row">
+                    <dt class="col-sm-3">
+                        @Html.DisplayNameFor(model => model.Currency)
+                    </dt>
+                    <dd class="col-sm-9">
+                        @Html.DisplayFor(model => model.Currency.Curr)
+                    </dd>
+                    <dt class="col-sm-3">
+                        @Html.DisplayNameFor(model => model.ExchangeRate)
+                    </dt>
+                    <dd class="col-sm-9">
+                        @Html.DisplayFor(model => model.ExchangeRate)
+                    </dd>
 
                     <dt class="col-sm-3">
                         @Html.DisplayNameFor(model => model.CustomerPO)
@@ -96,22 +108,32 @@
                         @Html.DisplayFor(model => model.CustomerPO)
                     </dd>
                     <dt class="col-sm-3">
-                        @Html.DisplayNameFor(model => model.QuoteStatus)
-                    </dt>
-                    <dd class="col-sm-9">
-                        <div class="form-group">
-                            <select asp-for="QuoteStatusId" asp-items="Model.QuoteStatus" class="form-control" id="QuoteStatusId" onchange="changestatus(this.value905);"></select>
-                            <span asp-validation-for="QuoteStatusId" class="text-danger"></span>
-                        </div>
-                    </dd>
-                    <dt class="col-sm-3">
                         Modificado
                     </dt>
                     <dd class="col-sm-9">
                         @Html.DisplayFor(model => model.ModifyDate)
                     </dd>
+                    <dt class="col-sm-3">
+                        @Html.DisplayNameFor(model => model.QuoteStatus)
+                    </dt>
+                    <dd class="col-sm-9">
+                        <div class="form-group">
+                            <select asp-for="QuoteStatusId" asp-items="Model.QuoteStatus" class="form-control" id="QuoteStatusId" onchange="changestatus(this.value);" style="width:200px;"></select>
+                            <span asp-validation-for="QuoteStatusId" class="text-danger"></span>
+                        </div>
+                    </dd>
                     <dd>
-                        <a onclick="PrintReport('@Model.QuoteId')" class="btn btn-primary"><i title='Imprimir cotización' class='fa-solid fa-print'></i></a>
+                        @if (ViewBag.DetailsCount > 0)
+                        {
+                            <a onclick="PrintReport('@Model.QuoteId')" class="btn btn-primary"><i title='Imprimir cotización' class='fa-solid fa-print'></i></a>
+                        }
+                       
+                        @if (Model.QuoteStatusId == 5)
+                        {
+
+                            <a onclick="showInPopup('@Url.Action("CreateWorkOrder", "Quotes", new { id = Model.QuoteId}, Context.Request.Scheme)','Crear Orden de trabajo','bg-success')" class="btn btn-success"><i class="fa fa-share-square" aria-hidden="true" title="Crear Orden de trabajo"></i></a>
+                        }
+                       
                     </dd>
                     
                 </dl>
@@ -437,7 +459,7 @@
                         });
 
                         dataTable.ajax.reload()
-                        setTimeout('ejecuta(' + $("#IndexID").val() + ')', 2100);
+                        //setTimeout('ejecuta(' + $("#IndexID").val() + ')', 2100);
                         //Popup.dialog('close');
                     }
 

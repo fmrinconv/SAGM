@@ -21,10 +21,17 @@ namespace SAGM.Helpers
 
         Task<IEnumerable<SelectListItem>> GetComboContactCustomersAsync(int customerId);
 
-        Task<IEnumerable<SelectListItem>> GetComboUnitAsync();
+        Task<IEnumerable<SelectListItem>> GetComboUnitAsync(int selectedindex = 0);
 
         Task<IEnumerable<SelectListItem>> GetComboQuoteStatus(int selectedindex = 0);
+        Task<IEnumerable<SelectListItem>> GetComboWorkOrderStatus(int selectedindex = 0);
 
         Task<IEnumerable<SelectListItem>> GetComboCurrenciesAsync(int selectedindex = 0);
+
+        Task<IEnumerable<SelectListItem>> GetComboProcessAsync(int selectedindex = 0);
+
+        Task<IEnumerable<SelectListItem>> GetComboMachinesAsync(int selectedindex = 0);
+
+
     }
 }

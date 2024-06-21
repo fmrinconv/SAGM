@@ -13,17 +13,17 @@
     <PackageReference Include="ClosedXML" Version="0.102.2" />
     <PackageReference Include="MailKit" Version="4.3.0" />
     <PackageReference Include="Microsoft.AspNetCore.Components.QuickGrid.EntityFrameworkAdapter" Version="8.0.1" />
-    <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="8.0.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.1" />
+    <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="8.0.1" />
     <PackageReference Include="QuestPDF" Version="2023.12.6" />
     <PackageReference Include="ReportViewerCore.NETCore" Version="15.1.19" />
     <PackageReference Include="WindowsAzure.Storage" Version="9.3.3" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.0.1" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation" Version="8.0.1" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.1" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite.Core" Version="8.0.1" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.1" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.1" />
-    <PackageReference Include="Microsoft.VisualStudio.Web.CodeGenerators.Mvc" Version="8.0.0" />
+    <PackageReference Include="Microsoft.VisualStudio.Web.CodeGenerators.Mvc" Version="8.0.1" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Views\Reports\" />

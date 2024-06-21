@@ -1,0 +1,50 @@
+﻿@model SAGM.Models.MachineViewModel
+
+@{
+    ViewData["Title"] = "Editar Máquina";
+    Layout = null;
+}
+
+<div class="container smfont">
+    <form asp-action="EditMachine" autocomplete="off" asp-route-id="@Model.MachineId" onsubmit="return jQueryAjaxPost(this);">
+        <input type="hidden" asp-for="ProcessId" />
+        <input type="hidden" asp-for="MachineId" />
+        <div class="box-body">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <span class="required">*</span>
+                <label asp-for="MachineName" class="control-label"></label>
+                <input asp-for="MachineName" class="form-control" id="machineName" />
+                <span asp-validation-for="MachineName" class="text-danger"></span>
+            </div>
+            <br />
+            <div class="form-group">
+                <label asp-for="Active" class="control-label"></label>
+                <input type="checkbox" asp-for="Active" id="Active" />
+                <span asp-validation-for="Active" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <div class="col text-center">
+                <button type="button" class="btn btn-sm btn-primary" data-bs-dismiss="modal"><i class="fa fa-ban"></i> Cancelar</button>
+                <button type="submit" class="btn btn-sm btn-success"><i class="fa fa-save"></i> Guardar</button>
+            </div>
+        </div>
+    </form>
+</div>
+
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script>
+        //script para tener el foco sobre el campo inicial
+        $(document).ready(function () {
+            $("#machineName").focus();
+            var tmpStr = $("#machineName").val();
+            $("#machineName").val('');
+            $("#machineName").val(tmpStr);
+        })
+    </script>
+}

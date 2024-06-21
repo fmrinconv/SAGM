@@ -18,5 +18,9 @@ namespace SAGM.Data.Entities
 
         public ICollection<QuoteDetail> QuoteDetails { get; set; }
 
+        public ICollection<WorkOrderDetail> WorkOrderDetails { get; set; }
+
+        public ICollection<WorkOrderDetailProcess> WorkOrderDetailsProcesses { get; set;}
+
     }
 }

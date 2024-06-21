@@ -1,0 +1,97 @@
+﻿@model IEnumerable<SAGM.Models.WorkLoad>
+
+<div class="container">
+    <table class="table table-hover display nowrap" id="TableWorkLoad" style="width:100%; font-size:small;">
+    <thead>
+        <tr>
+            <th></th>
+            <th style="text-align:center; width:7%;">&nbsp;&emsp;#
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.WorkOrderId)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.QuoteId)
+            </th>
+            <th style="text-align: center;">
+                Acciones
+            </th>
+            <th style="text-align: left;">
+                @Html.DisplayNameFor(model => model.WorkOrderName)
+            </th>
+            <th style="text-align: left;">
+                @Html.DisplayNameFor(model => model.CustomerNickName)
+            </th>
+            <th style="text-align: left;">
+                @Html.DisplayNameFor(model => model.Description)
+            </th>
+            <th style="text-align: right;">
+                @Html.DisplayNameFor(model => model.Quantity)
+            </th>
+            <th style="text-align: right;">
+                @Html.DisplayNameFor(model => model.Price)
+            </th>
+            <th style="text-align: right;">
+                Total
+            </th>
+            <th style="text-align: right;">
+                @Html.DisplayNameFor(model => model.Currency)
+            </th>
+            <th style="text-align: right;">
+                @Html.DisplayNameFor(model => model.ExchangeRate)
+            </th>
+            <th style="text-align: left;">
+                @Html.DisplayNameFor(model => model.FinalUser)
+            </th>
+            <th style="text-align: left;">
+                @Html.DisplayNameFor(model => model.QuoteName)
+            </th>
+            <th style="text-align: center;">
+                @Html.DisplayNameFor(model => model.WorkOrderStatusName)
+            </th>
+            <th style="text-align: left;">
+                @Html.DisplayNameFor(model => model.CustomerPO)
+            </th>
+            <th style="text-align: left;">
+                @Html.DisplayNameFor(model => model.Buyer)
+            </th>
+            <th style="text-align: left;">
+                @Html.DisplayNameFor(model => model.Seller)
+            </th>
+            <th style="text-align: left;">
+                @Html.DisplayNameFor(model => model.PODate)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.PromiseDate)
+            </th>           
+            <th style="text-align: right;">
+                @Html.DisplayNameFor(model => model.ShippedDate)
+            </th>
+            <th style="text-align: right;">
+                @Html.DisplayNameFor(model => model.RawMaterial)
+            </th>
+            <th style="text-align: right;">
+                @Html.DisplayNameFor(model => model.Machined)
+            </th>
+            <th style="text-align: right;">
+                @Html.DisplayNameFor(model => model.TT)
+            </th>
+            <th style="text-align: right;">
+                @Html.DisplayNameFor(model => model.Shipped)
+            </th>
+            <th style="text-align: right;">
+                @Html.DisplayNameFor(model => model.Invoiced)
+            </th>
+            <th class="none">
+             </th>
+            <th class="none">
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+
+
+    </tbody>
+
+    </table>
+</div>

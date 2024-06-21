@@ -1,0 +1,38 @@
+﻿@model SAGM.Data.Entities.Process
+
+@{
+    ViewData["Title"] = "Proceso";
+    Layout = null;
+}
+
+
+<div class="container smfont">
+    <form asp-action="AddOrEdit" autocomplete="off" asp-route-id="@Model.ProcessId" onsubmit="return jQueryAjaxPost(this);">
+        <input type="hidden" asp-for="ProcessId" />
+        <div class="box-body">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <span class="required">*</span>
+                <label asp-for="ProcessName" class="control-label"></label>
+                <input asp-for="ProcessName" class="form-control smfont" />
+                <span asp-validation-for="ProcessName" class="text-danger"></span>
+            </div>
+            <br />
+            <div class="form-group">
+                <label asp-for="Active" class="control-label"></label>
+                @Html.EditorFor(model => model.Active)
+                <span asp-validation-for="Active" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <div class="col text-center">
+                <button type="button" class="btn btn-sm btn-primary" data-bs-dismiss="modal"><i class="fa fa-ban"></i> Cancelar</button>
+                <button type="submit" class="btn btn-sm btn-success"><i class="fa fa-save"></i> Guardar</button>
+            </div>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

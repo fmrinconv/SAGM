@@ -13,12 +13,13 @@ namespace SAGM.Data
         {
             _context = context;
             _userHelper = userHelper;
-        }       
+        }
 
         public async Task SeedAsync()
         {
             await _context.Database.EnsureCreatedAsync();
             await CheckQuoteStatus();
+            await CheckWorkOrderStatus();
             await CheckUnitsAsync();
             await CheckCategoriesAsync();
             await CheckCountriesAsync();
@@ -26,6 +27,7 @@ namespace SAGM.Data
             await CheckUserAsync("1010", "Francisco Manuel", "Rincón Vargas", "admin@simaqap.com", "811 027 95 00", "tolon 300", UserType.Usuario);
             await CheckUserAsync("2020", "Usuario", "de pruebas", "user@simaqap.com", "811 027 95 00", "tolon 300", UserType.Usuario);
             await CheckCurrenciesAsync();
+            await CheckProcessAsync();
 
 
             User user = await _userHelper.GetUserAsync("admin@simaqap.com");
@@ -37,9 +39,6 @@ namespace SAGM.Data
 
             user = await _userHelper.GetUserAsync("user@simaqap.com");
             await _userHelper.AddUserToRoleAsync(user, UserType.Usuario.ToString());
-
-
-
         }
 
         private async Task<User> CheckUserAsync(
@@ -49,7 +48,7 @@ namespace SAGM.Data
             string email,
             string phone,
             string address,
-            UserType userType) 
+            UserType userType)
         {
             User user = await _userHelper.GetUserAsync(email);
             if (user == null)
@@ -69,7 +68,7 @@ namespace SAGM.Data
 
                 await _userHelper.AddUserAsync(user, "123456");
 
-                
+
 
                 string token = await _userHelper.GenerateEmailConfirmationTokenAsync(user);
                 await _userHelper.ConfirmEmailAsync(user, token);
@@ -77,7 +76,7 @@ namespace SAGM.Data
             return user;
         }
 
-      
+
         private async Task CheckRolesAsync()
         {
             await _userHelper.CheckRoleAsync(UserType.Administrador.ToString());
@@ -99,7 +98,7 @@ namespace SAGM.Data
                     {
                         new State{
                                 StateName = "Aguascalientes",
-                                Active = true, 
+                                Active = true,
                                 Cities = new List<City>()
                                 {
                                     new City{ CityName = "Aguascalientes", Active = true},
@@ -117,7 +116,7 @@ namespace SAGM.Data
                         },
                         new State{
                                 StateName = "Baja California",
-                                Active = true, 
+                                Active = true,
                                 Cities = new List<City>()
                                 {
                                     new City{ CityName = "Ensenada", Active = true},
@@ -131,7 +130,7 @@ namespace SAGM.Data
                         },
                         new State{
                                 StateName = "Baja California Sur",
-                                Active = true, 
+                                Active = true,
                                 Cities = new List<City>()
                                 {
                                     new City{ CityName = "Comundú", Active = true},
@@ -143,7 +142,7 @@ namespace SAGM.Data
                          },
                         new State{
                                 StateName = "Campeche",
-                                Active = true, 
+                                Active = true,
                                 Cities = new List<City>()
                                 {
                                     new City{ CityName = "Calkiní", Active = true},
@@ -164,7 +163,7 @@ namespace SAGM.Data
                          },
                         new State{
                                 StateName = "Coahuila",
-                                Active = true, 
+                                Active = true,
                                 Cities = new List<City>()
                                 {
                                     new City{ CityName = "Abasolo", Active = true},
@@ -210,7 +209,7 @@ namespace SAGM.Data
                          },
                         new State{
                                 StateName = "Colima",
-                                Active = true, 
+                                Active = true,
                                 Cities = new List<City>()
                                 {
                                     new City{ CityName = "Armería", Active = true},
@@ -227,7 +226,7 @@ namespace SAGM.Data
                          },
                         new State{
                                 StateName = "Chiapas",
-                                Active = true, 
+                                Active = true,
                                 Cities = new List<City>()
                                 {
                                     new City{ CityName = "Acacoyagua", Active = true},
@@ -358,7 +357,7 @@ namespace SAGM.Data
                          },
                         new State{
                                 StateName = "Chihuahua",
-                                Active = true, 
+                                Active = true,
                                 Cities = new List<City>()
                                 {
                                     new City{ CityName = "Ahumada", Active = true},
@@ -432,7 +431,7 @@ namespace SAGM.Data
                          },
                         new State{
                                 StateName = "Durango",
-                                Active = true, 
+                                Active = true,
                                 Cities = new List<City>()
                             {
                                     new City{ CityName = "Canatlán", Active = true},
@@ -478,7 +477,7 @@ namespace SAGM.Data
                         },
                         new State{
                                 StateName = "Ciudad de México",
-                                Active = true, 
+                                Active = true,
                                 Cities = new List<City>()
                                 {
                                     new City{ CityName = "Azcapotzalco", Active = true},
@@ -501,7 +500,7 @@ namespace SAGM.Data
                          },
                         new State{
                                 StateName = "Guanajuato",
-                                Active = true, 
+                                Active = true,
                                 Cities = new List<City>()
                                 {
                                     new City{ CityName = "Abasolo", Active = true},
@@ -554,7 +553,7 @@ namespace SAGM.Data
                          },
                         new State{
                                 StateName = "Guerrero",
-                                Active = true, 
+                                Active = true,
                                 Cities = new List<City>()
                                 {
                                     new City{ CityName = "Acapulco de Juárez", Active = true},
@@ -643,7 +642,7 @@ namespace SAGM.Data
                          },
                         new State{
                                 StateName = "Hidalgo",
-                                Active = true, 
+                                Active = true,
                                 Cities = new List<City>()
                                 {
                                     new City{ CityName = "Acatlán", Active = true},
@@ -734,7 +733,7 @@ namespace SAGM.Data
                          },
                         new State{
                                 StateName = "Jalisco",
-                                Active = true, 
+                                Active = true,
                                 Cities = new List<City>()
                                 {
                                     new City{ CityName = "Acatic", Active = true},
@@ -866,7 +865,7 @@ namespace SAGM.Data
                          },
                         new State{
                                 StateName = "Estado de México",
-                                Active = true, 
+                                Active = true,
                                 Cities = new List<City>()
                                 {
                                     new City{ CityName = "Acambay de Ruíz Castañeda", Active = true},
@@ -998,7 +997,7 @@ namespace SAGM.Data
                          },
                         new State{
                                 StateName = "Michoacán",
-                                Active = true, 
+                                Active = true,
                                 Cities = new List<City>()
                                 {
                                     new City{ CityName = "Acuitzio", Active = true},
@@ -1118,7 +1117,7 @@ namespace SAGM.Data
                          },
                         new State{
                                 StateName = "Morelos",
-                                Active = true, 
+                                Active = true,
                                 Cities = new List<City>()
                                 {
                                     new City{ CityName = "Amacuzac", Active = true},
@@ -1160,7 +1159,7 @@ namespace SAGM.Data
                          },
                         new State{
                                 StateName = "Nayarit",
-                                Active = true, 
+                                Active = true,
                                 Cities = new List<City>()
                                 {
                                     new City{ CityName = "Acaponeta", Active = true},
@@ -1187,7 +1186,7 @@ namespace SAGM.Data
                          },
                         new State{
                                 StateName = "Nuevo León",
-                                Active = true, 
+                                Active = true,
                                 Cities = new List<City>()
                                 {
                                     new City{ CityName = "Abasolo", Active = true},
@@ -1237,14 +1236,14 @@ namespace SAGM.Data
                                                                                                           LastName="Fernandez",
                                                                                                           Email = "daniel.fernandez@ngk.com.mx",
                                                                                                           Mobile= "8123500162",
-                                                                                                          Active = true, 
+                                                                                                          Active = true,
                                                                                                           PhoneNumber = "8182881000 ext 159"
                                                                                                         } ,
                                                                                             new Contact { Name = "Ruben",
                                                                                                           LastName="Rojas",
                                                                                                           Email = "ruben.rojas@ngk.com.mx",
                                                                                                           Mobile= "",
-                                                                                                          Active = true, 
+                                                                                                          Active = true,
                                                                                                           PhoneNumber = "8182881000 ext 168"
                                                                                                         },
                                                                                              new Contact { Name = "Chrisitian",
@@ -1254,8 +1253,8 @@ namespace SAGM.Data
                                                                                                           Active = true,
                                                                                                           PhoneNumber = "8182881000 ext 551"
                                                                                                         }
-                                                                                            } 
-                                                            } 
+                                                                                            }
+                                                            }
                                             }
                                     },
                                     new City{ CityName = "China", Active = true},
@@ -1346,10 +1345,96 @@ namespace SAGM.Data
                                     new City{ CityName = "Los Ramones", Active = true},
                                     new City{ CityName = "Rayones", Active = true},
                                     new City{ CityName = "Sabinas Hidalgo", Active = true},
-                                    new City{ CityName = "Salinas Victoria", Active = true},
+                                    new City{ CityName = "Salinas Victoria", Active = true,
+                                            Customer = new List<Customer>()
+                                            { new Customer { CustomerName = "KAWASAKI MOTORES DE MEXICO",
+                                                             CustomerNickName = "KAWASAKI",
+                                                             TaxId = "KMM191101Q88",
+                                                             Address = "AVENIDA INTERNACIONAL # 102 INTERPUERTO MONTERREY",
+                                                             PostalCode = "65513",
+                                                             CreditDays = 30,
+                                                             Active = true,
+                                                             PhoneNumber = "8141640137",
+                                                             Contacts = new List<Contact>(){
+                                                                                            new Contact { Name = "Daniel",
+                                                                                                          LastName="Rodriguez",
+                                                                                                          Email = "daniel.rodriguez@kawasakimotores.mx",
+                                                                                                          Mobile= "8112255131",
+                                                                                                          Active = true,
+                                                                                                          PhoneNumber = "8141640137"
+                                                                                                        } ,
+                                                                                            new Contact { Name = "Alexis",
+                                                                                                          LastName="Neri",
+                                                                                                          Email = "alexis.neri@kawasakimotores.mx",
+                                                                                                          Mobile= "7226054862",
+                                                                                                          Active = true,
+                                                                                                          PhoneNumber = "8141640137"
+                                                                                                        } ,
+                                                                                             new Contact { Name = "Enrique ",
+                                                                                                          LastName="Cazares",
+                                                                                                          Email = "enrique.cazares@kawasakimotores.mx",
+                                                                                                          Mobile= "8116024547",
+                                                                                                          Active = true,
+                                                                                                          PhoneNumber = "8141640137"
+                                                                                                        } ,
+                                                                                            new Contact { Name = "Aranza",
+                                                                                                          LastName="Delgado",
+                                                                                                          Email = "aranza.delgado@kawasakimotores.mx",
+                                                                                                          Mobile= "8110802233",
+                                                                                                          Active = true,
+                                                                                                          PhoneNumber = "8141640137"
+                                                                                                        } 
+                                                                                         
+                                                                                            }
+                                                            }
+                                            }
+                                    },
                                     new City{ CityName = "San Nicolás de los Garza", Active = true},
                                     new City{ CityName = "Hidalgo", Active = true},
-                                    new City{ CityName = "Santa Catarina", Active = true},
+                                    new City{ CityName = "Santa Catarina", Active = true,
+                                            Customer = new List<Customer>()
+                                            { new Customer { CustomerName = "NPI MONTERREY S DE RL DE CV",
+                                                             CustomerNickName = "NPI",
+                                                             TaxId = "NMO1810052N7",
+                                                             Address = "PROLONGACION LAS TORRES 230-240, REGIO PARQUE INDUSTRIAL SANTA CATARINA",
+                                                             PostalCode = "66367",
+                                                             CreditDays = 60,
+                                                             Active = true,
+                                                             PhoneNumber = "8114898500",
+                                                             Contacts = new List<Contact>(){
+                                                                                            new Contact { Name = "Daniel",
+                                                                                                          LastName="Ruiz",
+                                                                                                          Email = "daniel.ruiz@numericalprecisioninc.com",
+                                                                                                          Mobile= "8115776085",
+                                                                                                          Active = true,
+                                                                                                          PhoneNumber = "8114898500"
+                                                                                                        } ,
+                                                                                            new Contact { Name = "Francisco",
+                                                                                                          LastName="Santana",
+                                                                                                          Email = "francisco.santana@numericalprecisioninc.com",
+                                                                                                          Mobile= "8715973307",
+                                                                                                          Active = true,
+                                                                                                          PhoneNumber = "8114898500"
+                                                                                                        } ,
+                                                                                             new Contact { Name = "Ramiro ",
+                                                                                                          LastName="Garza",
+                                                                                                          Email = "ramiro.garza@numericalprecisioninc.com",
+                                                                                                          Mobile= "8117838215",
+                                                                                                          Active = true,
+                                                                                                          PhoneNumber = "8114898500"
+                                                                                                        } ,
+                                                                                            new Contact { Name = "Blake",
+                                                                                                          LastName="White",
+                                                                                                          Email = "blake.white@numericalprecisioninc.com",
+                                                                                                          Mobile= "8114898500",
+                                                                                                          Active = true,
+                                                                                                          PhoneNumber = "8114898500"
+                                                                                                        }
+
+                                                                                            }
+                                                            }
+                                            }
+                                    },
                                     new City{ CityName = "Santiago", Active = true},
                                     new City{ CityName = "Vallecillo", Active = true},
                                     new City{ CityName = "Villaldama", Active = true},
@@ -1357,7 +1442,7 @@ namespace SAGM.Data
                          },
                         new State{
                                 StateName = "Oaxaca",
-                                Active = true, 
+                                Active = true,
                                 Cities = new List<City>()
                                 {
                                     new City{ CityName = "Abejones", Active = true},
@@ -1934,7 +2019,7 @@ namespace SAGM.Data
                          },
                         new State{
                                 StateName = "Puebla",
-                                Active = true, 
+                                Active = true,
                                 Cities = new List<City>()
                                 {
                                     new City{ CityName = "Acajete", Active = true},
@@ -2158,7 +2243,7 @@ namespace SAGM.Data
                          },
                         new State{
                                 StateName = "Querétaro",
-                                Active = true, 
+                                Active = true,
                                 Cities = new List<City>()
                                 {
                                     new City{ CityName = "Amealco de Bonfil", Active = true},
@@ -2183,7 +2268,7 @@ namespace SAGM.Data
                          },
                         new State{
                                 StateName = "Quintana Roo",
-                                Active = true, 
+                                Active = true,
                                 Cities = new List<City>()
                                 {
                                     new City{ CityName = "Cozumel", Active = true},
@@ -2201,7 +2286,7 @@ namespace SAGM.Data
                          },
                         new State{
                                 StateName = "San Luis Potosí",
-                                Active = true, 
+                                Active = true,
                                 Cities = new List<City>()
                                 {
                                     new City{ CityName = "Ahualulco", Active = true},
@@ -2266,7 +2351,7 @@ namespace SAGM.Data
                          },
                         new State{
                                 StateName = "Sinaloa",
-                                Active = true, 
+                                Active = true,
                                 Cities = new List<City>()
                                 {
                                     new City{ CityName = "Ahome", Active = true},
@@ -2291,7 +2376,7 @@ namespace SAGM.Data
                          },
                         new State{
                                 StateName = "Sonora",
-                                Active = true, 
+                                Active = true,
                                 Cities = new List<City>()
                                 {
                                     new City{ CityName = "Aconchi", Active = true},
@@ -2370,7 +2455,7 @@ namespace SAGM.Data
                          },
                         new State{
                                 StateName = "Tabasco",
-                                Active = true, 
+                                Active = true,
                                 Cities = new List<City>()
                                 {
                                     new City{ CityName = "Balancán", Active = true},
@@ -2394,7 +2479,7 @@ namespace SAGM.Data
                          },
                         new State{
                                 StateName = "Tamaulipas",
-                                Active = true, 
+                                Active = true,
                                 Cities = new List<City>()
                                 {
                                     new City{ CityName = "Abasolo", Active = true},
@@ -2444,7 +2529,7 @@ namespace SAGM.Data
                          },
                         new State{
                                 StateName = "Tlaxcala",
-                                Active = true, 
+                                Active = true,
                                 Cities = new List<City>()
                                 {
                                     new City{ CityName = "Amaxac de Guerrero", Active = true},
@@ -2511,7 +2596,7 @@ namespace SAGM.Data
                          },
                         new State{
                                 StateName = "Veracruz",
-                                Active = true, 
+                                Active = true,
                                 Cities = new List<City>()
                                 {
                                     new City{ CityName = "Acajete", Active = true},
@@ -2730,7 +2815,7 @@ namespace SAGM.Data
                          },
                         new State{
                                 StateName = "Yucatán",
-                                Active = true, 
+                                Active = true,
                                 Cities = new List<City>()
                                 {
                                     new City{ CityName = "Abalá", Active = true},
@@ -2843,7 +2928,7 @@ namespace SAGM.Data
                          },
                         new State{
                                 StateName = "Zacatecas",
-                                Active = true, 
+                                Active = true,
                                 Cities = new List<City>()
                                 {
                                     new City{ CityName = "Apozol", Active = true},
@@ -2917,7 +3002,7 @@ namespace SAGM.Data
                     {
                         new State{
                                 StateName = "Alabama",
-                                Active = true, 
+                                Active = true,
                                 Cities = new List<City>()
                                 {
                                     new City{ CityName = "Abanda", Active = true},
@@ -3631,8 +3716,9 @@ namespace SAGM.Data
                 _context.Units.Add(new Unit { UnitName = "Servicio", Active = true });
                 _context.Units.Add(new Unit { UnitName = "Juego", Active = true });
                 _context.Units.Add(new Unit { UnitName = "EA", Active = true });
+                _context.Units.Add(new Unit { UnitName = "Horas", Active = true });
                 await _context.SaveChangesAsync();
-            } 
+            }
         }
 
         private async Task CheckCurrenciesAsync()
@@ -3657,6 +3743,120 @@ namespace SAGM.Data
                 _context.QuoteStatus.Add(new QuoteStatus { QuoteStatusName = "GANADA" });
                 _context.QuoteStatus.Add(new QuoteStatus { QuoteStatusName = "PERDIDA" });
                 _context.QuoteStatus.Add(new QuoteStatus { QuoteStatusName = "CON ORDEN" });
+                await _context.SaveChangesAsync();
+            }
+        }
+
+        private async Task CheckWorkOrderStatus()
+        {
+            if (!_context.WorkOrderStatus.Any())
+            {
+                _context.WorkOrderStatus.Add(new WorkOrderStatus { WorkOrderStatusName = "CREADA" });
+                _context.WorkOrderStatus.Add(new WorkOrderStatus { WorkOrderStatusName = "X MP" });
+                _context.WorkOrderStatus.Add(new WorkOrderStatus { WorkOrderStatusName = "X MAQUINAR" });
+                _context.WorkOrderStatus.Add(new WorkOrderStatus { WorkOrderStatusName = "X EMBARCAR" });
+                _context.WorkOrderStatus.Add(new WorkOrderStatus { WorkOrderStatusName = "X FACTURAR" });
+                _context.WorkOrderStatus.Add(new WorkOrderStatus { WorkOrderStatusName = "X COBRAR" });
+                _context.WorkOrderStatus.Add(new WorkOrderStatus { WorkOrderStatusName = "TERMINADA" });
+                _context.WorkOrderStatus.Add(new WorkOrderStatus { WorkOrderStatusName = "CANCELADA" });
+                await _context.SaveChangesAsync();
+            }
+        }
+
+
+        private async Task CheckProcessAsync()
+        {
+            if (!_context.Processes.Any())
+            {
+                _context.Processes.Add(new Process
+                    {
+                        ProcessName = "Fresado",
+                        Active = true,
+                        Machines = new List<Machine>()
+                        {
+                            new Machine{MachineName = "Fresa1", Active = true},
+                            new Machine{MachineName = "Fresa2", Active = true},
+
+                        }
+                    } );
+
+                _context.Processes.Add(new Process
+                {
+                    ProcessName = "Centro maquinado",
+                    Active = true,
+                    Machines = new List<Machine>()
+                        {
+                            new Machine{MachineName = "Mazak1", Active = true},
+                            new Machine{MachineName = "Mazak2", Active = true},
+
+                        }
+                } );
+
+                _context.Processes.Add(new Process
+                {
+                    ProcessName = "Torno convencional",
+                    Active = true,
+                    Machines = new List<Machine>()
+                        {
+                            new Machine{MachineName = "Torno 1 (3mts)", Active = true},
+                            new Machine{MachineName = "Torno 2 (1mt)", Active = true},
+                            new Machine{MachineName = "Torno 3 (1.5mts)", Active = true}
+
+                        }
+                });
+
+                _context.Processes.Add(new Process
+                {
+                    ProcessName = "Torno cnc",
+                    Active = true,
+                    Machines = new List<Machine>()
+                        {
+                            new Machine{MachineName = "Torno cnc1 (2016)", Active = true},
+                            new Machine{MachineName = "Torno cnc2 (2022)", Active = true},
+
+                        }
+                });
+
+                _context.Processes.Add(new Process
+                {
+                    ProcessName = "Rectificado plano",
+                    Active = true,
+                    Machines = new List<Machine>()
+                        {
+                            new Machine{MachineName = "Rectificadora 1", Active = true},
+                            new Machine{MachineName = "Rectificadora 2 (Automatica)", Active = true}
+
+                        }
+                });
+                _context.Processes.Add(new Process
+                {
+                    ProcessName = "Soldadura",
+                    Active = true,
+                    Machines = new List<Machine>()
+                        {
+                            new Machine{MachineName = "Microalambre (Miller 1)", Active = true},
+                            new Machine{MachineName = "Microalambre (Portátil)", Active = true}
+                        }
+                });
+                _context.Processes.Add(new Process
+                {
+                    ProcessName = "Pintura",
+                    Active = true,
+                    Machines = new List<Machine>()
+                        {
+                            new Machine{MachineName = "Compresor portatil ", Active = true}
+                        }
+                });
+                _context.Processes.Add(new Process
+                {
+                    ProcessName = "Ensamble",
+                    Active = true,
+                    Machines = new List<Machine>()
+                        {
+                            new Machine{MachineName = "Instalaciones SIMAQ", Active = true}
+                        }
+                });
+
                 await _context.SaveChangesAsync();
             }
         }

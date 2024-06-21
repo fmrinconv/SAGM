@@ -1,0 +1,83 @@
+﻿@model SAGM.Models.WorkOrderDetailProcessViewModel
+
+@{
+    ViewData["Title"] = "Cliente";
+    Layout = null;
+}
+
+
+<div class="container smfont">
+    <form asp-action="AddOrEditProcess" autocomplete="off" asp-route-id="@Model.WorkOrderDetailProcessId" enctype="multipart/form-data" onsubmit="return jQueryAjaxPost(this);">
+        <input type="hidden" asp-for="WorkOrderDetailProcessId" />
+        <input type="hidden" asp-for="WorkOrderDetailId" />
+        <input type="hidden" asp-for="Process" />
+        <input type="hidden" asp-for="Machines" />
+        <input type="hidden" asp-for="Units" />
+        <div class="box-body">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>     
+            <div class="form-group">
+                <label asp-for="ProcessId" class="control-label"></label>
+                <select asp-for="ProcessId" asp-items="Model.Process" class="form-control" id="ProcessId"></select>
+                <span asp-validation-for="ProcessId" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="MachineId" class="control-label"></label>
+                <select asp-for="MachineId" asp-items="Model.Machines" class="form-control" id="MachineId"></select>
+                <span asp-validation-for="MachineId" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="UnitId" class="control-label"></label>
+                <select asp-for="UnitId" asp-items="Model.Units" class="form-control" id="UnitId"></select>
+                <span asp-validation-for="UnitId" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Quantity" class="control-label"></label>
+                @Html.EditorFor(model => model.Quantity, new { htmlAttributes = new { @class = "form-control" } })
+                <span asp-validation-for="Quantity" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <div class="col text-center">
+                <button type="button" class="btn btn-sm btn-primary" data-bs-dismiss="modal"><i class="fa fa-ban"></i> Cancelar</button>
+                <button type="submit" class="btn btn-sm btn-success"><i class="fa fa-save"></i> Guardar</button>
+            </div>
+        </div>
+    </form>
+</div>
+
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+}
+
+
+<script type="text/javascript" >
+        $(document).ready(function () {
+            $("#ProcessId").change(function () {
+                $("#MachineId").empty();
+                $("#MachineId").append('<option value="0">[Selecciona una Maquina...]</option>');
+                $.ajax({
+                    type: 'POST',
+                    url: '@Url.Action("GetMachines")',
+                    dataType: 'json',
+                    data: { processId: $("#ProcessId").val() },
+                    success: function (machines) {
+                        $.each(machines, function (i, machine) {
+                        $("#MachineId").append('<option value="'
+                                + machine.machineId + '">'
+                                + machine.machineName + '</option>');
+                        });
+                    },
+                    error: function (ex) {
+                        alert('Failed to retrieve Machines.' + ex);
+                    }
+                });
+                return false;
+            })
+
+        });
+</script>
+
