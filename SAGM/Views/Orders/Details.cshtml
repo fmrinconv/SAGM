@@ -1,0 +1,746 @@
+﻿@model SAGM.Models.OrderViewModel
+
+@{
+    ViewData["Title"] = "Detalle " + Model.OrderName;
+}
+
+<style>
+    .archive
+    {
+        font-size: small;
+    }
+
+    select, input[type="search"] {
+        border: 1px solid gray;
+        padding: .1em .1em;
+        border-radius: .4em;
+    }
+
+    .liContainer {
+        width: 100%;
+        display: table-row;
+    }
+
+    .cell {
+        display: table-cell;
+        vertical-align: middle;
+    }
+
+    th {
+        background-color: mediumseagreen;
+        color: black;
+    }
+
+    tfoot
+    {
+        border:none !important;
+    }
+</style>
+<div>
+    <div class="text-danger bg-secondary bg-opacity-25 header">
+        <div class="row">
+            <div class="col-11"><i class="fa fa-money-check-dollar"></i><strong> Detalle de orden de compra:  <b>@Html.DisplayFor(model => model.OrderName)</b></strong></div>
+            <div class="col-1 text-end"><a asp-action="Index" title="Regresar" class="back"><i class="fa-solid fa-arrow-rotate-left" title="Regresar"></i></a></div>
+        </div>
+    </div>
+    <input type="hidden" id="OrderId" value="@Model.OrderId"/>
+    <input type="hidden" id="OrderDetailId" value="@ViewBag.OrderDetailId" />
+    <input type="hidden" id="Tax" value = "@Model.Tax" />
+    <input type="hidden" id="Discount" value="0" />
+
+
+    <div class="contenido container-fluid">
+        <div class="row">
+            <div class="col-6">
+                <dl class="row">
+                    <dt class="col-sm-3">
+                        @Html.DisplayNameFor(model => model.Supplier.SupplierNickName)
+                    </dt>
+                    <dd class="col-sm-9">
+                        @Html.DisplayFor(model => model.Supplier.SupplierNickName)
+                        <img src="@Model.Supplier.ImageFullPath" style="width:50px; height:50px; border-radius:50%;" class="zoom" />
+                    </dd>
+                    <dt class="col-sm-3">
+                        OC
+                    </dt>
+                    <dd class="col-sm-9">
+                        @Html.DisplayFor(model => model.OrderName)
+                    </dd>
+                    <dt class="col-sm-3">
+                        OT
+                    </dt>
+                    <dd class="col-sm-9">
+                        @if (Model.WorkOrderId != 0)
+                        {
+                            <a onclick="window.open('/WorkOrders/Details/@Model.WorkOrderId','_blank','location=yes,height=570,width=520,scrollbars=yes,status=yes')" href="#">@Html.DisplayFor(model => model.WorkOrderName)</a>
+                        }
+                        else
+                        {
+                            <a title='Enlazr OC' data-bs-toggle='modal' data-bs-target='#WorkOrdersModal' onclick='GetWorkOrders(@Model.OrderId)' class='btn btn-sm btn-outline-primary'><i title='Enlazar OC' class='fa fa-link'></i></a>
+                        }
+                    </dd>
+                    <dt class="col-sm-3">
+                        @Html.DisplayNameFor(model => model.BuyerName)
+                    </dt>
+                    <dd class="col-sm-9">  
+                        @Html.DisplayFor(model => model.BuyerName)
+                    </dd>
+                    <dt class="col-sm-3">
+                        @Html.DisplayNameFor(model => model.SellerName)
+                    </dt>
+                    <dd class="col-sm-9">
+                        @Html.DisplayFor(model => model.SellerName)
+                    </dd>
+                </dl>
+            </div>
+            <div class="col-6">
+                <dl class="row">
+                    <dt class="col-sm-4">
+                        @Html.DisplayNameFor(model => model.Currency)
+                    </dt>
+                    <dd class="col-sm-8">
+                        @Html.DisplayFor(model => model.Currency.Curr)
+                    </dd>
+                    <dt class="col-sm-4">
+                        @Html.DisplayNameFor(model => model.ExchangeRate)
+                    </dt>
+                    <dd class="col-sm-8">
+                        @Html.DisplayFor(model => model.ExchangeRate)
+                    </dd>
+
+                    <dt class="col-sm-4">
+                        @Html.DisplayNameFor(model => model.SupplierQuote)
+                    </dt>
+                    <dd class="col-sm-8">
+                        @Html.DisplayFor(model => model.SupplierQuote)
+                    </dd>
+                    <dt class="col-sm-4">
+                        @Html.DisplayNameFor(model => model.OrderStatus)
+                    </dt>
+                    <dd class="col-sm-5">
+                        <div class="form-group">
+                            <select asp-for="OrderStatusId" asp-items="Model.OrderStatus" class="form-control" id="OrderStatusId" onchange="changestatus(this.value);" ></select>
+                            <span asp-validation-for="OrderStatusId" class="text-danger"></span>
+                        </div>
+                    </dd>
+                    <dd>
+                        @if (ViewBag.DetailsCount > 0)
+                        {
+                            <a onclick="PrintReport('@Model.OrderId')" class="btn btn-primary"><i title='Imprimir OC' class='fa-solid fa-print'></i></a>
+                        }
+                    </dd>
+                    
+                </dl>
+
+            </div>
+        </div>
+        
+    </div>
+
+</div>
+
+
+<div class="contenido card mt-2">
+    <div class="card-header text-danger bg-secondary bg-opacity-25">
+        <i class="fa fa-money-check-dollar"></i><strong> Partidas</strong>
+        <a onclick="showInPopup('@Url.Action("AddOrEditDetail", "Orders", new { id = Model.OrderId, detailid=0 }, Context.Request.Scheme)','Agregar Partida','bg-success')" class="btn btn-sm btn-outline-success"><i class="fa-solid fa-plus-circle" title="Agregar partida"></i></a>
+    </div>
+    <div class="card-body">
+        <div id="view-all" >
+            <input type="hidden" id="Result" name="Result" value="@ViewBag.Result" />
+                @await Html.PartialAsync("_ViewAllOrderDetails.cshtml", Model)
+        </div>
+    </div>
+</div>
+<div class="modal fade in" id="WorkOrdersModal" tabindex="-1" role="dialog" data-bs-backdrop="static" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content g1">
+            <div class="modal-header bg-blue-gradient" style="background-color:gainsboro;">
+                <div class="col-11">
+                    <h5 class="modal-title text-danger" id="exampleModalLabel"><b>Selecciona una orden de trabajo</b></h5>
+                </div>
+                <button type="button" class="close" aria-label="Close" data-bs-dismiss="modal" onclick="DestroyTableWorkOrders()" style="border:none !important;background-color:gainsboro;">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="table-responsive">
+                    <table id="TableWorkOrders" class="table table-responsive table-hover responsive display" style="width:100%; font-size:x-small;">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>OT</th>
+                                <th>QuoteId</th>
+                                <th>Cotización</th>
+                                <th>Cliente</th>
+                                <th>Usuario</th>
+                                <th>Comprador</th>
+                                <th>Fecha compromiso</th>
+                                <th>OC Cliente</th>
+                                <th>Subtotal</th>
+                                <th>Comentarios</th>
+                                <th>Acción</th>
+                                <th>Partidas</th>
+                            </tr>
+                        </thead>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <div class="col text-center">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" onclick="DestroyTableWorkOrders()"><i class="fa fa-ban"> </i>Cancelar</button>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<partial name="_AddOrEditDialog" />
+
+@section Scripts{
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script src="~/js/showmodal.js"></script>
+
+    <script type="text/javascript">
+        var count = 0;
+        var Popup, dataTable, detailid, orderid;
+            var rolex;
+        var subototal = 0;
+
+        $(document).ready(function () {
+
+            orderid = $("#OrderId").val();
+
+            if ($("#Result").val() == "true") {
+                $.notify('@Html.Raw(ViewBag.Message)', "success", { globalPosition: "top center" });
+             
+
+            }
+            else if ($("#Result").val() == "false") {
+                $.notify('@Html.Raw(ViewBag.Message)', "error", { globalPosition: "top center" });
+            }
+            dataTable = $('#TableOrderDetails').DataTable(
+                {
+                    "ajax": {
+                        url: '/Orders/GetOrderDetails/?id=' + $('#OrderId').val(),
+                        type: "GET",
+                        datatype: "json",
+                        deferRender: true,
+                        orderClasses: false,
+                        serverSide: true
+                    },
+                    "language": {
+                        "url": "/lib/datatables/Spanish.json"
+                    },
+                    "aLengthMenu": [
+                        [25, 50, 100, 200, -1],
+                        [25, 50, 100, 200, "Todos"]
+                    ],
+                    "rowId": "orderDetailId",
+                    responsive: true,
+                    "footerCallback": function (row, data, start, end, display) {
+                        var api = this.api(), data;
+
+                        // Remove the formatting to get integer data for summation
+                        var intVal = function (i) {
+                            return typeof i === 'string' ?
+                                i.replace(/[\$,]/g, '') * 1 :
+                                typeof i === 'number' ?
+                                    i : 0;
+                        };
+
+                        // Total over all pages
+                        subtotal = api
+                            .column(7)
+                            .data()
+                            .reduce(function (a, b) {
+                                return intVal(a) + intVal(b);
+                            }, 0);
+
+                        // Total over this page
+                        pageTotal = api
+                            .column(7, { page: 'current' })
+                            .data()
+                            .reduce(function (a, b) {
+                                return intVal(a) + intVal(b);
+                            }, 0);
+
+                        // Update footer
+                        var htmlres = "<div><div class='row'><span style='text-align:right;'>Subtotal</span></div>";
+                            htmlres += "<div class='row'><span style='text-align:right;'>Descuento</span></div> ";
+                        htmlres += "<div class='row'><span style='text-align:right;'>IVA(" + $("#Tax").val().toString() + "%)</span></div>";
+                            htmlres += "<div class='row'><span style='text-align:right;'>Total $ </span></div> </div>";
+                        $(api.column(6).footer()).html(htmlres);
+
+                        var iva = parseFloat($("#Tax").val())/100;
+                        var ivaplus = parseFloat(1) + parseFloat(iva);
+                        var descuento = parseFloat($("#Discount").val());
+                        var IVA = (subtotal + descuento) * parseFloat(iva);
+                        var Total = (subtotal + descuento) * parseFloat(ivaplus);
+                        htmlres = "<div>" +
+                            "<div class='row'><span style='text-align:right;'>" + parseFloat(subtotal, 8).toFixed(2).replace(/(\d)(?=(\d{3})+\.)/g, "$1,").toString() + "</span></div>" +
+                            "<div class='row'><span style='text-align:right;'>" + descuento.toFixed(2).replace(/(\d)(?=(\d{3})+\.)/g, "$1,").toString() + "</span></div>" +
+                            "<div class='row'><span style='text-align:right;'>" + IVA.toFixed(2).replace(/(\d)(?=(\d{3})+\.)/g, "$1,").toString() +  "</span></div>" +
+                            "<div class='row'><span style='text-align:right;'>" + Total.toFixed(2).replace(/(\d)(?=(\d{3})+\.)/g, "$1,").toString() + "</span></div>" +
+                            "</div>"
+                        
+                        $(api.column(7).footer()).html(htmlres);
+                        //$(api.column(7).footer(1)).html("IVA $ " + parseFloat(total*.16, 8).toFixed(2).replace(/(\d)(?=(\d{3})+\.)/g, "$1,").toString());
+                    },
+                    "columnDefs": [
+                        {
+                            "targets": 0,
+                            visible: false,
+                            orderable: false
+                        },
+                        {
+                            "targets": 1,
+                            visible: true,
+                            responsivePriority: 1,
+                                orderable: false
+                        },
+                        {
+                            "targets": 2,  //Cantidad
+                            className: 'dt-body-center',
+                            visible: true,
+                            responsivePriority: 1,
+                                orderable: false
+                        },
+                        {
+                            "targets": [3, 4],//Unidad y Material
+                            className: 'dt-body-left',
+                            orderable: false,
+                            responsivePriority: 3,
+                                orderable: false
+                        },
+                        {
+                            "targets": 5,  //Cantidad
+                            className: 'dt-body-left',
+                            visible: true,
+                            responsivePriority: 1,
+                            orderable: false
+                        },
+                        {
+                            "targets": [6, 7],
+                            className: 'dt-body-right',
+                            orderable: false,
+                            responsivePriority: 2,
+                            orderable: false
+                        },
+                        {
+                            "targets": 8,
+                            className: 'dt-body-center',
+                            orderable: false,
+                            responsivePriority: 3,
+                            orderable: false
+                        },
+                        {
+                            "targets": 9,
+                            className: 'dt-body-center',
+                            orderable: false,
+                            responsivePriority: 2,
+                            orderable: false
+                        },
+
+                    ],
+                    "columns": [
+                            { "data": "orderDetailId" },
+                            { "data": "orderDetailId", "render": function (data) { count = count + 1; detailid = data; return "<span>" + count.toString() + "</span>"; } },
+                            { "data": "quantity" },
+                            { "data": "unit.unitName" },
+                            { "data": "material.materialName" },
+                            { "data": "description" },
+                            { "data": "price", "render": $.fn.dataTable.render.number(',', '.', 2) },
+                            { "data": "total", "render": $.fn.dataTable.render.number(',', '.', 2) },
+                            { "data": "archivesNumber" },
+                            { "data": "orderDetailId", 
+                                "render": function (data) { 
+                                    var result = "<div style='white-space: nowrap;'>";
+                                    result += "<a title='Copiar partida' onclick=\"CopyDetail('" + data + "')\" ";
+                                    result += "class='btn btn-sm btn-outline-success'><i class='fa-solid fa-copy' title='Copiar partida'></i></a>";
+
+                                    result += "<a title='Editar partida' onclick=\"showInPopup('/Orders/AddOrEditDetail?id=" + $("#OrderId").val() + "&detailid=" + detailid + "','Editar\ partida','bg-warning')\"";
+                                    result += "class='btn btn-sm btn-outline-warning'><i title='Editar partida' class='fa-solid fa-pencil-alt'></i></a>";
+
+                                    result += "<a title='Agregar archivos' onclick=\"showInPopup('/Archives/AddArchive?entityid=" + data + "&Entity=OrderDetail','Agregar\archivos','bg-primary')\"";
+                                    result += "class='btn btn-sm btn-outline-primary'><i title='Agregar archivos' class='fa-solid fa-file-circle-plus'></i></a>";
+
+                                    result += "<a title='Comentarios' onclick=\"showInPopup('/Orders/AddOrEditDetailComment?id=" + data + "','Agregar\ comentario','bg-primary')\" ";
+                                    result += "class='btn btn-sm btn-outline-secondary'><i class='fa-solid fa-comments' title='Comentarios'></i></a>";
+
+                                    result += "<a title='Eliminar partida' onclick=\"showInPopup('/Orders/DeleteOrderDetail?id=" + data + "','Eliminar\ partida','bg-danger')\"";
+                                    result += "class='btn btn-sm btn-outline-danger'><i title='Eliminar partida' class='fa-solid fa-trash'></i></a>";
+
+                                    result += "</div>";
+                                    
+                                   
+                                    return result;
+                                }
+                            
+                                },
+                            {
+                                "data": "archivesChain",
+                            "render": function (data) {
+                                var result = "";
+
+                                if (data.length > 0) {
+                                    result += "<div ><table class='form-control'><tr class='card-header text-success bg-secondary bg-opacity-25'>"
+                                    result += "<th>Archivos</th>";
+                                    result += "<th>Acción</th>";
+
+                                    var arrFiles = data.split("|");
+
+                                    for (var i = 0; i < arrFiles.length; i++) {
+                                        var file = arrFiles[i].split(",");
+                                        var guid = file[0];
+                                        var filename = file[1];
+                                        var id = file[2];
+
+                                        var filetype = filename.split(".");
+                                        var type = filetype[0];
+
+                                        result += "<tr><td class='archive'>" + filename + "<td>";
+                                        result += "<a title='Descargar' class='btn btn-sm btn-outline-primary' href='#' onclick=\"downloadFile('" + guid + "','" + filename + "')\"> <i class='fa fa-download'></i><strong></a>";
+                                        // result += "<a onclick=deleteArchive('" + id + "') class= 'btn btn-sm btn-outline-danger' > <i class='fa fa-trash' title = 'Eliminar archivo' > </i></a >";
+                                        result += "<a onclick=\"showInPopup('/Archives/Delete?id=" + id + "','Eliminar\ archivo','bg-secondary')\"";
+                                        result += "class='btn btn-sm btn-outline-danger'><i title='Eliminar archivo' class='fa fa-trash'></i></a>";
+                             
+
+                                        result += "</td></tr>";
+
+                                    };
+                                    result += "</table></div>";
+                                }
+
+                                return result;
+                            }
+                        }
+                    ]
+                });
+        });
+        function actualiza() {
+            
+                dataTable.ajax.reload();
+            
+            return false;
+        };
+        function deleteArchive(id) {
+                $.ajax({
+                    type: "Post",
+                    url: "/Archives/DeleteArchive/",
+                    dataType: 'json',
+                    data: { id: id },
+                    success: function (data) {
+
+                        if (data = "success") {
+                            $.notify("Archivo eliminado", {
+                                globalPosition: "top center",
+                                className: "success"
+                            });
+                        
+                            dataTable.ajax.reload()
+                            //Popup.dialog('close');
+                        }
+
+                    }
+                })
+        };
+        function downloadFile(guid, filename) {
+                var popout = window.open("/Orders/DownloadFile/?id=" + guid + "&filename=" + filename, "_blank");
+                return false;
+        };
+        function PrintReport(orderid) {
+                var popout = window.open("/Orders/PrintReport/?OrderId=" + orderid, "_blank");
+                return false;
+        }
+        function PopupForm(url, msg) {
+                var formDiv = $('<div/>');
+                $.get(url)
+                    .done(function (response) {
+                        formDiv.html(response);
+
+                        Popup = formDiv.dialog({
+                            autoOpen: true,
+                            dialogClass: "alert",
+                            classes: {
+                                "ui-dialog": "ui-corner-all",
+                                "ui-dialog-titlebar": "ui-corner-all",
+                            },
+                            show: { effect: "fade", duration: 400 },
+                            hide: { effect: "slide", duration: 200 },
+                            modal: true,
+                            resizable: false,
+                            title: msg,
+                            height: 420,
+                            width: 410,
+                            close: function () {
+                                Popup.dialog('destroy').remove();
+                            }
+                        });
+                    });
+            }
+        function CopyDetail(orderdetailId) {
+            $.ajax({
+                type: "Post",
+                url: "/Orders/CopyDetail/",
+                dataType: 'json',
+                data: { orderDetailId: orderdetailId },
+                success: function (data) {
+
+                    if (data = "success") {
+                        $.notify("Partida copiada", {
+                            globalPosition: "top center",
+                            className: "success"
+                        });
+                        count = 0;
+                        dataTable.ajax.reload()
+                        //setTimeout('ejecuta(' + $("#IndexID").val() + ')', 2100);
+                        //Popup.dialog('close');
+                    }
+
+                }
+            });
+        };
+        function changestatus(statusid) {
+            var id = $("#OrderId").val();
+            $.ajax({
+                type: "Post",
+                url: "/Orders/ChangeStatus/",
+                dataType: 'json',
+                data: { id: id, statusid: statusid },
+                success: function (data) {
+
+                    if (data.isValid == true) {
+                        $.notify("Estatus modificado", {
+                            globalPosition: "top center",
+                            className: "success"
+                        });
+                        //setTimeout('window.document.reload()', 1100);
+                        //Popup.dialog('close');
+                    }
+
+                }
+            });
+        };
+        function LinkOT(orderid, workorderid) {
+            $.ajax({
+                type: "POST",
+                url: "/Orders/LinkOT?orderid=" + orderid + "&workorderid=" + workorderid,
+                data: null,
+                async: true,
+                contentType: false,
+                processData: false,
+                success: function (data) {
+                    if (data.success == true) {
+                        $('#WorkOrdersModal').hide();
+                        //notificacion de transaccion exitosa usando plugin notify
+                        $.notify("¡OC Enlazada!", {
+                            globalPosition: "top center",
+                            className: "success"
+                        })
+                    }
+                    else {
+                        $.notify(data.message, {
+                            globalPosition: "top center",
+                            className: "warn"
+                        })
+                    }
+                }
+            });
+        }
+        function GetWorkOrders(lorderid) {
+            alert(lorderid);
+            count = 0;
+            orderid = lorderid;
+            dataTableWorkOrders = $('#TableWorkOrders').DataTable(
+                {
+                    "ajax": {
+                        "url": '/WorkOrders/GetWorkOrders',
+                        "type": "GET",
+                        "datatype": "json"
+                    },
+                    "language": {
+                        "url": "/lib/datatables/Spanish.json"
+                    },
+                    "aLengthMenu": [
+                        [25, 50, 100, 200, -1],
+                        [25, 50, 100, 200, "Todos"]
+                    ],
+                    responsive: true,
+                    "columnDefs": [
+                        {
+                            "targets": 0,
+                            className: 'dt-body-center dt-body-nowrap',
+                            responsivePriority: 1
+                        },
+                        {
+                            "targets": 1,
+                            className: 'dt-body-left dt-body-nowrap',
+                            responsivePriority: 1,
+                        },
+                        {
+                            "targets": 2,
+                            className: 'dt-body-left dt-body-nowrap',
+                            responsivePriority: 4,
+                            visible: false
+
+                        },
+                        {
+                            "targets": 3,
+                            className: 'dt-body-left dt-body-nowrap',
+                            responsivePriority: 1
+                        },
+                        {
+                            "targets": [4, 5],
+                            className: 'dt-body-left dt-body-nowrap',
+                            responsivePriority: 1
+                        },
+                        {
+                            "targets": [6, 7],
+                            className: 'dt-body-left dt-body-nowrap',
+                            responsivePriority: 2
+                        },
+                        {
+                            "targets": [8, 10],
+                            className: 'dt-body-center dt-body-nowrap',
+                            responsivePriority: 3
+                        },
+                        {
+                            "targets": 9,
+                            className: 'dt-body-left dt-body-nowrap',
+                            responsivePriority: 3
+                        },
+                        {
+                            "targets": 11,
+                            className: 'dt-body-left dt-body-nowrap',
+                            responsivePriority: 1
+                        },
+                        {
+                            "targets": 12,
+                            className: 'dt-body-left dt-body-nowrap',
+                            responsivePriority: 4
+                        }],
+                    "columns": [
+                        {
+                            "data": "workOrderId",
+                            "render":
+                                function (data) {
+                                    workorderid = data;
+                                    count = count + 1;
+                                    return count.toString();
+                                }
+                        },
+                        {
+                            "data": "workOrderName", "render":
+                                function (data) {
+                                    var result = '<a href=/WorkOrders/Details/' + workorderid + "> " + data + "</a>";
+                                    return result;
+                                }
+                        },
+                        {
+
+                            "data": "quoteId",
+                            "render":
+                                function (data) {
+                                    quoteid = data;
+                                    return quoteid;
+                                }
+                        },
+
+                        {
+                            "data": "quoteName", "render":
+                                function (data) {
+                                    var result = '<a href=/Quotes/Details/' + quoteid + "> " + data + "</a>";
+                                    return result;
+                                }
+                        },
+                        { "data": "customerNickName" },
+                        { "data": "finalUser" },
+                        { "data": "buyerContact" },
+                        {
+                            "data": "promiseDate",
+                            "render":
+                                function (data) {
+                                    if (data != null) {
+                                        var date = new Date(data);
+                                        var day = date.getDate();
+                                        var month = date.getMonth() + 1;
+                                        var year = date.getFullYear();
+                                        return year + "-" + (month.toString().length > 1 ? month : "0" + month) + "-" + (day.toString().length > 1 ? day : "0" + day);
+                                    }
+                                    else {
+                                        return "";
+                                    }
+
+                                }
+                        },
+                        { "data": "customerPO" },
+                        { "data": "total", "render": $.fn.dataTable.render.number(',', '.', 2) },
+                        { "data": "comments" },
+                        {
+                            "data": "workOrderId",
+                            "render":
+                                function (data) {
+                                    var result = "";
+                                    result += "<a title='Enlazar OT' onclick='LinkOT(" + orderid + "," + data + ")' ";
+                                    result += "class='btn btn-sm btn-outline-warning'><i title='Enlazar OT' class='fa-solid fa-link'></i></a>";
+                                    return result;
+
+                                }
+                        },
+                        {
+                            "data": "workOrderDetails",
+                            "render":
+                                function (data) {
+                                    var result = "";
+
+                                    if (data.length != 0) {
+                                        result += "<div><table style='border: 1px solid;'><tr class='bg-secondary bg-opacity-25'>";
+                                        result += "<th>Cant</th>";
+                                        result += "<th>Material</th>";
+                                        result += "<th>Desc</th>";
+                                        result += "<th>Precio</th>";
+                                        result += "<th>MP</th>";
+                                        result += "<th>Maquinadas</th>";
+                                        result += "<th>TT</th>";
+                                        result += "<th>Embarcadas</th>";
+                                        result += "<th>Facturadas</th></tr>";
+                                        for (var i = 0; i < data.length; i++) {
+                                            result += "<tr><td>" + data[i].quantity + "</td>";
+                                            result += "<td>" + data[i].material + "</td>";
+                                            result += "<td>" + data[i].description + "</td>";
+                                            result += "<td style='text-align:right'>" + Intl.NumberFormat('es-MX').format(data[i].price) + "</td>";
+                                            result += "<td>" + data[i].rawMaterial + "</td>";
+                                            result += "<td>" + data[i].machined + "</td>";
+                                            result += "<td>" + data[i].tt + "</td>";
+                                            result += "<td>" + data[i].shipped + "</td>";
+                                            result += "<td>" + data[i].invoiced + "</td></tr>";
+                                        };
+                                        result += "</table></div>";
+                                    }
+                                    else {
+                                        result = 'No hay partidas'
+                                    }
+                                    return result;
+                                }
+                        }
+
+                    ]
+                });
+        }
+        function DestroyTableWorkOrders() {
+            var dataTableWorkOrders = $('#TableWorkOrders').DataTable();
+            dataTableWorkOrders.destroy();
+        }
+   
+    </script>
+
+
+
+}

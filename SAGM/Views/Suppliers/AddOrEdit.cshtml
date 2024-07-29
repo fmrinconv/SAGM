@@ -1,0 +1,154 @@
+﻿@model SAGM.Models.EditSupplierViewModel
+
+@{
+    ViewData["Title"] = "Proveedor";
+    Layout = null;
+}
+
+
+<div class="container smfont">
+    <form asp-action="AddOrEdit" autocomplete="off" asp-route-id="@Model.SupplierId" enctype="multipart/form-data" onsubmit="return jQueryAjaxPost(this);">
+        <input type="hidden" asp-for="SupplierId" />
+        <input type="hidden" asp-for="Countries" />
+        <input type="hidden" asp-for="States" />
+        <input type="hidden" asp-for="Cities" />
+        <input type="hidden" asp-for="ImageId" />
+        <div class="box-body">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <span class="required">*</span>
+                <label asp-for="SupplierNickName" class="control-label"></label> (Acrónimo o nombre corto)
+                <input asp-for="SupplierNickName" class="form-control smfont" />
+                <span asp-validation-for="SupplierNickName" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <span class="required">*</span>
+                <label asp-for="SupplierName" class="control-label"></label>
+                <input asp-for="SupplierName" class="form-control smfont" />
+                <span asp-validation-for="SupplierName" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <span class="required">*</span>
+                <label asp-for="TaxId" class="control-label"></label>
+                <input asp-for="TaxId" class="form-control smfont" />
+                <span asp-validation-for="TaxId" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Address" class="control-label"></label>
+                <input asp-for="Address" class="form-control" />
+                <span asp-validation-for="Address" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="PostalCode" class="control-label"></label>
+                <input asp-for="PostalCode" class="form-control" />
+                <span asp-validation-for="PostalCode" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="PhoneNumber" class="control-label"></label>
+                <input asp-for="PhoneNumber" class="form-control" />
+                <span asp-validation-for="PhoneNumber" class="text-danger"></span>
+            </div>
+      
+            <div class="form-group">
+                <label asp-for="CountryId" class="control-label"></label>
+                <select asp-for="CountryId" asp-items="Model.Countries" class="form-control" id="CountryId"></select>
+                <span asp-validation-for="CountryId" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="StateId" class="control-label"></label>
+                <select asp-for="StateId" asp-items="Model.States" class="form-control" id="StateId"></select>
+                <span asp-validation-for="StateId" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="CityId" class="control-label"></label>
+                <select asp-for="CityId" asp-items="Model.Cities" class="form-control" id="CityId"></select>
+                <span asp-validation-for="CityId" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Active" class="control-label"></label>
+                @Html.EditorFor(model => model.Active)
+                <span asp-validation-for="Active" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <div class="row">
+                    <div class="col-8">
+                        <label asp-for="ImageFile" class="control-label"></label>
+                        <input asp-for="ImageFile" class="form-control" type="file" lang="es-mx" />
+                        <span asp-validation-for="ImageFile" class="text-danger"></span>
+                    </div>
+                    <div class="col-4 zoom">
+                        <img src="@Model.ImageFullPath" style="width:100px;height:100px;border-radius:50%" />
+                    </div>
+                </div>
+
+            </div>
+        </div>
+        <div class="modal-footer">
+            <div class="col text-center">
+                <button type="button" class="btn btn-sm btn-primary" data-bs-dismiss="modal"><i class="fa fa-ban"></i> Cancelar</button>
+                <button type="submit" class="btn btn-sm btn-success"><i class="fa fa-save"></i> Guardar</button>
+            </div>
+        </div>
+    </form>
+</div>
+
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+}
+
+
+<script type="text/javascript" >
+        $(document).ready(function () {
+            $("#CountryId").change(function () {
+                $("#StateId").empty();
+                $("#StateId").append('<option value="0">[Selecciona un Departamento / Estado...]</option>');
+                $("#CityId").empty();
+                $("#CityId").append('<option value="0">[Selecciona una ciudad...]</option>');
+                $.ajax({
+                    type: 'POST',
+                    url: '@Url.Action("GetStates")',
+                    dataType: 'json',
+                    data: { countryId: $("#CountryId").val() },
+                    success: function (states) {
+                        $.each(states, function (i, state) {
+                            $("#StateId").append('<option value="'
+                                + state.stateId + '">'
+                                + state.stateName + '</option>');
+                        });
+                    },
+                    error: function (ex) {
+                        alert('Failed to retrieve states.' + ex);
+                    }
+                });
+                return false;
+            })
+
+            $("#StateId").change(function () {
+                $("#CityId").empty();
+                $("#CityId").append('<option value="0">[Selecciona una ciudad...]</option>');
+                $.ajax({
+                    type: 'POST',
+                    url: '@Url.Action("GetCities")',
+                    dataType: 'json',
+                    data: { stateId: $("#StateId").val() },
+                    success: function (cities) {
+                        $.each(cities, function (i, city) {
+                            $("#CityId").append('<option value="'
+                                + city.cityId + '">'
+                                + city.cityName + '</option>');
+                        });
+                    },
+                    error: function (ex) {
+                        alert('Failed to retrieve cities.' + ex);
+                    }
+                });
+                return false;
+            })
+
+        });
+</script>
+

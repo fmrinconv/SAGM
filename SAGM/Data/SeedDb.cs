@@ -18,6 +18,7 @@ namespace SAGM.Data
         public async Task SeedAsync()
         {
             await _context.Database.EnsureCreatedAsync();
+            await CheckOrderStatus();
             await CheckQuoteStatus();
             await CheckWorkOrderStatus();
             await CheckUnitsAsync();
@@ -3759,6 +3760,20 @@ namespace SAGM.Data
                 _context.WorkOrderStatus.Add(new WorkOrderStatus { WorkOrderStatusName = "X COBRAR" });
                 _context.WorkOrderStatus.Add(new WorkOrderStatus { WorkOrderStatusName = "TERMINADA" });
                 _context.WorkOrderStatus.Add(new WorkOrderStatus { WorkOrderStatusName = "CANCELADA" });
+                await _context.SaveChangesAsync();
+            }
+        }
+
+        private async Task CheckOrderStatus()
+        {
+            if (!_context.OrderStatus.Any())
+            {
+                _context.OrderStatus.Add(new OrderStatus { OrderStatusName = "CREADA" });
+                _context.OrderStatus.Add(new OrderStatus { OrderStatusName = "EN MODIFICACION" });
+                _context.OrderStatus.Add(new OrderStatus { OrderStatusName = "ENVIADA" });
+                _context.OrderStatus.Add(new OrderStatus { OrderStatusName = "X RECIBIR" });
+                _context.OrderStatus.Add(new OrderStatus { OrderStatusName = "RECIBIDO" });
+                _context.OrderStatus.Add(new OrderStatus { OrderStatusName = "CANCELADA" });
                 await _context.SaveChangesAsync();
             }
         }

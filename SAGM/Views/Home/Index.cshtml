@@ -35,8 +35,16 @@
             <label>Inicie sesión para trabajar con SAGM</label>
             <br/>
             <br />
-        </div>
-    }
 
+        </div>
+
+    }
    
 </div>
+@section Scripts{
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+
+    }

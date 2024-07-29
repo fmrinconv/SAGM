@@ -455,17 +455,12 @@ namespace SAGM.Controllers
                     AllQuoteDetails detailsv = new()
                     {
                         QuoteDetailId = detail.QuoteDetailId,
-                        Quote = detail.Quote,
                         Description = detail.Description,
-                        Material = detail.Material,
                         MaterialName = detail.Material.MaterialName,
                         Price = detail.Price,
                         Quantity = detail.Quantity,
-                        Unit = detail.Unit,
                         UnitName = detail.Unit.UnitName,
-                        Archives = archives,
                         ArchivesChain = archiveschain
-
                     };
 
 

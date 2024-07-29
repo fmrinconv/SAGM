@@ -276,9 +276,14 @@ namespace SAGM.Migrations
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)");
 
+                    b.Property<int?>("SupplierId")
+                        .HasColumnType("int");
+
                     b.HasKey("ContactId");
 
                     b.HasIndex("CustomerId");
+
+                    b.HasIndex("SupplierId");
 
                     b.HasIndex("Name", "LastName", "CustomerId")
                         .IsUnique()
@@ -477,6 +482,201 @@ namespace SAGM.Migrations
                         .HasFilter("[CategoryId] IS NOT NULL");
 
                     b.ToTable("MaterialTypes");
+                });
+
+            modelBuilder.Entity("SAGM.Data.Entities.Order", b =>
+                {
+                    b.Property<int>("OrderId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("OrderId"));
+
+                    b.Property<bool>("Active")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Buyer")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Comments")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("CreatedById")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<int?>("CurrencyId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("DeliveryDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("EstimatedDeliveryDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<decimal>("ExchangeRate")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<DateTime>("OrderDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("OrderName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("OrderStatusId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("SupplierContactId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("SupplierId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("SupplierQuote")
+                        .HasMaxLength(128)
+                        .HasColumnType("nvarchar(128)");
+
+                    b.Property<decimal>("Tax")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int?>("WorkOrderId")
+                        .HasColumnType("int");
+
+                    b.HasKey("OrderId");
+
+                    b.HasIndex("CreatedById");
+
+                    b.HasIndex("CurrencyId");
+
+                    b.HasIndex("OrderStatusId");
+
+                    b.HasIndex("SupplierId");
+
+                    b.HasIndex("WorkOrderId");
+
+                    b.ToTable("Orders");
+                });
+
+            modelBuilder.Entity("SAGM.Data.Entities.OrderComment", b =>
+                {
+                    b.Property<int>("CommentId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("CommentId"));
+
+                    b.Property<string>("Comment")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("DateComment")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("OrderId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("UserId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("CommentId");
+
+                    b.HasIndex("OrderId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("OrderComments");
+                });
+
+            modelBuilder.Entity("SAGM.Data.Entities.OrderDetail", b =>
+                {
+                    b.Property<int>("OrderDetailId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("OrderDetailId"));
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("MaterialId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("OrderId")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("Price")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("Quantity")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int?>("UnitId")
+                        .HasColumnType("int");
+
+                    b.HasKey("OrderDetailId");
+
+                    b.HasIndex("MaterialId");
+
+                    b.HasIndex("OrderId");
+
+                    b.HasIndex("UnitId");
+
+                    b.ToTable("OrderDetails");
+                });
+
+            modelBuilder.Entity("SAGM.Data.Entities.OrderDetailComment", b =>
+                {
+                    b.Property<int>("CommentId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("CommentId"));
+
+                    b.Property<string>("Comment")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("DateComment")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("OrderDetailCommentCommentId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("OrderDetailId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("UserId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("CommentId");
+
+                    b.HasIndex("OrderDetailCommentCommentId");
+
+                    b.HasIndex("OrderDetailId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("OrderDetailComments");
+                });
+
+            modelBuilder.Entity("SAGM.Data.Entities.OrderStatus", b =>
+                {
+                    b.Property<int>("OrderStatusId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("OrderStatusId"));
+
+                    b.Property<string>("OrderStatusName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("OrderStatusId");
+
+                    b.ToTable("OrderStatus");
                 });
 
             modelBuilder.Entity("SAGM.Data.Entities.Process", b =>
@@ -724,6 +924,63 @@ namespace SAGM.Migrations
                         .HasFilter("[CountryId] IS NOT NULL");
 
                     b.ToTable("States");
+                });
+
+            modelBuilder.Entity("SAGM.Data.Entities.Supplier", b =>
+                {
+                    b.Property<int>("SupplierId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("SupplierId"));
+
+                    b.Property<bool>("Active")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Address")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<int?>("CityId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("CreditDays")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("ImageId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("PhoneNumber")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<string>("PostalCode")
+                        .IsRequired()
+                        .HasMaxLength(5)
+                        .HasColumnType("nvarchar(5)");
+
+                    b.Property<string>("SupplierName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("SupplierNickName")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("TaxId")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.HasKey("SupplierId");
+
+                    b.HasIndex("CityId");
+
+                    b.ToTable("Suppliers");
                 });
 
             modelBuilder.Entity("SAGM.Data.Entities.Unit", b =>
@@ -1152,7 +1409,13 @@ namespace SAGM.Migrations
                         .WithMany("Contacts")
                         .HasForeignKey("CustomerId");
 
+                    b.HasOne("SAGM.Data.Entities.Supplier", "Supplier")
+                        .WithMany("Contacts")
+                        .HasForeignKey("SupplierId");
+
                     b.Navigation("Customer");
+
+                    b.Navigation("Supplier");
                 });
 
             modelBuilder.Entity("SAGM.Data.Entities.Customer", b =>
@@ -1189,6 +1452,98 @@ namespace SAGM.Migrations
                         .HasForeignKey("CategoryId");
 
                     b.Navigation("Category");
+                });
+
+            modelBuilder.Entity("SAGM.Data.Entities.Order", b =>
+                {
+                    b.HasOne("SAGM.Data.Entities.User", "CreatedBy")
+                        .WithMany()
+                        .HasForeignKey("CreatedById")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("SAGM.Data.Entities.Currency", "Currency")
+                        .WithMany("Orders")
+                        .HasForeignKey("CurrencyId");
+
+                    b.HasOne("SAGM.Data.Entities.OrderStatus", "OrderStatus")
+                        .WithMany("Order")
+                        .HasForeignKey("OrderStatusId");
+
+                    b.HasOne("SAGM.Data.Entities.Supplier", "Supplier")
+                        .WithMany()
+                        .HasForeignKey("SupplierId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("SAGM.Data.Entities.WorkOrder", "WorkOrder")
+                        .WithMany("Orders")
+                        .HasForeignKey("WorkOrderId");
+
+                    b.Navigation("CreatedBy");
+
+                    b.Navigation("Currency");
+
+                    b.Navigation("OrderStatus");
+
+                    b.Navigation("Supplier");
+
+                    b.Navigation("WorkOrder");
+                });
+
+            modelBuilder.Entity("SAGM.Data.Entities.OrderComment", b =>
+                {
+                    b.HasOne("SAGM.Data.Entities.Order", "Order")
+                        .WithMany("OrderComments")
+                        .HasForeignKey("OrderId");
+
+                    b.HasOne("SAGM.Data.Entities.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId");
+
+                    b.Navigation("Order");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("SAGM.Data.Entities.OrderDetail", b =>
+                {
+                    b.HasOne("SAGM.Data.Entities.Material", "Material")
+                        .WithMany()
+                        .HasForeignKey("MaterialId");
+
+                    b.HasOne("SAGM.Data.Entities.Order", "Order")
+                        .WithMany("OrderDetails")
+                        .HasForeignKey("OrderId");
+
+                    b.HasOne("SAGM.Data.Entities.Unit", "Unit")
+                        .WithMany()
+                        .HasForeignKey("UnitId");
+
+                    b.Navigation("Material");
+
+                    b.Navigation("Order");
+
+                    b.Navigation("Unit");
+                });
+
+            modelBuilder.Entity("SAGM.Data.Entities.OrderDetailComment", b =>
+                {
+                    b.HasOne("SAGM.Data.Entities.OrderDetailComment", null)
+                        .WithMany("OrderDetailComments")
+                        .HasForeignKey("OrderDetailCommentCommentId");
+
+                    b.HasOne("SAGM.Data.Entities.OrderDetail", "OrderDetail")
+                        .WithMany("OrderDetailComments")
+                        .HasForeignKey("OrderDetailId");
+
+                    b.HasOne("SAGM.Data.Entities.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId");
+
+                    b.Navigation("OrderDetail");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("SAGM.Data.Entities.Quote", b =>
@@ -1281,6 +1636,15 @@ namespace SAGM.Migrations
                         .HasForeignKey("CountryId");
 
                     b.Navigation("Country");
+                });
+
+            modelBuilder.Entity("SAGM.Data.Entities.Supplier", b =>
+                {
+                    b.HasOne("SAGM.Data.Entities.City", "City")
+                        .WithMany()
+                        .HasForeignKey("CityId");
+
+                    b.Navigation("City");
                 });
 
             modelBuilder.Entity("SAGM.Data.Entities.User", b =>
@@ -1414,6 +1778,8 @@ namespace SAGM.Migrations
 
             modelBuilder.Entity("SAGM.Data.Entities.Currency", b =>
                 {
+                    b.Navigation("Orders");
+
                     b.Navigation("Quotes");
                 });
 
@@ -1437,6 +1803,28 @@ namespace SAGM.Migrations
             modelBuilder.Entity("SAGM.Data.Entities.MaterialType", b =>
                 {
                     b.Navigation("Materials");
+                });
+
+            modelBuilder.Entity("SAGM.Data.Entities.Order", b =>
+                {
+                    b.Navigation("OrderComments");
+
+                    b.Navigation("OrderDetails");
+                });
+
+            modelBuilder.Entity("SAGM.Data.Entities.OrderDetail", b =>
+                {
+                    b.Navigation("OrderDetailComments");
+                });
+
+            modelBuilder.Entity("SAGM.Data.Entities.OrderDetailComment", b =>
+                {
+                    b.Navigation("OrderDetailComments");
+                });
+
+            modelBuilder.Entity("SAGM.Data.Entities.OrderStatus", b =>
+                {
+                    b.Navigation("Order");
                 });
 
             modelBuilder.Entity("SAGM.Data.Entities.Process", b =>
@@ -1466,6 +1854,11 @@ namespace SAGM.Migrations
                     b.Navigation("Cities");
                 });
 
+            modelBuilder.Entity("SAGM.Data.Entities.Supplier", b =>
+                {
+                    b.Navigation("Contacts");
+                });
+
             modelBuilder.Entity("SAGM.Data.Entities.Unit", b =>
                 {
                     b.Navigation("QuoteDetails");
@@ -1484,6 +1877,8 @@ namespace SAGM.Migrations
 
             modelBuilder.Entity("SAGM.Data.Entities.WorkOrder", b =>
                 {
+                    b.Navigation("Orders");
+
                     b.Navigation("WorkOrderComments");
 
                     b.Navigation("WorkOrderDetails");

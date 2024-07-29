@@ -41,6 +41,9 @@
             else if (title == "Editar Orden de trabajo") {
                 $('#form-modal .modal-icon').addClass("fa fa-wrench");
             }
+            else if (title.substring(0, 8) == "Crear OC" || title.substring(0, 9) == "Editar OC" || title.substring(0, 15) == "Agregar Partida") {
+                $('#form-modal .modal-icon').addClass("fa fa-money-check-dollar");
+            }
             else if (title == "Eliminar archivo") {
                 $('#form-modal .modal-icon').addClass("fa fa-triangle-exclamation");
             }

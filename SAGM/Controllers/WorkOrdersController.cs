@@ -17,6 +17,7 @@ using System.Diagnostics.Contracts;
 using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.Blazor;
 using DocumentFormat.OpenXml.Office2010.Excel;
 
+
 namespace SAGM.Controllers
 {
     public class WorkOrdersController : Controller
@@ -285,9 +286,10 @@ namespace SAGM.Controllers
             }
 
             var workorder = await _context.WorkOrders
-                .Include(q => q.Customer)
-                .Include(q => q.WorkOrderDetails)
-                .Include(q => q.WorkOrderStatus)
+                .Include(w => w.Customer)
+                .Include(w => w.WorkOrderDetails)
+                .Include(w => w.WorkOrderStatus)
+                .Include(w => w.Orders).ThenInclude(w => w.OrderDetails)
                 .FirstOrDefaultAsync(m => m.WorkOrderId == id);
 
             ViewBag.DetailsCount = workorder.WorkOrderDetails.Count();
@@ -326,6 +328,30 @@ namespace SAGM.Controllers
             workorderv.WorkOrderstatus = workorderstatus;
             workorderv.WorkOrderStatusId = workorder.WorkOrderStatus.WorkOrderStatusId;
             workorderv.Tax = workorder.Tax;
+
+            decimal total = 0;
+            decimal spent = 0;
+
+            if (workorder.WorkOrderDetails != null) { 
+                List<WorkOrderDetail> wodetails = workorder.WorkOrderDetails.ToList();
+                foreach (WorkOrderDetail d in wodetails)
+                {
+                    total += total + (d.Quantity * d.Price) ;
+                }
+            }
+
+            if (workorder.Orders != null)
+            {
+                List<Order> orders = workorder.Orders.ToList();
+                foreach (Order o in orders)
+                {
+                    foreach (OrderDetail od in o.OrderDetails)
+                    {
+                        spent += (od.Quantity * od.Price);
+                    }
+                }
+            
+            }
 
 
             return View(workorderv);
@@ -419,6 +445,45 @@ namespace SAGM.Controllers
 
 
             return Json(new { data = details });
+        }
+
+        [HttpGet]
+        public async Task<JsonResult> GetForecast(int workorderid) {
+            WorkOrder workorder = await _context.WorkOrders
+                .Include(wo => wo.WorkOrderDetails).ThenInclude(wo => wo.WorkOrderDetailProcess)
+                .Include(w => w.Orders).ThenInclude(w => w.OrderDetails)
+                .FirstOrDefaultAsync(wo => wo.WorkOrderId == workorderid);
+
+            decimal total = 0;
+            decimal processcost = 0;
+            decimal materialcost = 0;
+
+            //Vamos a obtener el total de la OT y le restaremos costo por MO que sale de los procesos que se han capturado y restaremos tambien la suma de los detalles de las compras que se han hecho
+            
+
+            foreach (WorkOrderDetail wod in workorder.WorkOrderDetails)
+            {
+                //Obtenemos el total de la OT
+                total += total + (wod.Quantity * wod.Price);
+                //Por cada Detalle de OT obtenemos el costo de cada proceso y lo multiplicamos con la cantidad especificada en el detalle
+                foreach (WorkOrderDetailProcess wodp in wod.WorkOrderDetailProcess) {
+                    processcost +=  wod.Quantity * wodp.Quantity * 200;//se va a sustituir por wodp.cost 
+
+                }
+            }
+            foreach (Order wod in workorder.Orders)
+            {
+                foreach (OrderDetail od in wod.OrderDetails)
+                {
+                    materialcost += od.Quantity * od.Price;
+                }
+            }
+                WorkOrderForecastModel forecastModel = new WorkOrderForecastModel();
+            forecastModel.Total = total;
+            forecastModel.ProcessCost = processcost;
+            forecastModel.MaterialCost = materialcost;
+
+            return Json(forecastModel);
         }
 
         public IActionResult WorkLoad() 

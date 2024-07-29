@@ -1,0 +1,66 @@
+﻿@model IEnumerable<SAGM.Data.Entities.Supplier>
+<table class="table table-hover table-responsive compact row-border" id="TableSuppliers" style="font-size:x-small;">
+
+    <thead>
+        <tr>
+            <th style="text-align:center;">&nbsp;&emsp;#</th>
+            <th>
+                @Html.DisplayNameFor(model => model.SupplierNickName)
+            </th>
+            <th style="text-align: center;">
+                @Html.DisplayNameFor(model => model.SupplierName)
+            </th>
+            <th style="text-align: center;">
+                @Html.DisplayNameFor(model => model.TaxId)
+            </th>
+            <th style="text-align: center;">
+                @Html.DisplayNameFor(model => model.Address)
+            </th>
+            <th style="text-align: center;">
+                @Html.DisplayNameFor(model => model.PostalCode)
+            </th>
+            <th style="text-align: center;">
+                @Html.DisplayNameFor(model => model.ImageFullPath)
+            </th>
+            <th style="text-align: center;">
+                @Html.DisplayNameFor(model => model.Active)
+            </th>
+            <th>   
+                Acciones
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td></td>
+                <td>
+                    <a asp-action="Details" asp-controller="Suppliers" asp-route-Id="@item.SupplierId">@Html.DisplayFor(modelItem => item.SupplierNickName)</a>
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.SupplierName)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.TaxId)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Address)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.PostalCode)
+                </td>
+                <td>
+                    <img src="@item.ImageFullPath" style="width:50px; height:50px; border-radius:25px;" class="zoom" />
+                </td>
+                <td>
+                    @Html.CheckBoxFor(modelItem => item.Active, new { @id = "chkDeleted", @disabled = "true", @title="notitle"})
+                </td>
+                <td>
+                    <a onclick="showInPopup('@Url.Action("AddOrEdit","Suppliers", new {id = item.SupplierId}, Context.Request.Scheme)','Editar cliente','bg-warning')" class="btn btn-sm btn-outline-warning"><i class="fa-solid fa-pencil-alt"></i></a>
+                    <button data-id="@item.SupplierId" class="btn btn-sm btn-outline-danger deleteItem" data-bs-toggle="modal" data-bs-target="#deleteDialog"><i class="fa-solid fa-trash"></i></button>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

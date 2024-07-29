@@ -13,6 +13,7 @@ namespace SAGM.Data.Entities
         public string Curr { get; set; }
 
         public ICollection<Quote> Quotes { get; set; }
+        public ICollection<Order> Orders { get; set; }
 
     }
 }

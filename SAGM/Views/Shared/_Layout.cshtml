@@ -112,7 +112,7 @@
                                         </a>
                                         <ul class="dropdown-menu" style="background-color: #121247; border-color: silver">
                                             <li class="nav-item" style="margin-left:3px;">
-                                                <a class="text-decoration-none text-danger" asp-controller="Quotes" asp-action="Index"> <i class="fa fa-money-check-dollar"></i>  <strong>Ordenes </strong></a>
+                                                <a class="text-decoration-none text-danger" asp-controller="Orders" asp-action="Index"> <i class="fa fa-money-check-dollar"></i>  <strong>Ordenes </strong></a>
                                             </li>
 
                                         </ul>
@@ -123,13 +123,16 @@
                                         </a>
                                         <ul class="dropdown-menu" style="background-color: #121247; border-color: silver">
                                                 <li class="nav-item" style="margin-left:3px;">
-                                                    <a class="text-decoration-none"  asp-controller="Countries" asp-action="Index"> <i class="fa fa-globe"></i>  <strong>Países</strong></a>
+                                                    <a class="text-decoration-none" asp-area="" asp-controller="Customers" asp-action="Index"><i class="fa fa-users-gear"></i> <strong>Clientes</strong></a>
                                                 </li>
                                                 <li class="nav-item" style="margin-left:3px;">
                                                     <a class="text-decoration-none" asp-area="" asp-controller="Categories" asp-action="Index"><i class="fa fa-object-group"></i>  <strong>Categorías</strong></a>
                                                 </li>
                                                 <li class="nav-item" style="margin-left:3px;">
-                                                    <a class="text-decoration-none" asp-area="" asp-controller="Customers" asp-action="Index"><i class="fa fa-users-gear"></i> <strong>Clientes</strong></a>
+                                                    <a class="text-decoration-none"  asp-controller="Countries" asp-action="Index"> <i class="fa fa-globe"></i>  <strong>Países</strong></a>
+                                                </li>
+                                                <li class="nav-item" style="margin-left:3px;">
+                                                    <a class="text-decoration-none" asp-area="" asp-controller="Suppliers" asp-action="Index"><i class="fa fa-credit-card"></i> <strong>Proveedores</strong></a>
                                                 </li>
                                             <li><hr class="dropdown-divider"></li>
                                                
@@ -181,9 +184,9 @@
             </div>
         </nav>
     </header>
-    <div id="Notify" class="col-12"></div>
+@*     <div id="Notify" class="col-12"></div> *@
     <div class="container">
-        <main role="main" class="pb-3">
+        <main role="main" class="pb-3 container-fluid body-content">
             <partial name="_BusyIndicatorPartial" />
             @RenderBody()
         </main>
@@ -207,6 +210,7 @@
     <script src="~/js/jquery.datatables.min.js"></script>
     <script src="~/js/datatables.responsive.min.js"></script>
     <script src="~/lib/jquery/dist/notify.min.js"></script>
+    <script src="~/js/chart.min.js"></script>
    
     <script>
         function displayBusyIndicator() {

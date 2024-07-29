@@ -1,0 +1,144 @@
+﻿@model SAGM.Models.EditOrder
+
+@{
+    ViewData["Title"] = "Orden de compra";
+    Layout = null;
+}
+
+<div class="container smfont">
+    <form asp-action="EditOrder" autocomplete="off" onsubmit="return jQueryAjaxPost(this);">
+        <div class="row">
+            <div class="col-md-6">
+                <input type="hidden" id="OrderId" value="@Model.OrderId" name="OrderId" />
+                <input type="hidden" id="CreatedBy" value="@User.Identity.Name" name="CreatedBy" />
+                <input type="hidden" id="OrderName" value="@Model.OrderName" name="OrderName" />
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                <div class="form-group">
+                    <label asp-for="OrderDate" class="control-label"></label>
+                    <input asp-for="OrderDate" class="form-control"/>
+                    <span asp-validation-for="OrderDate" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="SupplierId" class="control-label"></label>
+                    <select asp-for="SupplierId" asp-items="Model.Suppliers" class="form-control" id="SupplierId"></select>
+                    <span asp-validation-for="SupplierId" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="SupplierContactId" class="control-label"></label>
+                    <select asp-for="SupplierContactId" asp-items="Model.SupllierContacts" class="form-control" id="SupplierContactId"></select>
+                    <span asp-validation-for="SupplierContactId" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="BuyerId" class="control-label"></label>
+                    <select asp-for="BuyerId" asp-items="Model.Buyers" class="form-control" id="BuyerId"></select>
+                    <span asp-validation-for="BuyerId" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="CurrencyId" class="control-label"></label>
+                    <select asp-for="CurrencyId" asp-items="Model.Currency" class="form-control" id="QuoteStatusId"></select>
+                    <span asp-validation-for="CurrencyId" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="OrderStatusId" class="control-label"></label>
+                    <select asp-for="OrderStatusId" asp-items="Model.OrderStatus" class="form-control" id="OrderStatusId"></select>
+                    <span asp-validation-for="OrderStatusId" class="text-danger"></span>
+                </div>
+                <div class="form-group form-check">
+                    <label class="form-check-label">
+                        <input class="form-check-input" asp-for="Active" /> @Html.DisplayNameFor(model => model.Active)
+                    </label>
+                </div>
+
+            </div>
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label asp-for="EstimatedDeliveryDate" class="control-label"></label>
+                    <input asp-for="EstimatedDeliveryDate" class="form-control" />
+                    <span asp-validation-for="EstimatedDeliveryDate" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="DeliveryDate" class="control-label"></label>
+                    <input asp-for="DeliveryDate" class="form-control" />
+                    <span asp-validation-for="DeliveryDate" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="SupplierQuote" class="control-label"></label>
+                    <input asp-for="SupplierQuote" class="form-control" />
+                    <span asp-validation-for="SupplierQuote" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="Tax" class="control-label"></label>
+                    <input asp-for="Tax" class="form-control" />
+                    <span asp-validation-for="Tax" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="ExchangeRate" class="control-label"></label>
+                    <input asp-for="ExchangeRate" class="form-control" />
+                    <span asp-validation-for="ExchangeRate" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="Comments" class="control-label"></label>
+                    <textarea asp-for="Comments" class="form-control"></textarea>
+                    <span asp-validation-for="Comments" class="text-danger"></span>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <div class="col text-center">
+                <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal"><i class="fa fa-ban"></i> Cancelar</button>
+                <button type="submit" class="btn btn-sm btn-success"><i class="fa fa-save"></i> Guardar</button>
+            </div>
+        </div>
+    </form>
+</div>
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+
+}
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("#SupplierId").change(function () {
+            $("#SupplierContactId").empty();
+            $('#SupplierContactId').attr("style", "background-color:silver;");
+            $('#SupplierContactId').attr("disabled", "disabled");
+            $("#SupplierContactId").append('<option value="0">[...Cargando...]</option>');
+            $.ajax({
+                type: 'POST',
+                url: '@Url.Action("GetSupplierContacts")',
+                dataType: 'json',
+                data: { supplierId: $("#SupplierId").val() },
+                success: function (contacts) {
+                    $.each(contacts, function (i, contact) {
+                        $("#SupplierContactId").append('<option value="'
+                            + contact.value + '">'
+                            + contact.text + '</option>');
+                    });
+                    setTimeout(() => { changeatt(); }, "500");
+                },
+                error: function (ex) {
+                    alert('Failed to retrieve.' + ex);
+                }
+            });
+
+            return false;
+        })
+    });
+
+    function changeatt() {
+        $('select option:contains("[...Cargando...]")').text('[Selecciona un contacto...]');
+        $('#SupplierContactId').removeAttr('disabled');
+        $('#SupplierContactId').removeAttr('style');
+
+    }
+
+</script>

@@ -1,0 +1,43 @@
+﻿@model SAGM.Models.CopyOrder
+@{
+    Layout = null;
+}
+
+
+
+<style>
+    .g1 {
+        background-color: #F9F9F9;
+        margin: 10px 10px 10px 10px;
+        border: 2px solid orange;
+        border-radius: 12px;
+        box-shadow: 5px 5px 5px #555;
+        background-color: whitesmoke;
+        padding: 1px 2px 2px 1px;
+    }
+</style>
+
+<div tabindex="-1" data-bs-backdrop="static" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <form asp-action="CopyQuote" method="post">
+
+    <div class="modal-body">
+        <p>¿Estás seguro que deseas copiar la Cotización @Model.OrderName ?</p>
+        <div class="form-group">
+                <input type="checkbox" id="copyfiles" asp-for="copyfilesheader" /><span>Incluir la copia de archivos de cabecera</span><br />
+                <input type="checkbox" id="copyfilesdet" asp-for="copyfilesdetails" /><span>Incluir la copia de archivos de partidas</span>          
+        </div>
+    </div>
+    <div class="modal-footer">
+        <div class="col text-center">
+
+                <input type="hidden" asp-for="OrderId" />
+                
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" arial-label="cerrar"><i class="fa fa-ban"></i> No</button>
+                <button type="submit" value="Si" class="btn btn-danger"><i class="fa fa-check-circle"></i> Sí</button>
+          
+        </div>
+
+    </div>
+    </form>
+
+</div>

@@ -26,6 +26,17 @@ namespace SAGM.Data
         public DbSet<Contact> Contacts { get; set; }
 
         public DbSet<Currency> Currencies { get; set; }
+
+        public DbSet<Order> Orders { get; set; }
+
+        public DbSet<OrderDetail> OrderDetails { get; set; }
+
+        public DbSet<OrderComment> OrderComments { get; set; }
+
+        public DbSet<OrderDetailComment> OrderDetailComments { get; set; }
+
+        public DbSet<OrderStatus> OrderStatus { get; set; }
+
         public DbSet<QuoteStatus> QuoteStatus { get; set; }
 
         public DbSet<Quote> Quotes { get; set; }
@@ -38,6 +49,8 @@ namespace SAGM.Data
         public DbSet<QuoteComment> QuoteComments { get; set; }
 
         public DbSet<QuoteDetailComment> QuoteDetailComments { get; set; }
+
+        public DbSet<Supplier> Suppliers { get; set; }
 
         public DbSet<WorkOrder> WorkOrders { get; set; }
         public DbSet<WorkOrderDetail> WorkOrderDetails { get; set; }

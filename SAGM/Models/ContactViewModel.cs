@@ -52,5 +52,7 @@ namespace SAGM.Models
         public string FullName => $"{Name} {LastName}";
 
         public Customer Customer { get; set; }
+
+        public Supplier Supplier { get; set; }
     }
 }

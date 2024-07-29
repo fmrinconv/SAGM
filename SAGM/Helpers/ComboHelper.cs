@@ -121,6 +121,20 @@ namespace SAGM.Helpers
             return list;
         }
 
+        public async Task<IEnumerable<SelectListItem>> GetComboSuppliersAsync()
+        {
+            List<SelectListItem> list = await _context.Suppliers.Select(c => new SelectListItem
+            {
+                Text = c.SupplierNickName,
+                Value = c.SupplierId.ToString()
+            })
+                 .OrderBy(c => c.Text)
+                 .ToListAsync();
+
+            list.Insert(0, new SelectListItem { Text = "[Seleccione un proveedor...]", Value = "0" });
+            return list;
+        }
+
         public async Task<IEnumerable<SelectListItem>> GetComboContactCustomersAsync(int customerId)
         {
 
@@ -139,6 +153,29 @@ namespace SAGM.Helpers
              .ToListAsync();
             }
           
+
+            list.Insert(0, new SelectListItem { Text = "[Seleccione un contacto...]", Value = "0" });
+            return list;
+        }
+
+        public async Task<IEnumerable<SelectListItem>> GetComboContactSuppliersAsync(int supplierId)
+        {
+
+            List<SelectListItem> list = new List<SelectListItem>();
+
+            if (supplierId > 0)
+            {
+                list = await _context.Contacts
+              .Where(c => c.Supplier.SupplierId == supplierId)
+              .Select(c => new SelectListItem
+              {
+                  Text = c.Name + " " + c.LastName,
+                  Value = c.ContactId.ToString()
+              })
+             .OrderBy(c => c.Text)
+             .ToListAsync();
+            }
+
 
             list.Insert(0, new SelectListItem { Text = "[Seleccione un contacto...]", Value = "0" });
             return list;
@@ -279,5 +316,30 @@ namespace SAGM.Helpers
             }
             return list;
         }
+
+        public async Task<IEnumerable<SelectListItem>> GetComboOrderStatus(int selectedindex = 0)
+        {
+            List<SelectListItem> list = await _context.OrderStatus.Select(s => new SelectListItem
+            {
+                Text = s.OrderStatusName,
+                Value = s.OrderStatusId.ToString()
+
+            })
+              .OrderBy(s => s.Text)
+              .ToListAsync();
+
+            foreach (var item in list)
+            {
+                if (item.Value == selectedindex.ToString())
+                {
+                    item.Selected = true;
+                }
+            }
+
+            return list;
+        }
+
+
+    
     }
 }

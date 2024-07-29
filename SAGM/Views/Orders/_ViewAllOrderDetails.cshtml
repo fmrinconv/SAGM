@@ -1,0 +1,59 @@
+﻿@model SAGM.Models.OrderViewModel
+<div class="container">
+<table class="table table-responsive table-hover responsive" id="TableOrderDetails" style="font-size:small; width:100%;">
+    <thead>
+        <tr>
+            <th>
+               
+            </th>
+            <th style="text-align:center; width:7%;">&nbsp;&emsp;#</th>
+            <th style="text-align: center;">
+                @Html.DisplayNameFor(model => model.OrderDetails.FirstOrDefault().Quantity)
+            </th>
+            <th style="text-align: left;">
+                U.Medida
+            </th>
+            <th style="text-align: left;">
+                @Html.DisplayNameFor(model => model.OrderDetails.FirstOrDefault().Material.MaterialName)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.OrderDetails.FirstOrDefault().Description)
+            </th>           
+            <th style="text-align: right;">
+                @Html.DisplayNameFor(model => model.OrderDetails.FirstOrDefault().Price)
+            </th>
+            <th style="text-align: right;">
+                @Html.DisplayNameFor(model => model.OrderDetails.FirstOrDefault().Total)
+            </th>
+            <th style="text-align: right;">
+                @Html.DisplayNameFor(model => model.OrderDetails.FirstOrDefault().ArchivesNumber)
+            </th>
+            <th style="text-align: center;">
+                Acciones
+            </th>
+            <th class="none">
+                 
+             </th>
+        </tr>
+    </thead>
+    <tbody>
+
+
+    </tbody>
+    <tfoot>
+        <tr>
+            <th></th>
+            <th></th>
+            <th></th>
+            <th></th>
+            <th></th>
+            <th></th>
+            <th></th>
+            <th style="padding:unset; padding-right:5px;"></th>
+            <th></th>
+            <th></th>
+            <th></th>
+        </tr>
+    </tfoot>
+    </table>
+</div>

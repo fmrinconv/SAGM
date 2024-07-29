@@ -205,6 +205,26 @@ namespace SAGM.Helpers
 
         }
 
+        public async Task<IEnumerable<SelectListItem>> GetBuyersAsync()
+        {
+            List<User> list = await _userManager.Users.ToListAsync();
+            List<SelectListItem> listBuyers = new List<SelectListItem>();
+
+            foreach (User user in list)
+            {
+                if (await _userManager.IsInRoleAsync(user, "Comprador"))
+                {
+                    SelectListItem item = new SelectListItem();
+                    item.Text = user.FullName;
+                    item.Value = user.UserName;
+
+                    listBuyers.Add(item);
+                }
+            }
+            return listBuyers;
+
+        }
+
         public async Task<IEnumerable<SelectListItem>> GetAllUsersAsync()
         {
             List<User> list = await _userManager.Users.ToListAsync();

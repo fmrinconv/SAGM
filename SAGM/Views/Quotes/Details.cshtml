@@ -88,37 +88,37 @@
             </div>
             <div class="col-6">
                 <dl class="row">
-                    <dt class="col-sm-3">
+                    <dt class="col-sm-4">
                         @Html.DisplayNameFor(model => model.Currency)
                     </dt>
-                    <dd class="col-sm-9">
+                    <dd class="col-sm-8">
                         @Html.DisplayFor(model => model.Currency.Curr)
                     </dd>
-                    <dt class="col-sm-3">
+                    <dt class="col-sm-4">
                         @Html.DisplayNameFor(model => model.ExchangeRate)
                     </dt>
-                    <dd class="col-sm-9">
+                    <dd class="col-sm-8">
                         @Html.DisplayFor(model => model.ExchangeRate)
                     </dd>
 
-                    <dt class="col-sm-3">
+                    <dt class="col-sm-4">
                         @Html.DisplayNameFor(model => model.CustomerPO)
                     </dt>
-                    <dd class="col-sm-9">
+                    <dd class="col-sm-8">
                         @Html.DisplayFor(model => model.CustomerPO)
                     </dd>
-                    <dt class="col-sm-3">
+                    <dt class="col-sm-4">
                         Modificado
                     </dt>
-                    <dd class="col-sm-9">
+                    <dd class="col-sm-8">
                         @Html.DisplayFor(model => model.ModifyDate)
                     </dd>
-                    <dt class="col-sm-3">
+                    <dt class="col-sm-4">
                         @Html.DisplayNameFor(model => model.QuoteStatus)
                     </dt>
-                    <dd class="col-sm-9">
+                    <dd class="col-sm-5">
                         <div class="form-group">
-                            <select asp-for="QuoteStatusId" asp-items="Model.QuoteStatus" class="form-control" id="QuoteStatusId" onchange="changestatus(this.value);" style="width:200px;"></select>
+                            <select asp-for="QuoteStatusId" asp-items="Model.QuoteStatus" class="form-control" id="QuoteStatusId" onchange="changestatus(this.value);"></select>
                             <span asp-validation-for="QuoteStatusId" class="text-danger"></span>
                         </div>
                     </dd>

@@ -95,6 +95,23 @@ namespace SAGM.Controllers
 
                     return RedirectToAction("Details", "WorkOrders", new { id = wd.WorkOrder.WorkOrderId, workOrderId = wd.WorkOrderDetailId });
 
+                case "Order":
+                    TempData["AddArchiveResult"] = "true";
+                    TempData["AddArchiveMessage"] = "La carga de archivos se ha completado con éxito";
+                    Order o = await _context.Orders
+                                        .FirstOrDefaultAsync(o => o.OrderId == archive.EntityId);
+
+                    return RedirectToAction("Index", "Orders", new { id = o.OrderId });
+
+                case "OrderDetail":
+                    TempData["AddArchiveResult"] = "true";
+                    TempData["AddArchiveMessage"] = "La carga de archivos se ha completado con éxito";
+                    OrderDetail od = await _context.OrderDetails
+                                        .Include(od => od.Order)
+                                        .FirstOrDefaultAsync(od => od.OrderDetailId == archive.EntityId);
+
+                    return RedirectToAction("Details", "Orders", new { id = od.Order.OrderId, orderDetilId = od.OrderDetailId });
+
                 default:
                     break;
             }
@@ -264,6 +281,16 @@ namespace SAGM.Controllers
 
             switch (archive.Entity)
             {
+                case "Quote":
+                    {
+                        var id = archive.EntityId; ///Este es el Id de la cotizacion pero tenmos que enviar el id de la Quote
+                        var quote = await _context.Quotes
+                                                   .FirstOrDefaultAsync(q => q.QuoteId == id);
+                        returnentityId = quote.QuoteId;
+                        controller = "Quotes";
+                        action = "Index";
+                        break;
+                    }
                 case "QuoteDetail" : 
                     {
                         var id = archive.EntityId; ///Este es el Id de QuoteDetail pero tenmos que enviar el id de la Quote
@@ -276,16 +303,6 @@ namespace SAGM.Controllers
                         break;
 
                     }
-                case "Quote":
-                    {
-                        var id = archive.EntityId; ///Este es el Id de la cotizacion pero tenmos que enviar el id de la Quote
-                        var quote = await _context.Quotes
-                                                   .FirstOrDefaultAsync(q => q.QuoteId == id);
-                        returnentityId = quote.QuoteId;
-                        controller = "Quotes";
-                        action = "Index";
-                        break;
-                    }
                 case "WorkOrder":
                     {
                         var id = archive.EntityId; ///Este es el Id de la cotizacion pero tenmos que enviar el id de la Quote
@@ -295,6 +312,40 @@ namespace SAGM.Controllers
                         controller = "WorkOrders";
                         action = "Index";
                         break;
+                    }
+                case "WorkOrderDetail":
+                    {
+                        var id = archive.EntityId; ///Este es el Id de QuoteDetail pero tenmos que enviar el id de la Quote
+                        var workorderdetail = await _context.WorkOrderDetails
+                                                    .Include(wod => wod.WorkOrder)
+                                                    .FirstOrDefaultAsync(wod => wod.WorkOrderDetailId == id);
+                        returnentityId = workorderdetail.WorkOrder.WorkOrderId;
+                        controller = "WorkOrders";
+                        action = "Details";
+                        break;
+
+                    }
+                case "Order":
+                    {
+                        var id = archive.EntityId; ///Este es el Id de la cotizacion pero tenmos que enviar el id de la Quote
+                        var order = await _context.Orders
+                                                   .FirstOrDefaultAsync(o => o.OrderId == id);
+                        returnentityId = order.OrderId;
+                        controller = "Orders";
+                        action = "Index";
+                        break;
+                    }
+                case "OrderDetail":
+                    {
+                        var id = archive.EntityId; ///Este es el Id de QuoteDetail pero tenmos que enviar el id de la Quote
+                        var orderdetail = await _context.OrderDetails
+                                                    .Include(od => od.Order)
+                                                    .FirstOrDefaultAsync(od => od.OrderDetailId == id);
+                        returnentityId = orderdetail.Order.OrderId;
+                        controller = "Orders";
+                        action = "Details";
+                        break;
+
                     }
             }
 

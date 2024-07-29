@@ -54,6 +54,8 @@ namespace SAGM.Data.Entities
 
         public Customer Customer { get; set; }
 
+        public Supplier Supplier { get; set; }
+
 
     }
 }

@@ -1,0 +1,89 @@
+﻿@model SAGM.Data.Entities.Contact
+
+
+@{
+    ViewData["Title"] = "Contacto";
+    Layout = null;
+}
+
+
+<div class="container smfont">
+    <form asp-action="AddOrEditContact" autocomplete="off" asp-route-id="@Model.ContactId" enctype="multipart/form-data" onsubmit="return jQueryAjaxPost(this);">
+        <input type="hidden" asp-for="ContactId" />
+        <input type="hidden" asp-for="Supplier.SupplierId" />
+        <input type="hidden" asp-for="Supplier.SupplierNickName" />
+        <input type="hidden" asp-for="Supplier.SupplierName" />
+        <input type="hidden" asp-for="Supplier.PhoneNumber" />
+        <input type="hidden" asp-for="Supplier.TaxId" />
+        <input type="hidden" asp-for="Supplier.Address" />
+        <input type="hidden" asp-for="Supplier.PostalCode" />
+        <input type="hidden" asp-for="Supplier.ImageId" />
+        <input type="hidden" asp-for="Supplier.Active" />
+
+        <input type="hidden" asp-for="ImageId" />
+        <div class="box-body">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <span class="required">*</span>
+                <label asp-for="Name" class="control-label"></label>
+                <input asp-for="Name" class="form-control smfont" />
+                <span asp-validation-for="Name" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <span class="required">*</span>
+                <label asp-for="LastName" class="control-label"></label>
+                <input asp-for="LastName" class="form-control smfont" />
+                <span asp-validation-for="LastName" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <span class="required">*</span>
+                <label asp-for="Email" class="control-label"></label>
+                <input asp-for="Email" class="form-control smfont" />
+                <span asp-validation-for="Email" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <span class="required">*</span>
+                <label asp-for="Mobile" class="control-label"></label>
+                <input asp-for="Mobile" class="form-control smfont" />
+                <span asp-validation-for="Mobile" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="PhoneNumber" class="control-label"></label>
+                <input asp-for="PhoneNumber" class="form-control" />
+                <span asp-validation-for="PhoneNumber" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Active" class="control-label"></label>
+                @Html.EditorFor(model => model.Active)
+                <span asp-validation-for="Active" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <div class="row">
+                    <div class="col-8">
+                        <label asp-for="ImageFile" class="control-label"></label>
+                        <input asp-for="ImageFile" class="form-control" type="file" lang="es-mx" />
+                        <span asp-validation-for="ImageFile" class="text-danger"></span>
+                    </div>
+                    <div class="col-4 zoom">
+                        <img src="@Model.ImageFullPath" style="width:100px;height:100px;border-radius:50%" />
+                    </div>
+                </div>
+
+            </div>
+        </div>
+        <div class="modal-footer">
+            <div class="col text-center">
+                <button type="button" class="btn btn-sm btn-primary" data-bs-dismiss="modal"><i class="fa fa-ban"></i> Cancelar</button>
+                <button type="submit" class="btn btn-sm btn-success"><i class="fa fa-save"></i> Guardar</button>
+            </div>
+        </div>
+    </form>
+</div>
+
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+}

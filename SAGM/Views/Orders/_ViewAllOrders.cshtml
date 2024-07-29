@@ -1,0 +1,85 @@
+﻿@model IEnumerable<SAGM.Models.AllOrders>
+<style>
+    td.details-control {
+        background: url('images/det_open.png') no-repeat center center;
+        cursor: pointer;
+    }
+
+    tr.shown td.details-control {
+        background: url('images/det_close.png') no-repeat center center;
+    }
+
+</style>
+
+<table class="table table-responsive table-hover responsive display" id="TableOrders" style="font-size:small; width:100%;">
+    <thead>
+        <tr>
+            <th align="right" >
+                #
+            </th>
+            <th style="text-align:left;">
+                OC
+            </th>
+            <th style="text-align:left;">
+                workorderid
+            </th>
+            <th style="text-align:left;">
+                OT
+            </th>
+            <th align="left">
+                Proveedor
+            </th>
+            <th style="text-align:left;">
+                Vendedor
+            </th>
+            <th style="text-align:left;">
+                Comprador
+            </th>
+            <th style="text-align:left;">
+                Fecha
+            </th>
+            <th style="text-align:left;">
+                Entrega estimada
+            </th>
+            <th style="text-align:left;">
+                Fecha entrega
+            </th>
+
+            <th>
+                @Html.DisplayNameFor(model => model.Currency)
+            </th>
+
+            <th>
+                @Html.DisplayNameFor(model => model.SupplierQuote)
+            </th>
+            <th>
+                Subtotal
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Active)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.OrderStatus.OrderStatusName)
+            </th>
+            <th>Acción</th>
+            <th>
+                @Html.DisplayNameFor(model => model.Tax)
+            </th>
+            <th>
+                Comentarios
+            </th>
+            <th>
+                Archivos en partidas:
+            </th>
+            <th>
+                Archivos de cotización:
+            </th>
+            <th >
+                Partidas
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+
+    </tbody>
+    </table>

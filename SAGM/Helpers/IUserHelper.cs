@@ -45,6 +45,8 @@ namespace SAGM.Helpers
 
         Task<IEnumerable<SelectListItem>> GetSellersAsync();
 
+        Task<IEnumerable<SelectListItem>> GetBuyersAsync();
+
         Task<IEnumerable<SelectListItem>> GetAllUsersAsync();
     }
 }
