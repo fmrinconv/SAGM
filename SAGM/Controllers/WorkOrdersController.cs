@@ -16,6 +16,12 @@ using static SAGM.Helpers.ModalHelper;
 using System.Diagnostics.Contracts;
 using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.Blazor;
 using DocumentFormat.OpenXml.Office2010.Excel;
+using DocumentFormat.OpenXml.Wordprocessing;
+using Org.BouncyCastle.Asn1.Cms;
+using System.Text.Json;
+using System.Diagnostics;
+using Process = SAGM.Data.Entities.Process;
+using DocumentFormat.OpenXml.ExtendedProperties;
 
 
 namespace SAGM.Controllers
@@ -65,7 +71,7 @@ namespace SAGM.Controllers
             };
 
 
-            
+
             if (TempData["AddOrEditCommentResult"] != null)
             {
                 ViewBag.Result = TempData["AddOrEditCommentResult"].ToString();
@@ -74,7 +80,7 @@ namespace SAGM.Controllers
                 TempData.Remove("AddOrEditCommentMessage");
             };
 
-         
+
             if (TempData["DeleteWOCommentResult"] != null)
             {
                 ViewBag.Result = TempData["DeleteCommentResult"].ToString();
@@ -126,7 +132,7 @@ namespace SAGM.Controllers
                 int archivesnumber = 0;
                 Quote quote = _context.Quotes.FirstOrDefault(q => q.QuoteId == w.QuoteId);
 
-             
+
 
                 //Armamos la lista de detalles
                 List<WorkOrderDetailViewIndexModel> details = new List<WorkOrderDetailViewIndexModel>();
@@ -140,7 +146,7 @@ namespace SAGM.Controllers
                         Material = _context.Materials.FindAsync(wd.Material.MaterialId).Result.MaterialName.ToString(),
                         Description = wd.Description,
                         Price = wd.Price,
-                        RawMaterial = wd.RawMaterial,   
+                        RawMaterial = wd.RawMaterial,
                         Machined = wd.Machined,
                         TT = wd.TT,
                         Shipped = wd.Shipped,
@@ -165,7 +171,7 @@ namespace SAGM.Controllers
                     archiveschain = archiveschain.Substring(0, archiveschain.Length - 1);
                 };
 
-                
+
                 WorkOrderViewIndexModel aqs = new WorkOrderViewIndexModel()
                 {
                     WorkOrderId = w.WorkOrderId,
@@ -189,7 +195,7 @@ namespace SAGM.Controllers
                     PromiseDate = w.PromiseDate,
                     ArchivesNumber = archivesnumber,
                     ArchivesChain = archiveschain,
-             
+
                 };
 
                 if (quote != null)
@@ -261,7 +267,7 @@ namespace SAGM.Controllers
                 };
 
 
-                if (TempData["AddOrEditWorkOrderDetailProcessResult"] != null) 
+                if (TempData["AddOrEditWorkOrderDetailProcessResult"] != null)
                 {
                     ViewBag.Result = TempData["AddOrEditWorkOrderDetailProcessResult"].ToString();
                     ViewBag.Message = TempData["AddOrEditWorkOrderDetailMessage"].ToString();
@@ -275,6 +281,13 @@ namespace SAGM.Controllers
                     ViewBag.Message = TempData["WorkOrderDetailProcessDeleteMessage"].ToString();
                     TempData.Remove("WorkOrderDetailProcessDeleteResult");
                     TempData.Remove("WorkOrderDetailProcessDeleteMessage");
+                }
+
+                if (TempData["RemisionResult"] != null) {
+                    ViewBag.Result = TempData["RemisionResult"].ToString();
+                    ViewBag.Message = TempData["RemisionMessage"].ToString();
+                    TempData.Remove("RemisionResult");
+                    TempData.Remove("RemisionMessage");
                 }
 
             }
@@ -332,11 +345,12 @@ namespace SAGM.Controllers
             decimal total = 0;
             decimal spent = 0;
 
-            if (workorder.WorkOrderDetails != null) { 
+            if (workorder.WorkOrderDetails != null)
+            {
                 List<WorkOrderDetail> wodetails = workorder.WorkOrderDetails.ToList();
                 foreach (WorkOrderDetail d in wodetails)
                 {
-                    total += total + (d.Quantity * d.Price) ;
+                    total += total + (d.Quantity * d.Price);
                 }
             }
 
@@ -350,7 +364,7 @@ namespace SAGM.Controllers
                         spent += (od.Quantity * od.Price);
                     }
                 }
-            
+
             }
 
 
@@ -374,7 +388,7 @@ namespace SAGM.Controllers
 
             User seller = await _userHelper.GetUserAsync(workorder.Seller);
 
-           WorkOrderViewModel workorderv = new WorkOrderViewModel();
+            WorkOrderViewModel workorderv = new WorkOrderViewModel();
 
 
             List<AllWorkOrderDetails> details = new List<AllWorkOrderDetails>().ToList();
@@ -415,7 +429,7 @@ namespace SAGM.Controllers
                     };
 
 
-                        AllWorkOrderDetails detailsv = new()
+                    AllWorkOrderDetails detailsv = new()
                     {
                         WorkOrderDetailId = detail.WorkOrderDetailId,
                         WorkOrder = detail.WorkOrder,
@@ -435,7 +449,7 @@ namespace SAGM.Controllers
                         Shipped = detail.Shipped,
                         Processchain = processchain,
 
-                        };
+                    };
 
 
                     details.Add(detailsv);
@@ -448,7 +462,8 @@ namespace SAGM.Controllers
         }
 
         [HttpGet]
-        public async Task<JsonResult> GetForecast(int workorderid) {
+        public async Task<JsonResult> GetForecast(int workorderid)
+        {
             WorkOrder workorder = await _context.WorkOrders
                 .Include(wo => wo.WorkOrderDetails).ThenInclude(wo => wo.WorkOrderDetailProcess)
                 .Include(w => w.Orders).ThenInclude(w => w.OrderDetails)
@@ -459,15 +474,16 @@ namespace SAGM.Controllers
             decimal materialcost = 0;
 
             //Vamos a obtener el total de la OT y le restaremos costo por MO que sale de los procesos que se han capturado y restaremos tambien la suma de los detalles de las compras que se han hecho
-            
+
 
             foreach (WorkOrderDetail wod in workorder.WorkOrderDetails)
             {
                 //Obtenemos el total de la OT
                 total += total + (wod.Quantity * wod.Price);
                 //Por cada Detalle de OT obtenemos el costo de cada proceso y lo multiplicamos con la cantidad especificada en el detalle
-                foreach (WorkOrderDetailProcess wodp in wod.WorkOrderDetailProcess) {
-                    processcost +=  wod.Quantity * wodp.Quantity * 200;//se va a sustituir por wodp.cost 
+                foreach (WorkOrderDetailProcess wodp in wod.WorkOrderDetailProcess)
+                {
+                    processcost += wod.Quantity * wodp.Quantity * 200;//se va a sustituir por wodp.cost 
 
                 }
             }
@@ -478,7 +494,7 @@ namespace SAGM.Controllers
                     materialcost += od.Quantity * od.Price;
                 }
             }
-                WorkOrderForecastModel forecastModel = new WorkOrderForecastModel();
+            WorkOrderForecastModel forecastModel = new WorkOrderForecastModel();
             forecastModel.Total = total;
             forecastModel.ProcessCost = processcost;
             forecastModel.MaterialCost = materialcost;
@@ -486,19 +502,19 @@ namespace SAGM.Controllers
             return Json(forecastModel);
         }
 
-        public IActionResult WorkLoad() 
+        public IActionResult WorkLoad()
         {
             List<WorkLoad> lstworkload = new List<WorkLoad>();
-            return View(lstworkload); 
+            return View(lstworkload);
         }
 
         [HttpGet]
 
         public async Task<JsonResult> GetWorkLoad()
-        { 
+        {
 
             List<WorkLoad> lstworkload = new List<WorkLoad>();
-            
+
 
             List<WorkOrder> workOrders = await _context.WorkOrders
                 .Include(w => w.Customer)
@@ -518,7 +534,7 @@ namespace SAGM.Controllers
             foreach (WorkOrder wo in workOrders)
             {
 
-               
+
 
                 foreach (WorkOrderDetail wod in wo.WorkOrderDetails)
                 {
@@ -534,7 +550,7 @@ namespace SAGM.Controllers
                     {
                         quotename = "";
                     }
-                   
+
 
 
                     Contact contact = await _context.Contacts.FindAsync(wo.FinalUserId);
@@ -567,7 +583,7 @@ namespace SAGM.Controllers
                     workload.TT = wod.TT;
                     workload.Shipped = wod.Shipped;
                     workload.Invoiced = wod.Invoiced;
-        
+
 
                     if (wod.WorkOrderDetailProcess != null)
                     {
@@ -580,7 +596,7 @@ namespace SAGM.Controllers
                             processname = p.Machine.Process.ProcessName;
                             process += $"{p.Machine.MachineName}\\{p.Machine.Process.ProcessName}\\{p.Quantity}\\{p.Unit.UnitName}|";
                         }
-                       
+
                     }
                     if (process.Length > 0)
                     {
@@ -591,7 +607,7 @@ namespace SAGM.Controllers
                 }
             }
             return Json(new { data = lstworkload.OrderByDescending(w => w.WorkOrderDetailId) });
-  
+
 
         }
 
@@ -622,12 +638,12 @@ namespace SAGM.Controllers
             sellers = (List<SelectListItem>)(from u in users join s in sellerlist on u.Value equals s.Value select u).ToList();
 
             List<SelectListItem> customers = (List<SelectListItem>)await _comboHelper.GetComboCustomersAsync();
-            List<SelectListItem> currencies = (List<SelectListItem>)await _comboHelper.GetComboCurrenciesAsync();     
-            
+            List<SelectListItem> currencies = (List<SelectListItem>)await _comboHelper.GetComboCurrenciesAsync();
+
             workorder.Customers = customers;
             workorder.Sellers = sellers;
             workorder.Currency = currencies;
-            workorder.WorkOrderDate = DateTime.Now; 
+            workorder.WorkOrderDate = DateTime.Now;
 
             return View(workorder);
         }
@@ -766,12 +782,12 @@ namespace SAGM.Controllers
                     workorder.ExchangeRate = model.ExchangeRate;
                     workorder.CreatedBy = await _userHelper.GetUserAsync(model.CreatedBy);
                     workorder.WorkOrderStatus = workorderstatus;
-             
+
                     workorder.Comments = model.Comments;
                     _context.Add(workorder);
                     await _context.SaveChangesAsync();
                     TempData["AddWorkOrderResult"] = "true";
-                    
+
                     TempData["AddWorkOrderMessage"] = "La Orden de trabajo fué creada";
                     return Json(new { isValid = true, html = ModalHelper.RenderRazorViewToString(this, "_ViewAllWorkOrders", _context.WorkOrders.ToList()) });
 
@@ -791,7 +807,7 @@ namespace SAGM.Controllers
 
                 WorkOrder workorder = new WorkOrder();
                 Customer customer = await _context.Customers.FindAsync(model.CustomerId);
-       
+
 
                 workorder.Active = model.Active;
                 workorder.BuyerContactId = model.BuyerContactId;
@@ -809,7 +825,7 @@ namespace SAGM.Controllers
                 workorder.Currency = await _context.Currencies.FindAsync(model.CurrencyId);
                 workorder.ExchangeRate = model.ExchangeRate;
                 workorder.CreatedBy = await _userHelper.GetUserAsync(model.CreatedBy);
-                
+
                 workorder.Comments = model.Comments;
 
                 List<SelectListItem> sellerlist = (List<SelectListItem>)await _userHelper.GetSellersAsync();
@@ -1118,7 +1134,7 @@ namespace SAGM.Controllers
 
         }
 
-        
+
 
         [HttpPost]
         public async Task<IActionResult> ChangeStatus(int workorderid, int statusid)
@@ -1587,13 +1603,13 @@ namespace SAGM.Controllers
             foreach (WorkOrder wo in workOrders)
             {
 
-               
+
 
                 foreach (WorkOrderDetail wod in wo.WorkOrderDetails)
                 {
                     WorkLoad workload = new WorkLoad();
                     var quotename = "";
-                    int quoteid = 0 ;
+                    int quoteid = 0;
 
                     if (wo.QuoteId != null)
                     {
@@ -1610,7 +1626,7 @@ namespace SAGM.Controllers
                         }
                     }
 
-                    
+
 
 
                     Contact contact = await _context.Contacts.FindAsync(wo.FinalUserId);
@@ -1665,7 +1681,7 @@ namespace SAGM.Controllers
                     lstworkload.Add(workload);
                 }
             }
-         
+
 
             DataTable dt = new DataTable("WorkLoadResult");
             dt.Columns.AddRange(new DataColumn[22] {
@@ -1697,31 +1713,31 @@ namespace SAGM.Controllers
 
             foreach (WorkLoad w in lstworkload)
             {
-         
-                    dt.Rows.Add(w.WorkOrderDetailId,
-                                w.WorkOrderName,
-                                w.QuoteName,
-                                w.CustomerNickName,
-                                w.WorkOrderStatusName,
-                                w.CustomerPO,
-                                w.FinalUser,
-                                w.Buyer,
-                                w.Seller,
-                                w.PODate,
-                                w.PromiseDate,
-                                w.ShippedDate,
-                                w.Description,
-                                w.Quantity,
-                                w.Price,
-                                w.Total,
-                                w.Currency,
-                                w.RawMaterial,
-                                w.Machined,
-                                w.TT,
-                                w.Shipped,
-                                w.Invoiced
-                                ); ;
-                
+
+                dt.Rows.Add(w.WorkOrderDetailId,
+                            w.WorkOrderName,
+                            w.QuoteName,
+                            w.CustomerNickName,
+                            w.WorkOrderStatusName,
+                            w.CustomerPO,
+                            w.FinalUser,
+                            w.Buyer,
+                            w.Seller,
+                            w.PODate,
+                            w.PromiseDate,
+                            w.ShippedDate,
+                            w.Description,
+                            w.Quantity,
+                            w.Price,
+                            w.Total,
+                            w.Currency,
+                            w.RawMaterial,
+                            w.Machined,
+                            w.TT,
+                            w.Shipped,
+                            w.Invoiced
+                            ); ;
+
             }
 
             try
@@ -1800,7 +1816,7 @@ namespace SAGM.Controllers
         public async Task<IActionResult> AddOrEditProcess(int id, int workOrderDetailid)
         {
 
-           
+
             if (id > 0)
             {
                 WorkOrderDetailProcess wodp = await _context.WorkOrderDetailProcesses
@@ -1824,16 +1840,16 @@ namespace SAGM.Controllers
 
                 return View(workOrderDetailProcessViewModel);
             }
-            else 
+            else
             {
-                WorkOrderDetailProcessViewModel workOrderDetailProcessViewModel = new() 
-                { 
-                   WorkOrderDetailProcessId = 0,
-                   WorkOrderDetailId = workOrderDetailid,
-                   Process = await _comboHelper.GetComboProcessAsync(),
-                   Machines = await _comboHelper.GetComboMachinesAsync(),
-                   Units = await _comboHelper.GetComboUnitAsync(),
-                   Quantity = 0
+                WorkOrderDetailProcessViewModel workOrderDetailProcessViewModel = new()
+                {
+                    WorkOrderDetailProcessId = 0,
+                    WorkOrderDetailId = workOrderDetailid,
+                    Process = await _comboHelper.GetComboProcessAsync(),
+                    Machines = await _comboHelper.GetComboMachinesAsync(),
+                    Units = await _comboHelper.GetComboUnitAsync(),
+                    Quantity = 0
                 };
 
                 return View(workOrderDetailProcessViewModel);
@@ -1856,7 +1872,7 @@ namespace SAGM.Controllers
                                                     .FirstOrDefaultAsync(w => w.WorkOrderDetailId == model.WorkOrderDetailId);
                         wodp.Machine = await _context.Machines.FindAsync(model.MachineId);
                         wodp.Unit = await _context.Units.FindAsync(model.UnitId);
-                        wodp.Quantity = model.Quantity; 
+                        wodp.Quantity = model.Quantity;
                         _context.Add(wodp);
                         await _context.SaveChangesAsync();
 
@@ -1878,7 +1894,7 @@ namespace SAGM.Controllers
                     try
                     {
                         WorkOrderDetailProcess wodp = await _context.WorkOrderDetailProcesses
-                            .Include(w => w.WorkOrderDetail).ThenInclude(w => w.WorkOrder)  
+                            .Include(w => w.WorkOrderDetail).ThenInclude(w => w.WorkOrder)
                             .FirstOrDefaultAsync(w => w.WorkOrderDetailProcessId == model.WorkOrderDetailProcessId);
                         wodp.Machine = await _context.Machines.FindAsync(model.MachineId);
                         wodp.Unit = await _context.Units.FindAsync(model.UnitId);
@@ -1886,7 +1902,7 @@ namespace SAGM.Controllers
                         _context.Update(wodp);
 
                         await _context.SaveChangesAsync();
-                      
+
 
 
                         TempData["AddOrEditWorkOrderDetailProcessResult"] = "true";
@@ -1908,7 +1924,7 @@ namespace SAGM.Controllers
             {
 
                 {
-                   
+
 
                     return Json(new { isValid = false, html = ModalHelper.RenderRazorViewToString(this, "AddOrEditDetail", model) });
                 }
@@ -1940,7 +1956,7 @@ namespace SAGM.Controllers
         [HttpPost]
         public async Task<IActionResult> DeleteProcess(WorkOrderDetailProcess model)
         {
-   
+
             var process = await _context.WorkOrderDetailProcesses
                 .Include(w => w.WorkOrderDetail).ThenInclude(d => d.WorkOrder)
                 .FirstOrDefaultAsync(c => c.WorkOrderDetailProcessId == model.WorkOrderDetailProcessId);
@@ -2034,6 +2050,257 @@ namespace SAGM.Controllers
         private bool WorkOrderExists(int id)
         {
             return _context.WorkOrders.Any(e => e.WorkOrderId == id);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> Remision(int? id)
+        {
+            if (id == null || _context.WorkOrders == null)
+            {
+                return NotFound();
+            }
+
+            var workorder = await _context.WorkOrders
+                .Include(w => w.Customer)
+                .Include(w => w.WorkOrderDetails)
+                .Include(w => w.WorkOrderStatus)
+                .Include(w => w.Orders).ThenInclude(w => w.OrderDetails)
+                .FirstOrDefaultAsync(m => m.WorkOrderId == id);
+
+            ViewBag.DetailsCount = workorder.WorkOrderDetails.Count();
+
+            if (workorder == null)
+            {
+                return NotFound();
+            }
+
+            List<SelectListItem> workorderstatus = (List<SelectListItem>)await _comboHelper.GetComboWorkOrderStatus(workorder.WorkOrderStatus.WorkOrderStatusId);
+
+
+            User seller = await _userHelper.GetUserAsync(workorder.Seller);
+            WorkOrderRemisionViewModel worvm = new WorkOrderRemisionViewModel();
+
+
+
+            WorkOrderViewModel workorderv = new WorkOrderViewModel();
+            Contact buyer = await _context.Contacts.FindAsync(workorder.BuyerContactId);
+            Contact finaluser = await _context.Contacts.FindAsync(workorder.FinalUserId);
+
+
+            worvm.WorkOrderId = workorder.WorkOrderId;
+            worvm.WorkOrder = workorder;
+
+            worvm.WorkOrder.WorkOrderId = workorder.WorkOrderId;
+
+            worvm.WorkOrder.WorkOrderId = workorder.WorkOrderId;
+            worvm.WorkOrder.Active = workorder.Active;
+            worvm.WorkOrder.BuyerContactId = workorder.BuyerContactId;
+            worvm.BuyerName = $"{buyer.Name} {buyer.LastName}";
+            worvm.WorkOrder.Comments = workorder.Comments;
+            worvm.WorkOrder.CreatedBy = workorder.CreatedBy;
+            worvm.WorkOrder.WorkOrderStatus = workorder.WorkOrderStatus;    
+            worvm.WorkOrder.Currency = workorder.Currency;
+            worvm.WorkOrder.ExchangeRate = workorder.ExchangeRate;
+            worvm.WorkOrder.Customer = workorder.Customer;
+            worvm.WorkOrder.CustomerPO = workorder.CustomerPO;
+            worvm.WorkOrder.FinalUserId = workorder.FinalUserId;
+            worvm.FinalUserName = $"{finaluser.Name} {finaluser.LastName}";
+            worvm.WorkOrder.ModifiedBy = workorder.ModifiedBy;
+            worvm.WorkOrder.ModifyDate = workorder.ModifyDate;
+            worvm.WorkOrder.WorkOrderComments = workorder.WorkOrderComments;
+            worvm.WorkOrder.Seller = workorder.Seller;
+            worvm.SellerName = seller.FullName;
+            worvm.RemisionDate = DateTime.Now;
+            worvm.WorkOrder.WorkOrderName = workorder.WorkOrderName;
+
+            return View(worvm);
+
+
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Remision(WorkOrderRemisionViewModel model)
+        {
+
+            string details = model.wodeliverydetails.Substring(0, model.wodeliverydetails.Length - 1);
+
+            return RedirectToAction("RemisionPreview", new { workorderid = model.WorkOrderId, wodeliverydetails = details, comments = model.Comments });
+        }
+
+
+
+        [HttpGet]
+        public async Task<IActionResult> RemisionPreview(int workorderid, string wodeliverydetails, string comments)
+        {  //Es el id de Remision
+
+           
+            WorkOrder workorder = await _context.WorkOrders
+                .Include(w => w.Customer).ThenInclude(w => w.City)
+                .FirstOrDefaultAsync(w => w.WorkOrderId == workorderid);
+
+            List<WorkOrderDetail> lwods = _context.WorkOrderDetails
+                                            .Include(w => w.Unit)
+                                            .Include(w => w.Material)
+                                            .Where(w => w.WorkOrder.WorkOrderId == workorderid).ToList();
+            List<WorkOrderDetail> lwodresult = new List<WorkOrderDetail>();
+
+
+
+            var mtxdetails = wodeliverydetails.Split('|');
+
+            foreach (WorkOrderDetail d in lwods)
+            {
+                foreach (var detail in mtxdetails)
+                {
+                    var detailid = detail.Split(",");
+                    if (d.WorkOrderDetailId.ToString() == detailid[0].ToString())
+                    {
+                        WorkOrderDetail workorderdetail = new WorkOrderDetail();
+                        workorderdetail = d;
+
+                        workorderdetail.Quantity = Int32.Parse(detailid[1]);
+                        lwodresult.Add(workorderdetail);
+                        break;
+
+                    }
+                }
+            }
+            workorder.WorkOrderDetails = lwodresult;
+
+            WorkOrderRemisionViewModel Worvm = new WorkOrderRemisionViewModel();
+
+            String workorderdeliveryname = DateTime.Now.ToString("yyyyMMdd"); //Variable formadora de nombre de coti
+            workorderdeliveryname = "REM-" + workorderdeliveryname + "-000";
+
+            Contact Buyer = await _context.Contacts.FindAsync(workorder.BuyerContactId);
+            Contact FinalUser = await _context.Contacts.FindAsync(workorder.FinalUserId);
+            User seller = await _userHelper.GetUserAsync(workorder.Seller);
+
+            if (comments == null || comments == "")
+            {
+                comments = "NA";
+            }
+
+            Worvm.WorkOrder = workorder;
+            Worvm.BuyerName = $"{Buyer.Name} {Buyer.LastName}";
+            Worvm.FinalUserName = $"{FinalUser.Name} {FinalUser.LastName}";
+            Worvm.SellerName = seller.FullName;
+            Worvm.Comments = comments;
+            Worvm.WorkOrderId = workorderid;
+            Worvm.WorkOrderDeliveryName = workorderdeliveryname;
+            Worvm.wodeliverydetails = wodeliverydetails;
+
+
+
+            return View("RemisionPreview", Worvm);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> RemisionConfirm(int workorderid, string wodeliverydetails, string comments)
+        {  //Es el id de Remision
+            WorkOrder w = await _context.WorkOrders.FindAsync(workorderid);
+            WorkOrderRemisionViewModel wormvm = new WorkOrderRemisionViewModel();
+            wormvm.WorkOrderId = workorderid;
+            wormvm.wodeliverydetails = wodeliverydetails;
+            wormvm.Comments = comments;
+            return View(wormvm);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> RemisionConfirm(WorkOrderRemisionViewModel model) {
+
+
+            String workorderdeliveryname = DateTime.Now.ToString("yyyyMMdd"); //Variable formadora de nombre de coti
+            String Lastnumber = ""; //Ultimo numero consecutivo de la cotización
+            String strnumber = "";
+            int Consec = 0;
+
+
+            workorderdeliveryname = "REM-" + workorderdeliveryname;
+
+            // -------------------------
+
+            WorkOrderDelivery LastWOD = await _context.WorkOrderDeliveries.Where(q => q.WorkOrderDeliveryName.Substring(0, 12) == workorderdeliveryname).OrderBy(w => w.WorkOrderDeliveryId).LastOrDefaultAsync();//Ultima cotizacion
+
+            if (LastWOD != null)
+            {
+                Lastnumber = LastWOD.WorkOrderDeliveryName.Substring(13, 3);
+                Consec = Int32.Parse(Lastnumber);
+            }
+            else
+            {
+                Lastnumber = "000";
+                Consec = Int32.Parse(Lastnumber);
+            }
+
+            Consec += 1;
+
+            strnumber = $"000{Consec}";
+
+            WorkOrder workorder = await _context.WorkOrders.FirstOrDefaultAsync(w => w.WorkOrderId == model.WorkOrderId);
+
+            workorderdeliveryname = workorderdeliveryname + "-" + strnumber.Substring(strnumber.Length - 3, 3);
+            WorkOrderDelivery wod = new WorkOrderDelivery();
+            wod.WorkOrder = workorder;
+            if (model.Comments != null)
+            {
+                wod.Comments = model.Comments.Replace("introespace", "\r\n");
+            }
+            else {
+                wod.Comments = model.Comments;
+            }
+            wod.RemisionDate = DateTime.Now;
+            wod.WorkOrderDeliveryName = workorderdeliveryname;
+            _context.Add(wod);
+            await _context.SaveChangesAsync();
+
+            var mtxdetails = model.wodeliverydetails.Split('|');
+
+            for (int i = 0; i < mtxdetails.Length; i++)
+            {
+                var detail = mtxdetails[i].Split(",");
+                WorkOrderDeliveryDetail wodd = new WorkOrderDeliveryDetail();
+                WorkOrderDetail workorderdetail = await _context.WorkOrderDetails.FindAsync(Convert.ToInt32(detail[0]));
+                wodd.workOrderDelivery = wod;
+                wodd.workOrderDetail = workorderdetail;
+                wodd.Quantity = Convert.ToDecimal(detail[1]);
+                _context.Add(wodd);
+                await _context.SaveChangesAsync();
+
+                //vamos a dejar que sea negativo se remisionamos mas piezas de las que estan declaradas en Quantity
+                //Entonces actualizamos las embarcadas ya que si estamos remisionando quiere decir que estamos embarcando
+                workorderdetail.Shipped = workorderdetail.Shipped + Convert.ToDecimal(detail[1]);
+                _context.Update(workorderdetail);
+                await _context.SaveChangesAsync();
+
+
+            }
+
+            //Actualizamos la workorder ya que como tuvo movimiento las piezas embarcadas entonces actualizamos le fecha de modificacion
+            workorder.ModifyDate = DateTime.Now;
+            _context.Update(workorder);
+            await _context.SaveChangesAsync();
+
+            TempData["RemisionResult"] = "true";
+            TempData["RemisionMessage"] = $"La remisión {workorderdeliveryname} fué creada";
+
+            WorkOrderViewModel wovm = new WorkOrderViewModel();
+
+            wovm.WorkOrderId = workorder.WorkOrderId;
+
+
+            return RedirectToAction(nameof(Details), new { id = workorder.WorkOrderId });
+      
+        }
+
+        public async Task<FileResult> PrintRemision(string workorderdeliveryname) ///usuamos el nombre ya que este lo obtenemos del mensaje al crear la remision y viene en el TempData["RemisionMessage"]
+        {
+
+            WorkOrderDelivery remision =  _context.WorkOrderDeliveries.Where(r => r.WorkOrderDeliveryName == workorderdeliveryname).FirstOrDefault();
+
+            Stream stream = new MemoryStream(await _reportHelper.GenerateRemisionReportPDFAsync(remision.WorkOrderDeliveryId));
+
+            return File(stream, "application/pdf", $"{remision.WorkOrderDeliveryName}{".pdf"}");
         }
     }
 }

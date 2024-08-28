@@ -1,0 +1,450 @@
+﻿@model SAGM.Models.WorkOrderRemisionViewModel
+
+@{
+    ViewData["Title"] = "Remisión";
+}
+
+<style>
+    .archive {
+        font-size: small;
+    }
+
+    select, input[type="search"] {
+        border: 1px solid gray;
+        padding: .1em .1em;
+        border-radius: .4em;
+    }
+
+    .liContainer {
+        width: 100%;
+        display: table-row;
+    }
+
+    .cell {
+        display: table-cell;
+        vertical-align: middle;
+    }
+
+    th {
+        background-color: silver;
+        color: black;
+    }
+
+    div.completed {
+        color: green;
+        font-weight: bold;
+    }
+
+    div.pending {
+        color: orange;
+        font-weight: bold;
+    }
+
+    div.nothing {
+        color: red;
+        font-weight: bold;
+    }
+
+    .inputremision{
+        width: 60px;
+        border: 1px solid gray;
+        padding: .1em .1em;
+        border-radius: .4em;
+    }
+
+
+    tfoot {
+        border: none !important;
+    }
+
+
+</style>
+<form asp-action="Remision" autocomplete="off" method="post" >
+<div>
+  
+        <input type="hidden" id="WorkOrderId" name="WorkOrderId" value="@Model.WorkOrderId" />
+        <input type="hidden" id="wodeliverydetails" name="wodeliverydetails" value="" />
+        <span asp-validation-for="wodeliverydetails" class="text-danger"></span>
+    <div class="text-success bg-secondary bg-opacity-25 header">
+        <div class="row">
+            <div class="col-11"><i class="fa fa-file-invoice-dollar"></i><strong> Remisión:  <b>@Html.DisplayFor(model => model.WorkOrder.WorkOrderName)</b></strong></div>
+            <div class="col-1 text-end"><a asp-action="Index" title="Regresar" class="back"><i class="fa-solid fa-arrow-rotate-left" title="Regresar"></i></a></div>
+        </div>
+    </div>
+   
+
+    <div class="container-fluid contenido">
+        <div class="row">
+            <div class="col-sm-12 col-md-6 col-lg-5 col-xl-5">
+                <dl class="row">
+                    <dt class="col-sm-3">
+                        @Html.DisplayNameFor(model => model.WorkOrder.Customer.CustomerNickName)
+                    </dt>
+                    <dd class="col-sm-9">
+                        @Html.DisplayFor(model => model.WorkOrder.Customer.CustomerNickName)
+                        <img src="@Model.WorkOrder.Customer.ImageFullPath" style="width:50px; height:50px; border-radius:50%;" class="zoom" />
+                    </dd>
+                    <dt class="col-sm-3">
+                        Documento
+                    </dt>
+                    <dd class="col-sm-9">
+                        @Html.DisplayFor(model => model.WorkOrder.WorkOrderName)
+                    </dd>
+                    <dt class="col-sm-3">
+                        @Html.DisplayNameFor(model => model.SellerName)
+                    </dt>
+                    <dd class="col-sm-9">
+                        @Html.DisplayFor(model => model.SellerName)
+                    </dd>
+                    <dt class="col-sm-3">
+                        @Html.DisplayNameFor(model => model.BuyerName)
+                    </dt>
+                    <dd class="col-sm-9">
+                        @Html.DisplayFor(model => model.BuyerName)
+                    </dd>
+                    <dt class="col-sm-3">
+                        Usuario
+                    </dt>
+                    <dd class="col-sm-9">
+                        @Html.DisplayFor(model => model.FinalUserName)
+                    </dd>
+                </dl>
+            </div>
+            <div class="col-sm-12 col-md-6 col-lg-4 col-xl-4">
+                <dl class="row">
+
+                    <dt class="col-sm-3">
+                        OC
+                    </dt>
+                    <dd class="col-sm-9">
+                        @Html.DisplayFor(model => model.WorkOrder.CustomerPO)
+                    </dd>
+                    <dt class="col-sm-5">
+                        @Html.DisplayNameFor(model => model.WorkOrder.WorkOrderStatus.WorkOrderStatusName)
+                    </dt>
+                    <dd class="col-sm-5">
+                            @Html.DisplayFor(model => model.WorkOrder.WorkOrderStatus.WorkOrderStatusName)
+                    </dd>
+                    <dt class="col-sm-3">
+                        Fecha
+                    </dt>
+                    <dd class="col-sm-9">
+                        @Html.DisplayFor(model => model.RemisionDate)
+                    </dd>
+                    <dd>
+                           
+
+                    </dd>
+
+                </dl>
+            </div>
+
+        </div>
+
+    </div>
+
+
+</div>
+
+<div>
+        <b><label class="text-danger" style="display:none;" id="partidas" name="partidas">Es necesario introducir las partidas a remisionar</label></b>
+</div>
+<div class="contenido card mt-2">
+    <div class="card-body">
+        <div id="view-all">
+            @await Html.PartialAsync("_ViewAllWorkOrderDetailsRemision.cshtml", Model)
+        </div>
+    </div>
+</div>
+
+    <div class="contenido card mt-2">
+        <div class="row">
+            <div class="form-floating">
+                <textarea class="form-control" placeholder="Leave a comment here" id="Comments" style="height: 100px" name="Comments"> @Html.DisplayFor(model => model.Comments)</textarea>
+                <label for="floatingTextarea2" style="color: silver;">&nbsp;Comentarios</label>
+            </div>
+        </div>
+    </div>
+
+    <div class="contenido text-center">
+        <button type="submit" class="btn btn-outline-primary" onclick="return valida();">Vista previa&nbsp;<i class="fa-solid fa-list-check"></i></button>
+    </div>
+
+</form>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script src="~/js/showmodal.js"></script>
+
+    <script type="text/javascript">
+        var count = 0;
+        var Popup, dataTable, detailid;
+        var rolex;
+        var subototal = 0;
+        var quantity = 0;
+
+
+        $(document).ready(function () {
+
+            if ($("#Result").val() == "true") {
+                $.notify('@Html.Raw(ViewBag.Message)', "success", { globalPosition: "top center" });
+
+            }
+            else if ($("#Result").val() == "false") {
+                $.notify('@Html.Raw(ViewBag.Message)', "error", { globalPosition: "top center" });
+            }
+
+            dataTable = $('#TableWorkOrderDetails').DataTable(
+                {
+                    "ajax": {
+                        "url": '/WorkOrders/GetWorkOrderDetails/?id=' + $('#WorkOrderId').val(),
+                        "type": "GET",
+                        "datatype": "json"
+                    },
+                    "language": {
+                        "url": "/lib/datatables/Spanish.json"
+                    },
+                    paging: false,
+                    responsive: true,
+                    searching: false,
+                    ordering: false,
+                    info: false,
+                    "rowId": "workOrderDetailId",
+                    responsive: true,
+                    "columnDefs": [
+                        {
+                            "targets": 0,
+                            visible: false,
+                            orderable: false
+                        },
+                        {
+                            "targets": 1,
+                            visible: true,
+                            responsivePriority: 1,
+                            orderable: false
+                        },
+                        {
+                            "targets": 2,  //Cantidad
+                            className: 'dt-body-center',
+                            visible: true,
+                            responsivePriority: 1,
+                            orderable: false
+                        },
+                        {
+                            "targets": [3, 4],//Unidad y Material
+                            className: 'dt-body-left',
+                            orderable: false,
+                            responsivePriority: 3,
+                            orderable: false
+                        },
+                        {
+                            "targets": 5,  //Cantidad
+                            className: 'dt-body-left',
+                            visible: true,
+                            responsivePriority: 1,
+                            orderable: false
+                        },
+                        {
+                            "targets": [6, 7],
+                            className: 'dt-body-right',
+                            orderable: false,
+                            responsivePriority: 2,
+                            orderable: false
+                        },
+                        {
+                            "targets": 8,
+                            className: 'dt-body-center',
+                            orderable: false,
+                            responsivePriority: 3,
+                            orderable: false
+                        },
+                        {
+                            "targets": [9, 10, 11],
+                            className: 'dt-body-center',
+                            orderable: false,
+                            responsivePriority: 2,
+                            orderable: false
+                        },
+
+                    ],
+                    "columns": [
+                        { "data": "workOrderDetailId" },
+                        { "data": "workOrderDetailId", "render": function (data) { count = count + 1; detailid = data; return "<span>" + count.toString() + "</span>"; } },
+                        {
+                            "data": "quantity",
+                            "render": function (data) {
+                                quantity = data;
+                                return data;
+                            }
+                        },
+                        { "data": "unit.unitName" },
+                        { "data": "material.materialName" },
+                        { "data": "description" },
+                        { "data": "price", "render": $.fn.dataTable.render.number(',', '.', 2) },
+                        {
+                            "data": "rawMaterial",
+                            "render": function (data) {
+                                if (data == quantity) {
+                                    return "<div class='completed'>" + data + "</div>"
+                                }
+                                else if (data == 0) {
+                                    return "<div class='nothing'>" + data + "</div>"
+                                }
+                                else {
+                                    return "<div class='pending'>" + data + "</div>"
+                                }
+                            }
+                        },
+                        {
+                            "data": "tt",
+                            "render": function (data) {
+                                if (data == quantity) {
+                                    return "<div class='completed'>" + data + "</div>"
+                                }
+                                else if (data == 0) {
+                                    return "<div class='nothing'>" + data + "</div>"
+                                }
+                                else {
+                                    return "<div class='pending'>" + data + "</div>"
+                                }
+                            }
+                        },
+                        {
+                            "data": "machined",
+                            "render": function (data) {
+                                if (data == quantity) {
+                                    return "<div class='completed'>" + data + "</div>"
+                                }
+                                else if (data == 0) {
+                                    return "<div class='nothing'>" + data + "</div>"
+                                }
+                                else {
+                                    return "<div class='pending'>" + data + "</div>"
+                                }
+                            }
+                        },
+                        {
+                            "data": "invoiced",
+                            "render": function (data) {
+                                if (data == quantity) {
+                                    return "<div class='completed'>" + data + "</div>"
+                                }
+                                else if (data == 0) {
+                                    return "<div class='nothing'>" + data + "</div>"
+                                }
+                                else {
+                                    return "<div class='pending'>" + data + "</div>"
+                                }
+                            }
+                        },
+                        {
+                            "data": "shipped",
+                            "render": function (data) {
+                                if (data == quantity) {
+                                    return "<div class='completed'>" + data + "</div>"
+                                }
+                                else if (data == 0) {
+                                    return "<div class='nothing'>" + data + "</div>"
+                                }
+                                else {
+                                    return "<div class='pending'>" + data + "</div>"
+                                }
+                            }
+                        },
+                        {
+                            "data": "workOrderDetailId",
+                            "render": function (data) {
+                                wodid = data;
+                                var result = "<div style='white-space: nowrap; text-align:right;'>";
+                                result += "<input type='text' class='inputremision' id='detail_" + wodid + "' onchange='matrix2()'  />"
+                                result += "</div>";
+
+
+                                return result;
+                            }
+
+                        }
+                    ]
+                });
+
+        });
+        function actualiza() {
+
+            dataTable.ajax.reload();
+
+            return false;
+        };
+  
+
+        function detail(wodid, quantity) { 
+            this.wodid = wodid;
+            this.quantity = quantity;
+        }
+
+        let arr = [];
+        
+        function returnmtx() { 
+            return arr;
+}
+
+
+        function matrix2() {
+            var strdetails = "";
+            $('input[type=text]').each(function () {
+                if ($(this).val() != "") {
+
+                    var workdetailid = $(this).attr('id');
+                    workdetailid = workdetailid.substring(7, workdetailid.length)
+                    strdetails += workdetailid + "," + $(this).val() + "|";
+                }
+            });
+            $("#wodeliverydetails").val(strdetails);
+        }
+
+        function matrix(wodid, quantity) {
+
+            var details = $("#wodeliverydetails").val() + wodid.toString() + "," + quantity + "|";
+            var strdetails = "";
+           
+            alert(strdetails);
+            $("#wodeliverydetails").val(details);
+
+            arr.push([wodid,parseInt(quantity)])
+
+            console.table(arr);
+
+
+            // //Ejemplo de matriz
+            // let MathScore = [
+            //     ['John Doe', 20, 60, 'A'],
+            //     ['Jane Doe', 10, 52, 'B'],
+            //     ['Petr Chess', 5, 24, 'F'],
+            //     ['Ling Jess', 28, 43, 'A'],
+            //     ['Ben Liard', 16, 51, 'B']
+            // ];
+            // console.table(MathScore);
+
+
+           
+        }
+
+        function valida() {
+            if ($("#wodeliverydetails").val() != "") {
+                window.document.getElementById("partidas").style.display = "none";
+                return true;
+            }
+            else {
+                window.document.getElementById("partidas").style.display = "block";
+                $.notify('Es necesario introducir las partidas a remisionar', "error", { globalPosition: "top center" });
+                return false;
+            }
+        }
+        
+
+    </script>
+
+
+
+}

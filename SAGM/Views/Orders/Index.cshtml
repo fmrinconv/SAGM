@@ -55,8 +55,8 @@
                 </button>
             </div>
             <div class="modal-body">
-                <div class="table-responsive">
-                    <table id="TableWorkOrders" class="table table-responsive table-hover responsive display" style="width:100%; font-size:x-small;">
+                <div class="table table-responsive">
+                    <table id="TableWorkOrders" class="table  table-hover display" style="width:100%; font-size:x-small;">
                         <thead>
                             <tr>
                                 <th>#</th>
@@ -79,7 +79,7 @@
             </div>
             <div class="modal-footer">
                 <div class="col text-center">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" onclick="DestroyTableWorkOrders()"><i class="fa fa-ban"> </i>Cancelar</button>
+                    <button type="button" id="btnCancelTableWorkOrder" class="btn btn-secondary" data-bs-dismiss="modal" onclick="DestroyTableWorkOrders()"><i class="fa fa-ban"> </i>Cancelar</button>
                 </div>
 
             </div>
@@ -100,6 +100,7 @@
         var dataTable;
         var orderid;
         var dataTableWorkOrders;
+        var workorderid;
         function parseJsonDate(jsonDateString) {
             return new Date(parseInt(jsonDateString.replace('/Date(', '')));
         }
@@ -278,8 +279,17 @@
                                 result += "<a title='Editar OC' onclick=\"showInPopup('/Orders/EditOrder?id=" + data + "','Editar\ OC','bg-danger')\" ";
                                 result += "class='btn btn-sm btn-outline-warning'><i title='Editar OC' class='fa-solid fa-pencil-alt' style='width:17px;'></i></a>";
 
-                                result += "<a title='Enlazr OC' data-bs-toggle='modal' data-bs-target='#WorkOrdersModal' onclick='GetWorkOrders(" + data + ")' ";
-                                result += "class='btn btn-sm btn-outline-primary'><i title='Enlazar OC' class='fa fa-link'></i></a>";
+                              if (workorderid == 0) 
+                              {
+                                  result += "<a title='Enlazr OC' data-bs-toggle='modal' data-bs-target='#WorkOrdersModal' onclick='GetWorkOrders(" + data + ")' ";
+                                  result += "class='btn btn-sm btn-outline-primary'><i title='Enlazar OC' class='fa fa-link'></i></a>";
+                              }
+                              else 
+                              {
+                                        result += "<a title='Desenlazar' onclick=\"showInPopup('/Orders/UnlinkOT?id=" + data + "','Desenlazar\ OC','bg-danger')\" ";
+                                        result += "class='btn btn-sm btn-outline-danger'><i title='Desenlazar OC' class='fa fa-link-slash' style='width:17px;'></i></a>";
+                              }
+                                
                                     
                                 result += "<a title='Copiar OC' onclick=\"showInPopup('/Orders/CopyOrder?id=" + data + "','Copiar\ OC','bg-danger')\" ";
                                 result += "class='btn btn-sm btn-outline-success'><i title='Copiar OC' class='fa fa-copy' style='width:17px;'></i></a>";
@@ -578,7 +588,7 @@
                 processData: false,
                 success: function (data) {
                     if (data.success == true) {
-                        $('#WorkOrdersModal').show();
+                        $('#btnCancelTableWorkOrder').click();
                         dataTable.ajax.reload();
                         //notificacion de transaccion exitosa usando plugin notify
                         $.notify("¡OC Enlazada!", {

@@ -25,6 +25,9 @@
                 <input type="submit" value="Guardar" class="btn btn-outline-primary" />
                 <a asp-action="ChangePassword" class="btn btn-outline-secondary">Cambiar Contraseña</a>
             </div>
+
+            <input type="hidden" id="Result" name="Result" value="@ViewBag.Result" />
+            <input type="hidden" id="Message" name="Message" value="@ViewBag.Message" />
         </form>
     </div>
     <div class="col-md-4 zoom">
@@ -35,6 +38,7 @@
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
     <script type="text/javascript">
+
         $(document).ready(function () {
             $("#CountryId").change(function () {
                 $("#StateId").empty();
@@ -83,8 +87,12 @@
             })
 
             if ($("#Result").val() == "true") {
-                $.notify('@ViewBag.Message', "success");
+                msj = $("#Message").val();
+                msj = msj.toString().replace("ñ", "\u00f1")
+                $.notify(msj, "success");
             }
         });
+
+       
     </script>
 }

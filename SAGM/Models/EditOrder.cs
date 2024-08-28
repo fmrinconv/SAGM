@@ -39,11 +39,11 @@ namespace SAGM.Models
 
         public IEnumerable<SelectListItem> SupllierContacts { get; set; }
 
-        [Display(Name = "Fecha modificación")]
+        [Display(Name = "Entrega estimada")]
         [DisplayFormat(DataFormatString = "{0:yyyy-MM-ddTHH:mm:ss}", ApplyFormatInEditMode = true)]
         public DateTime? EstimatedDeliveryDate { get; set; }
 
-        [Display(Name = "Fecha modificación")]
+        [Display(Name = "Fecha entrega")]
         [DisplayFormat(DataFormatString = "{0:yyyy-MM-ddTHH:mm:ss}", ApplyFormatInEditMode = true)]
         public DateTime? DeliveryDate { get; set; }
 

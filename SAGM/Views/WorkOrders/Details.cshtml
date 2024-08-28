@@ -129,7 +129,10 @@
                     <dd>
                         @if (ViewBag.DetailsCount > 0)
                         {
-                            <a onclick="PrintReport('@Model.WorkOrderId')" class="btn btn-primary"><i title='Imprimir cotización' class='fa-solid fa-print'></i></a>
+                            <a onclick="PrintReport('@Model.WorkOrderId')" class="btn btn-primary">OT <i title='Imprimir Orden de Trabajo' class='fa-solid fa-print'></i></a>
+
+                            <a href='@Url.Action("Remision", "WorkOrders", new { id = @Model.WorkOrderId }, Context.Request.Scheme)' class="btn btn-outline-primary" title="Imprimir remisión">Remisión<i class="fa-solid fa-list-check"></i></a>
+                
                         }
                     </dd>
 
@@ -159,9 +162,10 @@
         <a onclick="showInPopup('@Url.Action("AddOrEditDetail", "WorkOrders", new { id = Model.WorkOrderId, detailid=0 }, Context.Request.Scheme)','Agregar partida','bg-success')" class="btn btn-sm btn-outline-success"><i class="fa-solid fa-plus-circle" title="Agregar partida"></i></a>
     </div>
     <div class="card-body">
-        <div id="view-all" >
+        <div id="view-all" style="width:100%;">
             <input type="hidden" id="Result" name="Result" value="@ViewBag.Result" />
-                @await Html.PartialAsync("_ViewAllWorkOrderDetails.cshtml", Model)
+            <input type="hidden" id="Message" name="Message" value="@ViewBag.Message" />
+            @await Html.PartialAsync("_ViewAllWorkOrderDetails.cshtml", Model)
         </div>
     </div>
 </div>
@@ -192,6 +196,15 @@
            
             if ($("#Result").val() == "true") {
                 $.notify('@Html.Raw(ViewBag.Message)', "success", { globalPosition: "top center" });
+                var remisionName = $("#Message").val();
+
+
+                if ($("#Message").val().substring(0,9) == "La remisi") {
+                    var remision = remisionName.substring(12, 28)
+                    PrintRemision(remision);
+                    $("#Message").val("");
+
+                }
              
             }
             else if ($("#Result").val() == "false") {
@@ -546,8 +559,8 @@
                 var popout = window.open("/WorkOrders/DownloadFile/?id=" + guid + "&filename=" + filename, "_blank");
                 return false;
         };
-        function PrintReport(quoteid) {
-            var popout = window.open("/WorkOrders/PrintReport/?QuoteId=" + quoteid, "_blank");
+        function PrintReport(workorderid) {
+            var popout = window.open("/WorkOrders/PrintReport/?WorkOrderId=" + workorderid, "_blank");
                 return false;
         }
         function PopupForm(url, msg) {
@@ -619,8 +632,6 @@
                 }
             });
         };
-        function getPerformance() { 
-        }
 
         function graphic(workorderid) {
 
@@ -706,6 +717,10 @@
             
         }
 
+        function PrintRemision(workorderdeliveryname) {
+            var popout = window.open("/WorkOrders/PrintRemision/?workorderdeliveryname=" + workorderdeliveryname, "_blank");
+            return false;
+        }
    
     </script>
 

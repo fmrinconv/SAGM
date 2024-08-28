@@ -91,8 +91,8 @@ namespace SAGM.Helpers
                         //Cliente
                         table.Cell().Row(1).Column(1).PaddingLeft(2).BorderRight(1).BorderColor(Colors.BlueGrey.Lighten5).Text(quote.Customer.CustomerNickName).FontSize(9);
                         table.Cell().Row(2).Column(1).PaddingLeft(2).BorderRight(1).BorderColor(Colors.BlueGrey.Lighten5).Text(quote.Customer.Address).FontSize(9);
-                        table.Cell().Row(3).Column(1).PaddingLeft(2).BorderRight(1).BorderColor(Colors.BlueGrey.Lighten5).Text($"{"Comprador:"} {finalUser.Name} {finalUser.LastName}").FontSize(9);
-                        table.Cell().Row(4).Column(1).PaddingLeft(2).BorderRight(1).BorderColor(Colors.BlueGrey.Lighten5).Padding(1).Text($"{"Usuario:"} {buyer.Name} {buyer.LastName}").FontSize(9);
+                        table.Cell().Row(3).Column(1).PaddingLeft(2).BorderRight(1).BorderColor(Colors.BlueGrey.Lighten5).Text($"{"Comprador:"} {buyer.Name} {buyer.LastName}").FontSize(9);
+                        table.Cell().Row(4).Column(1).PaddingLeft(2).BorderRight(1).BorderColor(Colors.BlueGrey.Lighten5).Padding(1).Text($"{"Usuario:"} {finalUser.Name} {finalUser.LastName}").FontSize(9); 
 
                         //SIMAQ
                         table.Cell().Row(1).Column(2).PaddingLeft(2).Text("SILLA MAQUINADOS ALTA PRECISION").FontSize(9);
@@ -236,7 +236,7 @@ namespace SAGM.Helpers
                 return container
                     .Width(202, QuestPDF.Infrastructure.Unit.Millimetre)
                     .BorderLeft(1)
-                    .BorderColor(Colors.BlueGrey.Lighten5).PaddingLeft(2);
+                    .BorderColor(Colors.BlueGrey.Lighten5).PaddingLeft(2    );
                 
 
 
@@ -651,6 +651,193 @@ namespace SAGM.Helpers
 
                 return Report;
             }
+        }
+
+        public async Task<byte[]> GenerateRemisionReportPDFAsync(int workOrderDeliveryId)
+        {
+            nfi.CurrencyDecimalDigits = 2;
+            nfi.NumberDecimalDigits = 2;
+
+            WorkOrderDelivery remision = await _context.WorkOrderDeliveries
+                .Include(r => r.WorkOrder).ThenInclude(r => r.Customer)
+                .Include(r => r.WorkOrder).ThenInclude(r => r.WorkOrderDetails).ThenInclude(d => d.Unit)
+                .Include(r => r.WorkOrder).ThenInclude(r => r.WorkOrderDetails).ThenInclude(d => d.Material)
+                .Include(r => r.WorkOrderDeliveryDetails)
+                .FirstOrDefaultAsync(r => r.WorkOrderDeliveryId == workOrderDeliveryId);
+
+
+            Contact buyer = await _context.Contacts.FindAsync(remision.WorkOrder.BuyerContactId);
+            Contact finalUser = await _context.Contacts.FindAsync(remision.WorkOrder.FinalUserId);
+
+            QuestPDF.Settings.License = LicenseType.Community;
+            var Report = QuestPDF.Fluent.Document.Create(document =>
+            {
+
+                document.Page(page =>
+                {
+                    string path = Path.Combine(_host.WebRootPath, "Images\\");
+                    var rutaimagen = $"{path}{"simaq_header_remision.jpg"}";
+                    byte[] imageData = System.IO.File.ReadAllBytes(rutaimagen);
+
+                    page.Size(PageSizes.Letter);
+                    page.Margin(5, QuestPDF.Infrastructure.Unit.Millimetre);
+
+                    page.Header().ShowOnce().Column(col =>
+                    {
+                        col.Item().Row(row => row.RelativeItem().Height(68).Image(imageData));
+                        col.Item().Row(row => row.RelativeItem().Height(20).AlignRight().PaddingRight(5).Text(remision.WorkOrderDeliveryName).FontColor("626567").BackgroundColor("5aede8").Bold());
+                        col.Item().Border(1).BorderColor(Colors.BlueGrey.Lighten5).Table(table =>
+                        {
+
+                            table.ColumnsDefinition(columns =>
+                            {
+                                columns.RelativeColumn();
+                                columns.RelativeColumn();
+
+                            });
+                            table.Header(header =>
+                            {
+                                header.Cell().BorderRight(1).BorderColor(Colors.BlueGrey.Lighten5).Padding(3).AlignLeft().Text("Datos del cliente").Bold();
+                                header.Cell().Padding(3).AlignLeft().Text("Datos del proveedor").Bold();
+                            });
+
+                            //Cliente
+                            table.Cell().Row(1).Column(1).PaddingLeft(2).BorderRight(1).BorderColor(Colors.BlueGrey.Lighten5).Text(remision.WorkOrder.Customer.CustomerNickName).FontSize(9);
+                            table.Cell().Row(2).Column(1).PaddingLeft(2).BorderRight(1).BorderColor(Colors.BlueGrey.Lighten5).Text(remision.WorkOrder.Customer.Address).FontSize(9);
+                            table.Cell().Row(3).Column(1).PaddingLeft(2).BorderRight(1).BorderColor(Colors.BlueGrey.Lighten5).Text($"{"Comprador:"} {buyer.Name} {buyer.LastName}").FontSize(9);
+                            table.Cell().Row(4).Column(1).PaddingLeft(2).BorderRight(1).BorderColor(Colors.BlueGrey.Lighten5).Padding(1).Text($"{"Usuario:"} {finalUser.Name} {finalUser.LastName}").FontSize(9);
+                            
+
+                            //SIMAQ
+                            table.Cell().Row(1).Column(2).PaddingLeft(2).Text("SILLA MAQUINADOS ALTA PRECISION").FontSize(9);
+                            table.Cell().Row(2).Column(2).PaddingLeft(2).Text("Aramberri #503, Col. Lazaro Cardenas Ampliación, Escobedo, NL.").FontSize(9);
+                            table.Cell().Row(3).Column(2).PaddingLeft(2).Text("81 83 97 66 79, 81 15 34 99 71").FontSize(9);
+
+
+                        });
+                    });
+
+                    page.Content().PaddingVertical(10).Column(col =>
+                    {
+                        col.Item().Table(table => {
+                            table.ColumnsDefinition(columns =>
+                            {
+                                columns.ConstantColumn(10, QuestPDF.Infrastructure.Unit.Millimetre);//#
+                                columns.RelativeColumn();//Material
+                                columns.ConstantColumn(120, QuestPDF.Infrastructure.Unit.Millimetre);//Descripción
+                                columns.ConstantColumn(17, QuestPDF.Infrastructure.Unit.Millimetre);//U.Medida
+                                columns.ConstantColumn(18, QuestPDF.Infrastructure.Unit.Millimetre);//Cantidad
+
+                            });
+
+                            table.Header(header =>
+                            {
+                                header.Cell().Background("5aede8").Element(encabezado).Text("#").FontSize(9).FontColor("626567").Bold();
+                                header.Cell().Background("5aede8").Element(encabezado).Text("Material").FontSize(9).FontColor("626567").Bold();
+                                header.Cell().Background("5aede8").Element(encabezado).Text("Descripción").FontSize(9).FontColor("626567").Bold();
+                                header.Cell().Background("5aede8").Element(encabezado).Text("U.M").FontSize(9).FontColor("626567").Bold();
+                                header.Cell().Background("5aede8").Element(encabezado).Text("Cantidad").FontSize(9).FontColor("626567").Bold();
+
+                            });
+
+                            int counter = 1;
+
+                            foreach (WorkOrderDeliveryDetail dd in remision.WorkOrderDeliveryDetails)
+                            {
+
+
+
+                                table.Cell().Element(contenido).Padding(1).AlignCenter().Text(counter.ToString()).FontSize(9); //#
+                                table.Cell().Element(contenido).Padding(1).AlignCenter().Text(dd.workOrderDetail.Material.MaterialName).FontSize(9);
+                                table.Cell().Element(contenido).Padding(1).AlignLeft().Text(dd.workOrderDetail.Description).FontSize(9);
+                                table.Cell().Element(contenido).Padding(1).AlignCenter().Text(dd.workOrderDetail.Unit.UnitName).FontSize(9);
+                                table.Cell().Element(contenido).Padding(1).AlignRight().Text(dd.Quantity.ToString("N", nfi)).FontSize(9);
+
+                                counter += 1;
+                            }
+                        });
+                        col.Item().Table(t =>
+                        {
+                            t.ColumnsDefinition(columns =>
+                            {
+                                columns.RelativeColumn();
+
+
+                            });
+                      
+                            //Comentarios
+                            t.Cell().PaddingTop(20).Background("5aede8").AlignLeft().Element(comment).Text("Comentarios").FontSize(9).FontColor("626567").Bold();
+                            t.Cell().PaddingLeft(1).Width(205, QuestPDF.Infrastructure.Unit.Millimetre).Border(1).BorderColor(Colors.Grey.Medium).AlignLeft().Text(remision.Comments).FontSize(9);
+
+                            
+                        });
+                        col.Item().PaddingTop(5).Table(t => 
+                        {
+                            t.ColumnsDefinition( columns => 
+                            {
+                                columns.ConstantColumn(45, QuestPDF.Infrastructure.Unit.Millimetre);
+                                columns.ConstantColumn(80, QuestPDF.Infrastructure.Unit.Millimetre);//#
+                            });
+
+                            t.Cell().Height(7, QuestPDF.Infrastructure.Unit.Millimetre).Element(contenido).Padding(1).AlignLeft().Text("Nombre de quien recibe").FontSize(10);
+                            t.Cell().Height(7, QuestPDF.Infrastructure.Unit.Millimetre).Element(contenido).Padding(1).AlignLeft().Text("");
+                            t.Cell().Height(7, QuestPDF.Infrastructure.Unit.Millimetre).Element(contenido).Padding(1).AlignLeft().Text("Fecha").FontSize(10); ;
+                            t.Cell().Height(7, QuestPDF.Infrastructure.Unit.Millimetre).Element(contenido).Padding(1).AlignLeft().Text("");
+                            t.Cell().Height(15, QuestPDF.Infrastructure.Unit.Millimetre).Element(contenido).Padding(1).AlignLeft().Text("Firma").FontSize(10); ;
+                            t.Cell().Height(15, QuestPDF.Infrastructure.Unit.Millimetre).Element(contenido).Padding(1).AlignLeft().Text("");
+                        });
+                    });
+
+
+
+
+                    page.Footer().Row(row =>
+                    {
+                        var rutaimagen = $"{path}{"simaq_footer_remision.jpg"}";
+                        byte[] imageData = System.IO.File.ReadAllBytes(rutaimagen);
+                        row.ConstantItem(140).Height(65).AlignBottom().Text(txt =>
+                        {
+                            txt.Span("Página ").FontSize(8).FontFamily("Tahoma").FontColor("626567");
+                            txt.CurrentPageNumber().FontSize(8).FontFamily("Tahoma").FontColor("626567");
+                            txt.Span(" de ").FontSize(8).FontFamily("Tahoma").FontColor("626567");
+                            txt.TotalPages().FontSize(8).FontFamily("Tahoma").FontColor("626567");
+                        });
+                        row.RelativeItem().Height(65);
+                        row.ConstantItem(120).Height(65).AlignBottom().Image(imageData);
+                    });
+
+                });
+            }).GeneratePdf();
+
+            static IContainer encabezado(IContainer container)
+            {
+                return container
+                    .Border(1)
+                    .BorderColor(Colors.BlueGrey.Lighten5)
+                    .AlignCenter();
+
+            }
+
+            static IContainer contenido(IContainer container)
+            {
+                return container
+                    .Border(1)
+                    .BorderColor(Colors.BlueGrey.Lighten5);
+
+            }
+
+            static IContainer comment(IContainer container)
+            {
+                return container
+                    .Width(202, QuestPDF.Infrastructure.Unit.Millimetre)
+                    .BorderLeft(1)
+                    .BorderColor(Colors.BlueGrey.Lighten5).PaddingLeft(2);
+
+
+
+            }
+
+            return Report;
         }
     }
 }

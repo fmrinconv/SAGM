@@ -49,5 +49,7 @@ namespace SAGM.Data.Entities
         public ICollection<WorkOrderDetailComment> WorkOrderDetailComments { get; set; }
 
         public ICollection<WorkOrderDetailProcess> WorkOrderDetailProcess { get; set; }
+
+        public ICollection<WorkOrderDeliveryDetail> WorkOrderDeliveryDetails { get; set; }
     }
 }

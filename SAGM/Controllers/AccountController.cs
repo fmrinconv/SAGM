@@ -60,6 +60,9 @@ namespace SAGM.Controllers
                     IdentityResult result = await _userHelper.ChangePasswordAsync(user, model.OldPassword, model.NewPassword);
                     if (result.Succeeded)
                     {
+
+                        TempData["ChangePasswordResult"] = "true";
+                        TempData["ChangePasswordMessage"] = "La contraseña ha sido cambiada con éxito";
                         return RedirectToAction("ChangeUser");
                     }
                     else
@@ -85,7 +88,20 @@ namespace SAGM.Controllers
 
         public async Task<IActionResult> ChangeUser()
         {
-            User user = await _userHelper.GetUserAsync(User.Identity.Name);
+
+
+            ViewBag.Result = "";
+            ViewBag.Message = "";
+
+            if (TempData.Count() != 0)
+            {
+                ViewBag.Result = TempData["ChangePasswordResult"].ToString();
+                ViewBag.Message = TempData["ChangePasswordMessage"].ToString();
+                TempData.Remove("ChangePasswordResult");
+                TempData.Remove("ChangePasswordMessage");
+            }
+
+                User user = await _userHelper.GetUserAsync(User.Identity.Name);
             if (user == null)
             {
                 return NotFound();
@@ -135,6 +151,7 @@ namespace SAGM.Controllers
                 user.FirstName = model.FirstName;
                 user.LastName = model.LastName;
                 user.PhoneNumber = model.PhoneNumber;
+                user.ImageId = model.ImageId;
                 user.City = await _context.Cities.FindAsync(model.CityId);
                 await _userHelper.UpdateUserAsync(user);
                 ViewBag.Result = "true";
@@ -175,6 +192,7 @@ namespace SAGM.Controllers
                 SignInResult result = await _userHelper.LoginAsync(model);
                 if (result.Succeeded)
                 {
+                    
                     return RedirectToAction("Index", "Home");
                 }
                 if (result.IsLockedOut)

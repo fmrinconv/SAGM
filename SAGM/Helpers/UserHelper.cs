@@ -141,9 +141,9 @@ namespace SAGM.Helpers
             return await _userManager.GenerateEmailConfirmationTokenAsync(user);
         }
 
-        public Task<IdentityResult> ChangePasswordAsync(User user, string oldPassword, string newPassword)
+        public async Task<IdentityResult> ChangePasswordAsync(User user, string oldPassword, string newPassword)
         {
-            throw new NotImplementedException();
+            return await _userManager.ChangePasswordAsync(user, oldPassword, newPassword);
         }
 
         public async Task<string> GeneratePasswordResetTokenAsync(User user)

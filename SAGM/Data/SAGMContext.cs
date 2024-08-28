@@ -66,6 +66,10 @@ namespace SAGM.Data
 
         public DbSet<WorkOrderDetailProcess> WorkOrderDetailProcesses { get; set; }
 
+        public DbSet<WorkOrderDelivery> WorkOrderDeliveries { get; set; }
+
+        public DbSet<WorkOrderDeliveryDetail> workOrderDeliveryDetails { get; set; }
+
 
         internal static IConfiguration GetService(Type type)
         {

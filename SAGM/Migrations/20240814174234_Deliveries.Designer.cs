@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SAGM.Data;
 
@@ -11,9 +12,11 @@ using SAGM.Data;
 namespace SAGM.Migrations
 {
     [DbContext(typeof(SAGMContext))]
-    partial class SAGMContextModelSnapshot : ModelSnapshot
+    [Migration("20240814174234_Deliveries")]
+    partial class Deliveries
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1768,7 +1771,7 @@ namespace SAGM.Migrations
             modelBuilder.Entity("SAGM.Data.Entities.WorkOrderDeliveryDetail", b =>
                 {
                     b.HasOne("SAGM.Data.Entities.WorkOrderDelivery", "workOrderDelivery")
-                        .WithMany("WorkOrderDeliveryDetails")
+                        .WithMany()
                         .HasForeignKey("WorkOrderDeliveryId");
 
                     b.HasOne("SAGM.Data.Entities.WorkOrderDetail", "workOrderDetail")
@@ -1962,11 +1965,6 @@ namespace SAGM.Migrations
                     b.Navigation("WorkOrderDeliveries");
 
                     b.Navigation("WorkOrderDetails");
-                });
-
-            modelBuilder.Entity("SAGM.Data.Entities.WorkOrderDelivery", b =>
-                {
-                    b.Navigation("WorkOrderDeliveryDetails");
                 });
 
             modelBuilder.Entity("SAGM.Data.Entities.WorkOrderDetail", b =>

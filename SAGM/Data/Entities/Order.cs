@@ -34,11 +34,11 @@ namespace SAGM.Data.Entities
         [Required(ErrorMessage = "El campo {0} es obligatorio.")]
         public int SupplierContactId { get; set; }
 
-        [Display(Name = "Fecha modificación")]
+        [Display(Name = "Fecha compromiso")]
         [DisplayFormat(DataFormatString = "{0:yyyy-MM-ddTHH:mm:ss}", ApplyFormatInEditMode = true)]
         public DateTime? EstimatedDeliveryDate { get; set; }
 
-        [Display(Name = "Fecha modificación")]
+        [Display(Name = "Fecha entrega")]
         [DisplayFormat(DataFormatString = "{0:yyyy-MM-ddTHH:mm:ss}", ApplyFormatInEditMode = true)]
         public DateTime? DeliveryDate { get; set; } = null;
 

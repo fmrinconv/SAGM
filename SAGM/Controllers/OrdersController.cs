@@ -7,6 +7,8 @@ using Microsoft.EntityFrameworkCore;
 using SAGM.Data.Entities;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using DocumentFormat.OpenXml.Office2010.Excel;
+using System.Reflection.PortableExecutable;
+using DocumentFormat.OpenXml.InkML;
 
 namespace SAGM.Controllers
 {
@@ -695,7 +697,10 @@ namespace SAGM.Controllers
         }
 
         [HttpPost]
-           public async Task<JsonResult> LinkOT(int orderid, int workorderid) {          
+
+        public async Task<JsonResult> LinkOT(int orderid, int workorderid) {
+
+            string workordername = "";
 
             Order order = await _context.Orders
               .Include(o => o.Supplier)
@@ -705,14 +710,16 @@ namespace SAGM.Controllers
               .Include(o => o.WorkOrder)
               .FirstOrDefaultAsync(m => m.OrderId == orderid);
 
+            
+            if (order.WorkOrder != null)
+            {
+                workorderid = order.WorkOrder.WorkOrderId;
+                workordername = order.WorkOrder.WorkOrderName;
+            }
+
             order.WorkOrder = await _context.WorkOrders.FindAsync(workorderid);
             _context.Update(order);
             await _context.SaveChangesAsync();
-
-            string workordername = "";
-
-       
-    
 
             ViewBag.DetailsCount = order.OrderDetails.Count();
 
@@ -745,9 +752,36 @@ namespace SAGM.Controllers
             orderv.Tax = order.Tax;
 
 
+            return Json(new { success = true});
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> UnlinkOT(int id)
+        {
+            Order o = await _context.Orders.FindAsync(id);
+ 
+            return View(o);
+        }
 
 
-            return Json(new { isValid = true, html = ModalHelper.RenderRazorViewToString(this, "Details", orderv) });
+        [HttpPost]
+        public async Task<IActionResult> UnlinkOT(Order model)
+        {
+            Order order = await _context.Orders
+                .Include(o => o.OrderDetails)
+                .Include(o => o.Supplier)
+                .Include(o => o.OrderStatus)
+                .Include(o => o.WorkOrder)
+                .Include(o => o.Currency)
+                .FirstOrDefaultAsync(o => o.OrderId == model.OrderId);
+            order.WorkOrder = null;
+
+            _context.Update(order);
+            await _context.SaveChangesAsync();
+            TempData["EditOrderResult"] = "true";
+            TempData["EditOrderMessage"] = "La OC fue desenlazada";
+
+            return RedirectToAction(nameof(Index));
         }
 
         public async Task<IActionResult> AddOrEditDetail(int id = 0, int detailid = 0)

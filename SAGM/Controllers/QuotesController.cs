@@ -1505,6 +1505,7 @@ namespace SAGM.Controllers
                 .Include(q => q.QuoteDetails).ThenInclude(q => q.Material)
                 .Include(q => q.QuoteDetails).ThenInclude(q => q.Unit)
                 .Include(q => q.Customer)
+                .Include(q => q.Currency)
                 .FirstOrDefaultAsync(q => q.QuoteId == model.QuoteId);
 
        
@@ -1523,7 +1524,7 @@ namespace SAGM.Controllers
 
             // -------------------------
 
-            Quote Lastquote = await _context.Quotes.Where(q => q.QuoteName.Substring(0, 11) == quotename.Substring(0, 11)).OrderBy(q => q.QuoteId).LastOrDefaultAsync();//Ultima cotizacion
+            Quote Lastquote = await _context.Quotes.Where(q => q.QuoteName.Substring(0, 12) == quotename.Substring(0, 12)).OrderBy(q => q.QuoteId).LastOrDefaultAsync();//Ultima cotizacion
 
             if (Lastquote != null)
             {
@@ -1545,7 +1546,7 @@ namespace SAGM.Controllers
             //-----------------------
 
             User createdBy = await _userHelper.GetUserAsync(User.Identity.Name);
-            QuoteStatus quotestatus = await _context.QuoteStatus.FindAsync(1);//El primer estatus es creada
+            QuoteStatus quotestatus = await _context.QuoteStatus.FindAsync(2);//Como es copia nace en modificación
 
             Quote quote = new Quote()
             {

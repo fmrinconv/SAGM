@@ -51,7 +51,7 @@ namespace SAGM.Models
         public string? ModifiedBy { get; set; }
 
         [StringLength(128)]
-        [Display(Name = "OC Cliente")]
+        [Display(Name = "Req Cliente")]
         public string? CustomerPO { get; set; }
 
         [Display(Name = "Estatus")]
