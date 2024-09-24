@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SAGM.Data;
 
@@ -11,9 +12,11 @@ using SAGM.Data;
 namespace SAGM.Migrations
 {
     [DbContext(typeof(SAGMContext))]
-    partial class SAGMContextModelSnapshot : ModelSnapshot
+    [Migration("20240909183251_receipt")]
+    partial class receipt
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -665,6 +668,32 @@ namespace SAGM.Migrations
                     b.ToTable("OrderDetailComments");
                 });
 
+            modelBuilder.Entity("SAGM.Data.Entities.OrderDetailReceipts", b =>
+                {
+                    b.Property<int>("OrderDetailReceiptId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("OrderDetailReceiptId"));
+
+                    b.Property<int?>("OrderDetailId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("OrderReceiptId")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("Quantity")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.HasKey("OrderDetailReceiptId");
+
+                    b.HasIndex("OrderDetailId");
+
+                    b.HasIndex("OrderReceiptId");
+
+                    b.ToTable("OrderDetailReceipts");
+                });
+
             modelBuilder.Entity("SAGM.Data.Entities.OrderReceipt", b =>
                 {
                     b.Property<int>("OrderReceiptId")
@@ -697,32 +726,6 @@ namespace SAGM.Migrations
                     b.HasIndex("ReceivedById");
 
                     b.ToTable("OrderReceipts");
-                });
-
-            modelBuilder.Entity("SAGM.Data.Entities.OrderReceiptDetail", b =>
-                {
-                    b.Property<int>("OrderDetailReceiptId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("OrderDetailReceiptId"));
-
-                    b.Property<int?>("OrderDetailId")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("OrderReceiptId")
-                        .HasColumnType("int");
-
-                    b.Property<decimal>("Quantity")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.HasKey("OrderDetailReceiptId");
-
-                    b.HasIndex("OrderDetailId");
-
-                    b.HasIndex("OrderReceiptId");
-
-                    b.ToTable("OrderReceiptDetails");
                 });
 
             modelBuilder.Entity("SAGM.Data.Entities.OrderStatus", b =>
@@ -1663,6 +1666,21 @@ namespace SAGM.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("SAGM.Data.Entities.OrderDetailReceipts", b =>
+                {
+                    b.HasOne("SAGM.Data.Entities.OrderDetail", "OrderDetail")
+                        .WithMany()
+                        .HasForeignKey("OrderDetailId");
+
+                    b.HasOne("SAGM.Data.Entities.OrderReceipt", "OrderReceipt")
+                        .WithMany()
+                        .HasForeignKey("OrderReceiptId");
+
+                    b.Navigation("OrderDetail");
+
+                    b.Navigation("OrderReceipt");
+                });
+
             modelBuilder.Entity("SAGM.Data.Entities.OrderReceipt", b =>
                 {
                     b.HasOne("SAGM.Data.Entities.Order", "Order")
@@ -1678,21 +1696,6 @@ namespace SAGM.Migrations
                     b.Navigation("Order");
 
                     b.Navigation("ReceivedBy");
-                });
-
-            modelBuilder.Entity("SAGM.Data.Entities.OrderReceiptDetail", b =>
-                {
-                    b.HasOne("SAGM.Data.Entities.OrderDetail", "OrderDetail")
-                        .WithMany()
-                        .HasForeignKey("OrderDetailId");
-
-                    b.HasOne("SAGM.Data.Entities.OrderReceipt", "OrderReceipt")
-                        .WithMany("OrderReceiptDetails")
-                        .HasForeignKey("OrderReceiptId");
-
-                    b.Navigation("OrderDetail");
-
-                    b.Navigation("OrderReceipt");
                 });
 
             modelBuilder.Entity("SAGM.Data.Entities.Quote", b =>
@@ -1993,11 +1996,6 @@ namespace SAGM.Migrations
             modelBuilder.Entity("SAGM.Data.Entities.OrderDetailComment", b =>
                 {
                     b.Navigation("OrderDetailComments");
-                });
-
-            modelBuilder.Entity("SAGM.Data.Entities.OrderReceipt", b =>
-                {
-                    b.Navigation("OrderReceiptDetails");
                 });
 
             modelBuilder.Entity("SAGM.Data.Entities.OrderStatus", b =>

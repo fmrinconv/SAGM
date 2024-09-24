@@ -49,7 +49,7 @@ namespace SAGM.Controllers
                 TempData.Remove("AddOrEditCustomerMessage");
             }
 
-            return View(await _context.Customers
+            return View(await _context.Customers.OrderBy(c => c.CustomerNickName)
                 .ToListAsync());
 
         }

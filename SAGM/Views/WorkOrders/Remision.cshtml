@@ -166,7 +166,7 @@
         </div>
     </div>
 
-    <div class="contenido text-center">
+    <div class="contenido mt-2 text-center">
         <button type="submit" class="btn btn-outline-primary" onclick="return valida();">Vista previa&nbsp;<i class="fa-solid fa-list-check"></i></button>
     </div>
 
@@ -358,7 +358,7 @@
                             "render": function (data) {
                                 wodid = data;
                                 var result = "<div style='white-space: nowrap; text-align:right;'>";
-                                result += "<input type='text' class='inputremision' id='detail_" + wodid + "' onchange='matrix2()'  />"
+                                result += "<input type='text' class='inputremision' id='detail_" + wodid + "' onchange='fillids()'  />"
                                 result += "</div>";
 
 
@@ -390,7 +390,7 @@
 }
 
 
-        function matrix2() {
+        function fillids() {
             var strdetails = "";
             $('input[type=text]').each(function () {
                 if ($(this).val() != "") {

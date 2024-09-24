@@ -26,6 +26,11 @@ namespace SAGM.Data.Entities
         [Required(ErrorMessage = "El campo {0} es obligatorio.")]
         public decimal Price { get; set; }
 
+        [Column(TypeName = "decimal(18,2)")]
+        [Display(Name = "Recibido")]
+        [Required(ErrorMessage = "El campo {0} es obligatorio.")]
+        public decimal Received { get; set; } = 0;
+
         public Material Material { get; set; }
 
         public Unit Unit { get; set; }

@@ -32,6 +32,7 @@ namespace SAGM.Data.Entities
 
         public ICollection<QuoteDetailComment> QuoteDetailComments { get; set; }
 
-
+        [Display(Name = "Comentarios")]
+        public int CommentsNumber => QuoteDetailComments == null ? 0 : QuoteDetailComments.Count;
     }
 }

@@ -70,6 +70,9 @@ namespace SAGM.Data
 
         public DbSet<WorkOrderDeliveryDetail> workOrderDeliveryDetails { get; set; }
 
+        public DbSet<OrderReceipt> OrderReceipts { get; set; }
+        public DbSet<OrderReceiptDetail> OrderReceiptDetails { get; set; }
+
 
         internal static IConfiguration GetService(Type type)
         {

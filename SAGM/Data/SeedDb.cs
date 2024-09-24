@@ -85,6 +85,7 @@ namespace SAGM.Data
             await _userHelper.CheckRoleAsync(UserType.Finanzas.ToString());
             await _userHelper.CheckRoleAsync(UserType.Comprador.ToString());
             await _userHelper.CheckRoleAsync(UserType.Vendedor.ToString());
+            await _userHelper.CheckRoleAsync(UserType.Receptor.ToString());
         }
 
         private async Task CheckCountriesAsync()

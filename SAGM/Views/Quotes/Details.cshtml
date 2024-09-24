@@ -47,6 +47,7 @@
     <input type="hidden" id="QuoteDetailId" value="@ViewBag.quoteDetailId" />
     <input type="hidden" id="Tax" value = "@Model.Tax" />
     <input type="hidden" id="Discount" value="0" />
+    <input type="hidden" id="currencyname" value="@Model.Currency.Curr" />
 
 
     <div class="contenido container-fluid">
@@ -234,7 +235,7 @@
                         var htmlres = "<div><div class='row'><span style='text-align:right;'>Subtotal</span></div>";
                             htmlres += "<div class='row'><span style='text-align:right;'>Descuento</span></div> ";
                         htmlres += "<div class='row'><span style='text-align:right;'>IVA(" + $("#Tax").val().toString() + "%)</span></div>";
-                            htmlres += "<div class='row'><span style='text-align:right;'>Total $ </span></div> </div>";
+                        htmlres += "<div class='row'><span style='text-align:right;'>Total(" + $("#currencyname").val().toString()  + ") $ </span></div> </div>";
                         $(api.column(6).footer()).html(htmlres);
 
                         var iva = parseFloat($("#Tax").val())/100;
@@ -294,13 +295,15 @@
                         },
                         {
                             "targets": 8,
-                            className: 'dt-body-center',
-                            orderable: false,
-                            responsivePriority: 3,
-                            orderable: false
+                            visible: false,
                         },
                         {
                             "targets": 9,
+                            visible: false,
+                            orderable: false
+                        },
+                        {
+                            "targets": 10,
                             className: 'dt-body-center',
                             orderable: false,
                             responsivePriority: 2,
@@ -317,7 +320,10 @@
                             { "data": "description" },
                             { "data": "price", "render": $.fn.dataTable.render.number(',', '.', 2) },
                             { "data": "total", "render": $.fn.dataTable.render.number(',', '.', 2) },
-                            { "data": "archivesNumber" },
+                            { "data": "archivesNumber",
+                                "render": function (data) { archivesnumber = data; return data; },
+},
+                            { "data": "commentsNumber", "render": function (data) { commentsnumber = data; return data; }  },
                             { "data": "quoteDetailId", 
                                 "render": function (data) { 
                                     var result = "<div style='white-space: nowrap;'>";
@@ -328,10 +334,10 @@
                                     result += "class='btn btn-sm btn-outline-warning'><i title='Editar partida' class='fa-solid fa-pencil-alt'></i></a>";
 
                                     result += "<a title='Agregar archivos' onclick=\"showInPopup('/Archives/AddArchive?entityid=" + data + "&Entity=QuoteDetail','Agregar\archivos','bg-primary')\"";
-                                    result += "class='btn btn-sm btn-outline-primary'><i title='Agregar archivos' class='fa-solid fa-file-circle-plus'></i></a>";
+                                result += "class='btn btn-sm btn-outline-primary'>" + archivesnumber + "<i title='Agregar archivos' class='fa-solid fa-file-circle-plus'></i></a>";
 
                                     result += "<a title='Comentarios' onclick=\"showInPopup('/Quotes/AddOrEditDetailComment?id=" + data + "','Agregar\ comentario','bg-primary')\" ";
-                                    result += "class='btn btn-sm btn-outline-secondary'><i class='fa-solid fa-comments' title='Comentarios'></i></a>";
+                                    result += "class='btn btn-sm btn-outline-secondary'>" + commentsnumber + "<i class='fa-solid fa-comments' title='Comentarios'></i></a>";
 
                                     result += "<a title='Eliminar partida' onclick=\"showInPopup('/Quotes/DeleteQuoteDetail?id=" + data + "','Eliminar\ partida','bg-danger')\"";
                                     result += "class='btn btn-sm btn-outline-danger'><i title='Eliminar partida' class='fa-solid fa-trash'></i></a>";
@@ -469,10 +475,12 @@
         function changestatus(statusid) {
             var id = $("#QuoteId").val();
             $.ajax({
-                type: "Post",
-                url: "/Quotes/ChangeStatus/",
-                dataType: 'json',
-                data: { id: id, statusid: statusid },
+                type: "POST",
+                url: "/Quotes/ChangeStatus?id=" + id + "&statusid=" + statusid,
+                data: null,
+                async: true,
+                contentType: false,
+                processData: false,
                 success: function (data) {
 
                     if (data.isValid == true) {

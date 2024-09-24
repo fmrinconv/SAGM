@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using SAGM.Data.Entities;
+using SAGM.Enums;
 using SAGM.Models;
 
 namespace SAGM.Helpers
@@ -48,5 +49,7 @@ namespace SAGM.Helpers
         Task<IEnumerable<SelectListItem>> GetBuyersAsync();
 
         Task<IEnumerable<SelectListItem>> GetAllUsersAsync();
+
+        Task<IEnumerable<SelectListItem>> GetUsersByRoleAsync(UserType role);
     }
 }

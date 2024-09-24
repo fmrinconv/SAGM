@@ -7,6 +7,7 @@ using System.Security.Cryptography.X509Certificates;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Humanizer;
 using System.Collections.Immutable;
+using SAGM.Enums;
 
 namespace SAGM.Helpers
 {
@@ -243,6 +244,25 @@ namespace SAGM.Helpers
             }
             return listusers;
 
+        }
+
+        public async Task<IEnumerable<SelectListItem>> GetUsersByRoleAsync(UserType role)
+        {
+            List<User> list = await _userManager.Users.ToListAsync();
+            List<SelectListItem> listReceptors = new List<SelectListItem>();
+
+            foreach (User user in list)
+            {
+                if (await _userManager.IsInRoleAsync(user, role.ToString()))
+                {
+                    SelectListItem item = new SelectListItem();
+                    item.Text = user.FullName;
+                    item.Value = user.UserName;
+
+                    listReceptors.Add(item);
+                }
+            }
+            return listReceptors;
         }
     }
 }

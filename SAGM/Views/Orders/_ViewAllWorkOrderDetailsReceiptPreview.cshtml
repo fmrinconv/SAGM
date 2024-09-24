@@ -1,0 +1,42 @@
+﻿@model SAGM.Models.OrderReceiptViewModel
+
+<table class="table table-hover responsive" id="TableWorkOrderDetails" style="font-size:small; width:100%;">
+    <thead>
+        <tr>
+            <th style="background-color:#5aede8;">
+               
+            </th>
+            <th style="text-align: right; width:7%; background-color:#5aede8; color: #626567">&nbsp;&emsp;#</th>
+            <th style="text-align: right; background-color:#5aede8; color: #626567">
+                @Html.DisplayNameFor(model => model.OrderDetails.FirstOrDefault().Quantity)
+            </th>
+            <th style="text-align: left; background-color:#5aede8; color: #626567";>
+                U.Medida
+            </th>
+            <th style="text-align: left; background-color:#5aede8; color: #626567">
+                @Html.DisplayNameFor(model => model.OrderDetails.FirstOrDefault().Material.MaterialName)
+            </th>
+            <th style="text-align: left; background-color:#5aede8; color: #626567">
+                @Html.DisplayNameFor(model => model.OrderDetails.FirstOrDefault().Description)
+            </th>           
+
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model?.OrderDetails)
+        {
+            <tr>
+                <td>@Html.DisplayFor(modelItem => item.OrderDetailId)</td>
+                <td>@Html.DisplayFor(modelItem => item.OrderDetailId)</td>
+                <td>@Html.DisplayFor(modelItem => item.Quantity)</td>
+                <td>@Html.DisplayFor(modelItem => item.Unit.UnitName)</td>
+                <td>@Html.DisplayFor(modelItem => item.Material.MaterialName)</td>
+                <td>@Html.DisplayFor(modelItem => item.Description)</td>
+
+            </tr>
+        }
+
+
+    </tbody>
+
+    </table>

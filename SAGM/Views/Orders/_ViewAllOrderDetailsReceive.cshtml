@@ -1,6 +1,6 @@
-﻿@model SAGM.Models.QuoteViewModel
+﻿@model SAGM.Models.OrderReceiptViewModel
 <div class="container">
-<table class="table table-responsive table-hover responsive" id="TableQuoteDetails" style="font-size:small; width:100%;">
+<table class="table table-responsive table-hover responsive" id="TableOrderDetails" style="font-size:small; width:100%;">
     <thead>
         <tr>
             <th>
@@ -8,31 +8,34 @@
             </th>
             <th style="text-align:center; width:7%;">&nbsp;&emsp;#</th>
             <th style="text-align: center;">
-                @Html.DisplayNameFor(model => model.QuoteDetails.FirstOrDefault().Quantity)
+                @Html.DisplayNameFor(model => model.OrderDetails.FirstOrDefault().Quantity)
             </th>
             <th style="text-align: left;">
                 U.Medida
             </th>
             <th style="text-align: left;">
-                @Html.DisplayNameFor(model => model.QuoteDetails.FirstOrDefault().Material.MaterialName)
+                @Html.DisplayNameFor(model => model.OrderDetails.FirstOrDefault().Material.MaterialName)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.QuoteDetails.FirstOrDefault().Description)
+                @Html.DisplayNameFor(model => model.OrderDetails.FirstOrDefault().Description)
             </th>           
             <th style="text-align: right;">
-                @Html.DisplayNameFor(model => model.QuoteDetails.FirstOrDefault().Price)
+                @Html.DisplayNameFor(model => model.OrderDetails.FirstOrDefault().Price)
             </th>
             <th style="text-align: right;">
-                @Html.DisplayNameFor(model => model.QuoteDetails.FirstOrDefault().Total)
+                @Html.DisplayNameFor(model => model.OrderDetails.FirstOrDefault().Total)
             </th>
             <th style="text-align: right;">
-                @Html.DisplayNameFor(model => model.QuoteDetails.FirstOrDefault().ArchivesNumber)
+                @Html.DisplayNameFor(model => model.OrderDetails.FirstOrDefault().ArchivesNumber)
             </th>
             <th style="text-align: right;">
-                @Html.DisplayNameFor(model => model.QuoteDetails.FirstOrDefault().CommentsNumber)
+                @Html.DisplayNameFor(model => model.OrderDetails.FirstOrDefault().Received)
             </th>
             <th style="text-align: center;">
-                Acciones
+                Recibir
+            </th>
+            <th style="text-align: center;">
+                Cant Recibo
             </th>
             <th class="none">
                  
@@ -56,7 +59,8 @@
             <th></th>
             <th></th>
             <th></th>
-                <th></th>
+            <th></th>
+            <th></th>
         </tr>
     </tfoot>
     </table>

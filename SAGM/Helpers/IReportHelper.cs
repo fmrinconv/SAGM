@@ -12,6 +12,8 @@ namespace SAGM.Helpers
 
         Task<byte[]> GenerateRemisionReportPDFAsync(int workOrderDeliveryId);
 
-        
+        Task<byte[]> GenerateReceiptReportPDFAsync(int orderReceiptId);
+
+
     }
 }

@@ -615,9 +615,7 @@
             var id = $("#WorkOrderId").val();
             $.ajax({
                 type: "Post",
-                url: "/WorkOrders/ChangeStatus/",
-                dataType: 'json',
-                data: { workorderid: id, statusid: statusid },
+                url: "/WorkOrders/ChangeStatus?id=" + encodeURIComponent(id) + "&statusid=" + encodeURIComponent(statusid),
                 success: function (data) {
 
                     if (data.isValid == true) {

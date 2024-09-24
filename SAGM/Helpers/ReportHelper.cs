@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using DocumentFormat.OpenXml.Spreadsheet;
+using Microsoft.EntityFrameworkCore;
 using QuestPDF.Fluent;
 using QuestPDF.Helpers;
 using QuestPDF.Infrastructure;
@@ -9,6 +10,7 @@ using System.Globalization;
 using System.IO;
 using System.Reflection.Metadata;
 using static System.Runtime.InteropServices.JavaScript.JSType;
+using Colors = QuestPDF.Helpers.Colors;
 
 namespace SAGM.Helpers
 {
@@ -109,10 +111,10 @@ namespace SAGM.Helpers
                             table.ColumnsDefinition(columns =>
                             {
                                 columns.ConstantColumn(10, QuestPDF.Infrastructure.Unit.Millimetre);//#
-                                columns.ConstantColumn(17, QuestPDF.Infrastructure.Unit.Millimetre);//Material
-                                columns.ConstantColumn(100, QuestPDF.Infrastructure.Unit.Millimetre);//Descripción
+                                columns.ConstantColumn(25, QuestPDF.Infrastructure.Unit.Millimetre);//Material
+                                columns.ConstantColumn(90, QuestPDF.Infrastructure.Unit.Millimetre);//Descripción
                                 columns.ConstantColumn(17, QuestPDF.Infrastructure.Unit.Millimetre);//U.Medida
-                                columns.ConstantColumn(18, QuestPDF.Infrastructure.Unit.Millimetre);//Cantidad
+                                columns.ConstantColumn(17, QuestPDF.Infrastructure.Unit.Millimetre);//Cantidad
                                 columns.RelativeColumn();//Precio
                                 columns.RelativeColumn();//Total
                             });
@@ -838,6 +840,194 @@ namespace SAGM.Helpers
             }
 
             return Report;
+        }
+
+        public async Task<byte[]> GenerateReceiptReportPDFAsync(int orderReceiptId)
+        {
+            nfi.CurrencyDecimalDigits = 2;
+            nfi.NumberDecimalDigits = 2;
+
+            OrderReceipt receipt = await _context.OrderReceipts
+             .Include(r => r.Order).ThenInclude(r => r.Supplier)
+             .Include(r => r.Order).ThenInclude(r => r.OrderDetails).ThenInclude(d => d.Unit)
+             .Include(r => r.Order).ThenInclude(r => r.OrderDetails).ThenInclude(d => d.Material)
+             .Include(r => r.OrderReceiptDetails)
+             .FirstOrDefaultAsync(r => r.OrderReceiptId == orderReceiptId);
+
+            Contact seller = await _context.Contacts.FindAsync(receipt.Order.SupplierContactId);
+
+            QuestPDF.Settings.License = LicenseType.Community;
+            var Report = QuestPDF.Fluent.Document.Create(document =>
+            {
+
+                document.Page(page =>
+                {
+                    string path = Path.Combine(_host.WebRootPath, "Images\\");
+                    var rutaimagen = $"{path}{"simaq_header_receipt.jpg"}";
+                    byte[] imageData = System.IO.File.ReadAllBytes(rutaimagen);
+
+                    page.Size(PageSizes.Letter);
+                    page.Margin(5, QuestPDF.Infrastructure.Unit.Millimetre);
+
+                    page.Header().ShowOnce().Column(col =>
+                    {
+                        col.Item().Row(row => row.RelativeItem().Height(68).Image(imageData));
+                        col.Item().Row(row => row.RelativeItem().Height(20).AlignRight().PaddingRight(5).Text(receipt.ReceiptName).FontColor("626567").BackgroundColor("5aede8").Bold());
+                        col.Item().Border(1).BorderColor(Colors.BlueGrey.Lighten5).Table(table =>
+                        {
+
+                            table.ColumnsDefinition(columns =>
+                            {
+                                columns.RelativeColumn();
+                                columns.RelativeColumn();
+
+                            });
+                            table.Header(header =>
+                            {
+                                header.Cell().BorderRight(1).BorderColor(Colors.BlueGrey.Lighten5).Padding(3).AlignLeft().Text("Datos del cliente").Bold();
+                                header.Cell().Padding(3).AlignLeft().Text("Datos del proveedor").Bold();
+                            });
+
+                            //Cliente
+                            table.Cell().Row(1).Column(1).PaddingLeft(2).BorderRight(1).BorderColor(Colors.BlueGrey.Lighten5).Text(receipt.Order.Supplier.SupplierName).FontSize(9);
+                            table.Cell().Row(2).Column(1).PaddingLeft(2).BorderRight(1).BorderColor(Colors.BlueGrey.Lighten5).Text(receipt.Order.Supplier.Address).FontSize(9);
+                            table.Cell().Row(3).Column(1).PaddingLeft(2).BorderRight(1).BorderColor(Colors.BlueGrey.Lighten5).Text($"{"Vendedor:"} {seller.Name} {seller.LastName}").FontSize(9);
+
+
+                            //SIMAQ
+                            table.Cell().Row(1).Column(2).PaddingLeft(2).Text("SILLA MAQUINADOS ALTA PRECISION").FontSize(9);
+                            table.Cell().Row(2).Column(2).PaddingLeft(2).Text("Aramberri #503, Col. Lazaro Cardenas Ampliación, Escobedo, NL.").FontSize(9);
+                            table.Cell().Row(3).Column(2).PaddingLeft(2).Text("81 83 97 66 79, 81 15 34 99 71").FontSize(9);
+                            table.Cell().Row(4).Column(2).PaddingLeft(2).BorderRight(1).BorderColor(Colors.BlueGrey.Lighten5).Text(receipt.Order.Buyer).FontSize(9);
+
+                        });
+                    });
+
+                    page.Content().PaddingVertical(10).Column(col =>
+                    {
+                        col.Item().Table(table => {
+                            table.ColumnsDefinition(columns =>
+                            {
+                                columns.ConstantColumn(10, QuestPDF.Infrastructure.Unit.Millimetre);//#
+                                columns.RelativeColumn();//Material
+                                columns.ConstantColumn(100, QuestPDF.Infrastructure.Unit.Millimetre);//Descripción
+                                columns.ConstantColumn(17, QuestPDF.Infrastructure.Unit.Millimetre);//U.Medida
+                                columns.ConstantColumn(18, QuestPDF.Infrastructure.Unit.Millimetre);//Cantidad
+
+                            });
+
+                            table.Header(header =>
+                            {
+                                header.Cell().Background("5aede8").Element(encabezado).Text("#").FontSize(9).FontColor("626567").Bold();
+                                header.Cell().Background("5aede8").Element(encabezado).Text("Material").FontSize(9).FontColor("626567").Bold();
+                                header.Cell().Background("5aede8").Element(encabezado).Text("Descripción").FontSize(9).FontColor("626567").Bold();
+                                header.Cell().Background("5aede8").Element(encabezado).Text("U.M").FontSize(9).FontColor("626567").Bold();
+                                header.Cell().Background("5aede8").Element(encabezado).Text("Cantidad").FontSize(9).FontColor("626567").Bold();
+
+                            });
+
+                            int counter = 1;
+
+                            foreach (OrderReceiptDetail dd in receipt.OrderReceiptDetails)
+                            {
+
+
+
+                                table.Cell().Element(contenido).Padding(1).AlignCenter().Text(counter.ToString()).FontSize(9); //#
+                                table.Cell().Element(contenido).Padding(1).AlignCenter().Text(dd.OrderDetail.Material.MaterialName).FontSize(9);
+                                table.Cell().Element(contenido).Padding(1).AlignLeft().Text(dd.OrderDetail.Description).FontSize(9);
+                                table.Cell().Element(contenido).Padding(1).AlignCenter().Text(dd.OrderDetail.Unit.UnitName).FontSize(9);
+                                table.Cell().Element(contenido).Padding(1).AlignRight().Text(dd.Quantity.ToString("N", nfi)).FontSize(9);
+
+                                counter += 1;
+                            }
+                        });
+                        col.Item().Table(t =>
+                        {
+                            t.ColumnsDefinition(columns =>
+                            {
+                                columns.RelativeColumn();
+
+
+                            });
+
+                            //Comentarios
+                            t.Cell().PaddingTop(20).Background("5aede8").AlignLeft().Element(comment).Text("Comentarios").FontSize(9).FontColor("626567").Bold();
+                            t.Cell().PaddingLeft(1).Width(205, QuestPDF.Infrastructure.Unit.Millimetre).Border(1).BorderColor(Colors.Grey.Medium).AlignLeft().Text(receipt.Comments).FontSize(9);
+
+
+                        });
+                        col.Item().PaddingTop(7).Table(t =>
+                        {
+                            t.ColumnsDefinition(columns =>
+                            {
+                                columns.ConstantColumn(45, QuestPDF.Infrastructure.Unit.Millimetre);
+                                columns.ConstantColumn(80, QuestPDF.Infrastructure.Unit.Millimetre);//#
+                            });
+
+                            t.Cell().Height(7, QuestPDF.Infrastructure.Unit.Millimetre).Element(contenido).Padding(1).AlignLeft().Text("Nombre de quien recibe").FontSize(10);
+                            t.Cell().Height(7, QuestPDF.Infrastructure.Unit.Millimetre).Element(contenido).Padding(1).AlignLeft().Text("");
+                            t.Cell().Height(7, QuestPDF.Infrastructure.Unit.Millimetre).Element(contenido).Padding(1).AlignLeft().Text("Fecha").FontSize(10); ;
+                            t.Cell().Height(7, QuestPDF.Infrastructure.Unit.Millimetre).Element(contenido).Padding(1).AlignLeft().Text("");
+                            t.Cell().Height(15, QuestPDF.Infrastructure.Unit.Millimetre).Element(contenido).Padding(1).AlignLeft().Text("Firma").FontSize(10); ;
+                            t.Cell().Height(15, QuestPDF.Infrastructure.Unit.Millimetre).Element(contenido).Padding(1).AlignLeft().Text("");
+                        });
+                    });
+
+
+
+
+                    page.Footer().Row(row =>
+                    {
+                        var rutaimagen = $"{path}{"simaq_footer_receipt.jpg"}";
+                        byte[] imageData = System.IO.File.ReadAllBytes(rutaimagen);
+                        row.ConstantItem(140).Height(65).AlignBottom().Text(txt =>
+                        {
+                            txt.Span("Página ").FontSize(8).FontFamily("Tahoma").FontColor("626567");
+                            txt.CurrentPageNumber().FontSize(8).FontFamily("Tahoma").FontColor("626567");
+                            txt.Span(" de ").FontSize(8).FontFamily("Tahoma").FontColor("626567");
+                            txt.TotalPages().FontSize(8).FontFamily("Tahoma").FontColor("626567");
+                        });
+                        row.RelativeItem().Height(65);
+                        row.ConstantItem(120).Height(65).AlignBottom().Image(imageData);
+                    });
+
+                });
+            }).GeneratePdf();
+
+            static IContainer encabezado(IContainer container)
+            {
+                return container
+                    .Border(1)
+                    .BorderColor(Colors.BlueGrey.Lighten5)
+                    .AlignCenter();
+
+            }
+
+            static IContainer contenido(IContainer container)
+            {
+                return container
+                    .Border(1)
+                    .BorderColor(Colors.BlueGrey.Lighten5);
+
+            }
+
+            static IContainer comment(IContainer container)
+            {
+                return container
+                    .Width(202, QuestPDF.Infrastructure.Unit.Millimetre)
+                    .BorderLeft(1)
+                    .BorderColor(Colors.BlueGrey.Lighten5).PaddingLeft(2);
+
+
+
+            }
+
+            return Report;
+
+
+
+            throw new NotImplementedException();
         }
     }
 }

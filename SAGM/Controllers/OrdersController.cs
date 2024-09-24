@@ -9,6 +9,8 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using DocumentFormat.OpenXml.Office2010.Excel;
 using System.Reflection.PortableExecutable;
 using DocumentFormat.OpenXml.InkML;
+using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.Blazor;
+using SAGM.Migrations;
 
 namespace SAGM.Controllers
 {
@@ -457,6 +459,13 @@ namespace SAGM.Controllers
                     TempData.Remove("DeleteOrderDetailtResult");
                     TempData.Remove("DeleteOrderDetailMessage");
                 }
+                if (TempData["ReceiptResult"] != null)
+                {
+                    ViewBag.Result = TempData["ReceiptResult"].ToString();
+                    ViewBag.Message = TempData["ReceiptMessage"].ToString();
+                    TempData.Remove("ReceiptResult");
+                    TempData.Remove("ReceiptMessage");
+                }
 
 
             }
@@ -575,6 +584,72 @@ namespace SAGM.Controllers
                         UnitName = detail.Unit.UnitName,
                         Archives = archives,
                         ArchivesChain = archiveschain
+
+                    };
+
+
+                    details.Add(detailsv);
+                }
+
+            }
+
+
+            return Json(new { data = details });
+        }
+
+    
+
+        [HttpGet]
+        public async Task<JsonResult> GetOrderDetailsReceive(int id)
+        {
+
+            var order = await _context.Orders
+                .Include(o => o.OrderDetails).ThenInclude(d => d.Unit)
+                .Include(o => o.OrderDetails).ThenInclude(d => d.Material)
+                .FirstOrDefaultAsync(m => m.OrderId == id);
+            if (order == null)
+            {
+                return Json(new { });
+            }
+
+            User buyer = await _userHelper.GetUserAsync(order.Buyer);
+
+
+            List<AllOrderDetails> details = new List<AllOrderDetails>().ToList();
+            if (order.OrderDetails != null)
+            {
+
+                foreach (var detail in order.OrderDetails)
+                {
+
+                    List<Archive> archives = _context.Archives.Where(a => a.Entity == "OrderDetail" && a.EntityId == detail.OrderDetailId).ToList();
+
+                    string archiveschain = "";
+
+                    foreach (var item in archives)
+                    {
+                        archiveschain += item.ArchiveGuid.ToString() + "," + item.ArchiveName + "," + item.ArchiveId + "|";
+                    }
+                    if (archiveschain != "")
+                    {
+                        archiveschain = archiveschain.Substring(0, archiveschain.Length - 1);
+                    };
+
+
+                    AllOrderDetails detailsv = new()
+                    {
+                        OrderDetailId = detail.OrderDetailId,
+                        Order = detail.Order,
+                        Description = detail.Description,
+                        Material = detail.Material,
+                        MaterialName = detail.Material.MaterialName,
+                        Price = detail.Price,
+                        Quantity = detail.Quantity,
+                        Unit = detail.Unit,
+                        UnitName = detail.Unit.UnitName,
+                        Archives = archives,
+                        ArchivesChain = archiveschain,
+                        Received = detail.Received
 
                     };
 
@@ -1528,6 +1603,302 @@ namespace SAGM.Controllers
 
 
 
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> Receive(int? id)
+        {
+
+
+            ViewBag.Result = "";
+            ViewBag.Message = "";
+
+
+            if (TempData != null)
+            {
+                if (TempData["AddOrEditQuoteDetailResult"] != null)
+                {
+
+                    ViewBag.Result = TempData["AddOrEditOrderDetailResult"].ToString();
+                    ViewBag.Message = TempData["AddOrEditOrderDetailMessage"].ToString();
+                    TempData.Remove("AddOrEditOrderDetailResult");
+                    TempData.Remove("AddOrEditOrderDetailMessage");
+                }
+                if (TempData["AddArchiveResult"] != null)
+                {
+
+                    ViewBag.Result = TempData["AddArchiveResult"].ToString();
+                    ViewBag.Message = TempData["AddArchiveMessage"].ToString();
+                    TempData.Remove("AddArchiveResult");
+                    TempData.Remove("AddArchiveMessage");
+                }
+
+                if (TempData["ArchiveDeleteResult"] != null)
+                {
+                    ViewBag.Result = TempData["ArchiveDeleteResult"].ToString();
+                    ViewBag.Message = TempData["ArchiveDeleteMessage"].ToString();
+                    TempData.Remove("ArchiveDeleteResult");
+                    TempData.Remove("ArchiveDeleteMessage");
+                }
+                if (TempData["DeleteOrderDetailtResult"] != null)
+                {
+                    ViewBag.Result = TempData["DeleteOrderDetailtResult"].ToString();
+                    ViewBag.Message = TempData["DeleteOrderDetailMessage"].ToString();
+                    TempData.Remove("DeleteOrderDetailtResult");
+                    TempData.Remove("DeleteOrderDetailMessage");
+                }
+
+
+            }
+
+
+            if (id == null || _context.Orders == null)
+            {
+                return NotFound();
+            }
+
+            var order = await _context.Orders
+                .Include(o => o.Supplier)
+                .Include(o => o.OrderDetails)
+                .Include(o => o.OrderStatus)
+                .Include(o => o.Currency)
+                .Include(o => o.WorkOrder)
+                .FirstOrDefaultAsync(m => m.OrderId == id);
+
+            int workorderid = 0;
+            string workordername = "";
+
+            if (order.WorkOrder != null)
+            {
+                workorderid = order.WorkOrder.WorkOrderId;
+                workordername = order.WorkOrder.WorkOrderName;
+            }
+
+            ViewBag.DetailsCount = order.OrderDetails.Count();
+
+            if (order == null)
+            {
+                return NotFound();
+            }
+
+            List<SelectListItem> orderstatus = (List<SelectListItem>)await _comboHelper.GetComboOrderStatus(order.OrderStatus.OrderStatusId);
+
+            List<SelectListItem> receptors = (List<SelectListItem>)await _userHelper.GetUsersByRoleAsync(Enums.UserType.Receptor);
+
+
+            User buyer = await _userHelper.GetUserAsync(order.Buyer);
+
+            OrderReceiptViewModel orderv = new OrderReceiptViewModel();
+            Contact suppliercontact = await _context.Contacts.FindAsync(order.SupplierContactId);
+            orderv.OrderId = order.OrderId;
+            orderv.Active = order.Active;
+            orderv.SupplierContactId = order.SupplierContactId;
+            orderv.SellerName = $"{suppliercontact.Name} {suppliercontact.LastName}";
+            orderv.Comments = order.Comments;
+            orderv.CreatedBy = order.CreatedBy;
+            orderv.Currency = order.Currency;
+            orderv.Supplier = order.Supplier;
+            orderv.SupplierQuote = order.SupplierQuote;
+            orderv.EstimatedDeliveryDate = order.EstimatedDeliveryDate;
+            orderv.DeliveryDate = order.DeliveryDate;
+            orderv.Buyer = order.Buyer;
+            orderv.BuyerName = buyer.FullName;
+            orderv.OrderName = order.OrderName;
+            orderv.OrderStatus = orderstatus;
+            orderv.WorkOrderId = workorderid;
+            orderv.WorkOrderName = workordername;
+            orderv.OrderStatusId = order.OrderStatus.OrderStatusId;
+            orderv.Tax = order.Tax;
+            orderv.Receptors = receptors;
+
+
+            return View(orderv);
+
+        }
+
+
+        [HttpPost]
+        public async Task<IActionResult> Receive(OrderReceiptViewModel model)
+        {
+            string receiptdetails = model.ReceiptDetails;
+            receiptdetails = receiptdetails.Substring(0, receiptdetails.Length - 1);
+            return RedirectToAction("ReceiptPreview", new { orderid = model.OrderId, receiptDetails = receiptdetails, receiptComments = model.ReceiptComments, receivedBy  = model.ReceivedBy});
+        }
+
+
+        [HttpGet]
+        public async Task<IActionResult> ReceiptPreview(int orderid, string receiptDetails, string receiptComments, string receivedBy)
+        {  //Es el id de Remision
+
+
+            Order order = await _context.Orders
+                .Include(o => o.Supplier).ThenInclude(s => s.City)
+                .FirstOrDefaultAsync(o => o.OrderId == orderid);
+
+            List<OrderDetail> lods = _context.OrderDetails
+                                            .Include(d => d.Unit)
+                                            .Include(d => d.Material)
+                                            .Where(d => d.Order.OrderId == orderid).ToList();
+            List<AllOrderDetails> lodresult = new List<AllOrderDetails>();
+
+            User receptor = await _userHelper.GetUserAsync(receivedBy);
+
+
+
+            var mtxdetails = receiptDetails.Split('|');
+
+            foreach (OrderDetail d in lods)
+            {
+                foreach (var detail in mtxdetails)
+                {
+                    var detailid = detail.Split(",");
+                    if (d.OrderDetailId.ToString() == detailid[0].ToString())
+                    {
+                        AllOrderDetails orderdetail = new AllOrderDetails();
+                        orderdetail.OrderDetailId = d.OrderDetailId;
+                        orderdetail.Unit = d.Unit;
+                        orderdetail.Price = d.Price;
+                        orderdetail.Quantity = Int32.Parse(detailid[1]);
+                        orderdetail.Material = d.Material;
+                        orderdetail.Description = d.Description;
+                        lodresult.Add(orderdetail);
+                        break;
+
+                    }
+                }
+            }
+           
+
+            OrderReceiptViewModel orvm = new OrderReceiptViewModel();
+
+            String orderreceiptname = DateTime.Now.ToString("yyyyMMdd"); //Variable formadora de nombre de coti
+            orderreceiptname = "REC-" + orderreceiptname + "-000";
+
+           
+            Contact Seller = await _context.Contacts.FindAsync(order.SupplierContactId);
+
+            User Buyer = await _userHelper.GetUserAsync(order.Buyer);
+
+            if (receiptComments == null || receiptComments == "")
+            {
+                receiptComments = "NA";
+            }
+
+            orvm.OrderId = orderid;
+            orvm.OrderDetails = lodresult;
+            orvm.Supplier = order.Supplier;
+            orvm.BuyerName = $"{Buyer.FirstName} {Buyer.LastName}";
+            orvm.SellerName = $"{Seller.Name} {Seller.LastName}";
+            orvm.ReceiptComments = receiptComments;
+            orvm.OrderReceiptName = orderreceiptname;
+            orvm.ReceiptDetails = receiptDetails;
+            orvm.ReceivedBy = receivedBy;
+            orvm.ReceptorName = $"{receptor.FirstName} {receptor.LastName}";
+
+
+
+
+
+            return View("ReceiptPreview", orvm);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> ReceiptConfirm(int orderid, string receiptDetails, string receiptComments, string receivedBy)
+        {  //Es el id de Remision
+            Order o = await _context.Orders.FindAsync(orderid);
+            OrderReceiptViewModel ormvm = new OrderReceiptViewModel();
+            ormvm.OrderId = orderid;
+            ormvm.ReceiptDetails = receiptDetails;
+            ormvm.ReceiptComments = receiptComments;
+            ormvm.ReceivedBy = receivedBy;
+            return View(ormvm);
+        }
+        [HttpPost]
+        public async Task<IActionResult> ReceiptConfirm(OrderReceiptViewModel model)
+        {
+            String receiptname = DateTime.Now.ToString("yyyyMMdd"); //Variable formadora de nombre de coti
+            String Lastnumber = ""; //Ultimo numero consecutivo de la cotización
+            String strnumber = "";
+            int Consec = 0;
+
+
+            receiptname = "REC-" + receiptname;
+
+            // -------------------------
+
+           OrderReceipt LastOR = await _context.OrderReceipts.Where(o => o.ReceiptName.Substring(0, 12) == receiptname).OrderBy(o => o.OrderReceiptId).LastOrDefaultAsync();//Ultima cotizacion
+
+            if (LastOR != null)
+            {
+                Lastnumber = LastOR.ReceiptName.Substring(13, 3);
+                Consec = Int32.Parse(Lastnumber);
+            }
+            else
+            {
+                Lastnumber = "000";
+                Consec = Int32.Parse(Lastnumber);
+            }
+
+            Consec += 1;
+
+            strnumber = $"000{Consec}";
+
+            Order order = await _context.Orders.FirstOrDefaultAsync(o => o.OrderId == model.OrderId);
+
+            receiptname = receiptname + "-" + strnumber.Substring(strnumber.Length - 3, 3);
+            User receivedBy = await _userHelper.GetUserAsync(model.ReceivedBy);
+
+            OrderReceipt oR = new OrderReceipt();
+            oR.Order = order;
+            oR.ReceiptName = receiptname;
+            oR.ReceiptDate = DateTime.Now;
+            oR.Comments = model.ReceiptComments;
+            oR.ReceivedBy = receivedBy;
+            _context.Add(oR);
+            await _context.SaveChangesAsync();
+       
+
+            var mtxdetails = model.ReceiptDetails.Split('|');
+
+            for (int i = 0; i < mtxdetails.Length; i++)
+            {
+                var detail = mtxdetails[i].Split(",");
+                OrderReceiptDetail odr = new OrderReceiptDetail();
+                OrderDetail orderdetail = await _context.OrderDetails.FindAsync(Convert.ToInt32(detail[0]));
+                odr.OrderReceipt = oR;
+                odr.OrderDetail = orderdetail;
+                odr.Quantity = Convert.ToDecimal(detail[1]);
+                _context.Add(odr);
+                await _context.SaveChangesAsync();
+
+                //vamos a dejar que sea negativo se remisionamos mas piezas de las que estan declaradas en Quantity
+                //Entonces actualizamos las embarcadas ya que si estamos remisionando quiere decir que estamos embarcando
+                orderdetail.Received = orderdetail.Received + Convert.ToDecimal(detail[1]);
+                _context.Update(orderdetail);
+                await _context.SaveChangesAsync();
+
+
+            }
+
+
+            TempData["ReceiptResult"] = "true";
+            TempData["ReceiptMessage"] = $"El recibo {receiptname} fué creado";
+
+            OrderReceiptViewModel orvm = new OrderReceiptViewModel();
+
+            orvm.OrderId = order.OrderId;
+
+            return RedirectToAction(nameof(Details), new { id = model.OrderId });
+        }
+
+        public async Task<FileResult> PrintReceipt(string receiptname) ///usuamos el nombre ya que este lo obtenemos del mensaje al crear la remision y viene en el TempData["RemisionMessage"]
+        {
+
+            OrderReceipt receipt = _context.OrderReceipts.Where(r => r.ReceiptName == receiptname).FirstOrDefault();
+
+            Stream stream = new MemoryStream(await _reportHelper.GenerateReceiptReportPDFAsync(receipt.OrderReceiptId));
+
+            return File(stream, "application/pdf", $"{receipt.ReceiptName}{".pdf"}");
         }
 
     }

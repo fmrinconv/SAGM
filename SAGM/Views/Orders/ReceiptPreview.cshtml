@@ -1,4 +1,4 @@
-﻿@model SAGM.Models.WorkOrderRemisionViewModel
+﻿@model SAGM.Models.OrderReceiptViewModel
 
 @{
     ViewData["Title"] = "Detalle " ;
@@ -17,17 +17,17 @@
 
 
 <div class="container text-center" style="border: solid 1px blue; ">
-    <div class="row justify-content-md-center">
-        <div class="col-xxl-10 col-xl-10 col-lg-10 col-md-10 col-sm-12 col-xs-12 p-2">
-            <img src="~/images/simaq_header_remision.jpg" class="img-fluid" />
+    <div class="row justify-content-md-center" >
+        <div class="col-xxl-10 col-xl-10 col-lg-10 col-md-10 col-sm-12 col-xs-12 p-2" style="border: solid 1px silver">
+            <img src="~/images/simaq_header_receipt.jpg" class="img-fluid" />
         </div>
     </div>
     <div class="row justify-content-md-center">
         <div class="col-xxl-10 col-xl-10 col-lg-10 col-md-10 col-sm-12 col-xs-12  text-end">
             <table style="width:100%;">
                 <tr>
-                    <td width="55%"<label style="color:gray; font-weight:800;"> REMISION </label></td>
-                    <td width="45%" style="text-align:right;"><b><label style="background-color:#5aede8; color:#626567">@Model.WorkOrderDeliveryName</label></b></td>
+                    <td width="55%"<label style="color:gray; font-weight:800;">RECIBO DE MATERIAL</label></td>
+                    <td width="45%" style="text-align:right;"><b><label style="background-color:#5aede8; color:#626567">@Model.OrderReceiptName</label></b></td>
                 </tr>
             </table>
         </div>
@@ -37,15 +37,16 @@
             <div class="containter">
                 <div class="row">
                     <div class="col-6">
-                        <b><label>Datos de cliente</label></b>
-                    </div>
-                    <div class="col-6">
                         <b><label>Datos del proveedor</label></b>
                     </div>
+                    <div class="col-6">
+                        <b><label>Datos de cliente</label></b>
+                    </div>
+                    
                 </div>
                 <div class="row">
                     <div class="col-6">
-                        <label>@Model.WorkOrder.Customer.CustomerName</label>
+                        <label>@Model.Supplier.SupplierName</label>
                     </div>
                     <div class="col-6">
                         <label>SILLA MAQUINADOS ALTA PRECISION</label>
@@ -53,7 +54,7 @@
                 </div>
                 <div class="row">
                     <div class="col-6">
-                        <label>@Model.WorkOrder.Customer.Address, @Model.WorkOrder.Customer.City.CityName </label>
+                        <label>@Model.Supplier.Address, @Model.Supplier.City.CityName </label>
                     </div>
                     <div class="col-6">
                         <label>ARAMBERRI #503, LAZARO CARDENAS AMPLIACION</label>
@@ -61,15 +62,15 @@
                 </div>
                 <div class="row">
                     <div class="col-6">
-                        <label>Comprador: @Model.BuyerName </label>
+                        <label>Vendedor: @Model.SellerName</label>
                     </div>
                     <div class="col-6">
-                        <label>Vendedor: @Model.SellerName</label>
+                        <label>Comprador: @Model.BuyerName </label>
                     </div>
                 </div>
                 <div class="row">
                     <div class="col-6">
-                        <label>Usuario: @Model.FinalUserName</label>
+                        <label></label>
                     </div>
                     <div class="col-6">
                         <label></label>
@@ -82,7 +83,7 @@
 
     <div class="row justify-content-md-center">
         <div class="col-xxl-10 col-xl-10 col-lg-10 col-md-10 col-sm-12 col-xs-12 p-2">
-                @await Html.PartialAsync("_ViewAllWorkOrderDetailsRemisionPreview", Model)
+            @await Html.PartialAsync("_ViewAllWorkOrderDetailsReceiptPreview", Model)
 
         </div>
     </div>
@@ -97,7 +98,7 @@
                     <tr>
                         <td style="vertical-align:top; padding: 5px; ">
                             <br />
-                            <label style="white-space:pre-wrap;">@Model.Comments</label>
+                            <label style="white-space:pre-wrap;">@Model.ReceiptComments</label>
                             <br />
                         </td>
                         <td></td>
@@ -114,7 +115,7 @@
                 <tbody>
                     <tr style="border-bottom: 1px solid gray;">
                         <td style="width:50%; border-bottom: 1px solid gray;  border-right: 1px solid gray; padding: 5px;">Nombre de quien recibe:</td>
-                        <td style="width:50%; border-bottom: 1px solid gray; padding: 5px;"></td>
+                        <td style="width:50%; border-bottom: 1px solid gray; padding: 5px;">@Model.ReceptorName</td>
                     </tr>
                     <tr>
                         <td style="border-bottom: 1px solid gray;  border-right: 1px solid gray; padding: 5px;">Fecha:</td>
@@ -132,10 +133,11 @@
     <div class="row justify-content-md-center">
         <div class="col-xxl-10 col-xl-10 col-lg-10 col-md-10 col-sm-12 col-xs-12 p-2">
         <table style="font-family: Tahoma; color: silver; width:100%; font-size: small;">
+
             <tr>
-                <td style="text-align: left; vertical-align:bottom;">Página 1 de 1</td>
-                <td colspan="5"></td>
-                    <td style="text-align: right;"> <img src="~/images/simaq_footer_remision.jpg" class="img-fluid" width="30%;" height="30%;"/></td>
+                <td style="text-align: left; vertical-align:bottom;" nowrap>Página 1 de 1</td>
+                <td ></td>
+                    <td style="text-align: right;"> <img src="~/images/simaq_footer_receipt.jpg" class="img-fluid" width="80%;" height="80%;" /></td>
             </tr>
         </table>
         </div>
@@ -144,7 +146,8 @@
 <div class="container text-end" style="padding-top:5px;">
     <div class="col-xxl-11 col-xl-11 col-lg-11 col-md-11 col-sm-12 col-xs-12 text-center">
         @{
-            string comments = Model.Comments;
+            string comments = Model.ReceiptComments;
+            string receivedBy = Model.ReceivedBy;
             if (comments != null)
             {
                 comments = comments.Replace("\n", "introespace").Replace("\r", "introespace");
@@ -154,11 +157,11 @@
             {
                 comments = "";
             }
-            var url = "/WorkOrders/RemisionConfirm?workorderid=" + @Model.WorkOrderId + "&wodeliverydetails=" + @Model.wodeliverydetails + "&comments=" + comments;
+            var url = "/Orders/ReceiptConfirm?orderid=" + @Model.OrderId + "&receiptDetails=" + @Model.ReceiptDetails + "&receiptComments=" + comments + "&receivedBy=" + receivedBy;
 
         }
 
-        <a title='Guardar' onclick="javascript: showInPopup('@url','Continuar','bg-primary')" class='btn btn-sm btn-success'>Continuar &nbsp;<i title='Guardar y continuar' class='fa-solid fa-save'></i></a>
+        <a title='Guardar' onclick="javascript: showInPopup('@url','Generar recibo','bg-primary')" class='btn btn-sm btn-success'>Generar recibo <i title='Guardar y continuar' class='fa-solid fa-save'></i></a>
 
     </div>
 </div>

@@ -16,5 +16,8 @@ namespace SAGM.Models
         public int ArchivesNumber => Archives == null ? 0 : Archives.Count;
 
         public string ArchivesChain { get; set; }
+
+
+      
     }
 }

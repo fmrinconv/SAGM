@@ -148,6 +148,7 @@
     <div class="card-body">
         <div id="view-all" >
             <input type="hidden" id="Result" name="Result" value="@ViewBag.Result" />
+            <input type="hidden" id="Message" name="Message" value="@ViewBag.Message" />
                 @await Html.PartialAsync("_ViewAllOrderDetails.cshtml", Model)
         </div>
     </div>
@@ -195,7 +196,14 @@
         </div>
     </div>
 </div>
-
+<div class="contenido card mt-2">
+    <div class="row">
+        <div class="form-floating">
+            <textarea class="form-control" placeholder="Leave a comment here" id="Comments" style="height: 100px" name="Comments" disabled="disabled"> @Html.DisplayFor(model => model.Comments)</textarea>
+            <label for="floatingTextarea2" style="color: silver;">&nbsp;Comentarios</label>
+        </div>
+    </div>
+</div>
 
 
 <partial name="_AddOrEditDialog" />
@@ -218,13 +226,25 @@
             orderid = $("#OrderId").val();
 
             if ($("#Result").val() == "true") {
+              
                 $.notify('@Html.Raw(ViewBag.Message)', "success", { globalPosition: "top center" });
-             
 
+                var receiptName = $("#Message").val();
+
+                if ($("#Message").val().substring(0, 9) == "El recibo") {
+                    var receipt = receiptName.substring(10, 26)
+                    PrintReceipt(receipt);
+                    $("#Message").val("");
+
+                }
             }
             else if ($("#Result").val() == "false") {
                 $.notify('@Html.Raw(ViewBag.Message)', "error", { globalPosition: "top center" });
             }
+
+
+
+
             dataTable = $('#TableOrderDetails').DataTable(
                 {
                     "ajax": {
@@ -737,6 +757,11 @@
         function DestroyTableWorkOrders() {
             var dataTableWorkOrders = $('#TableWorkOrders').DataTable();
             dataTableWorkOrders.destroy();
+        }
+
+        function PrintReceipt(receiptname) {
+            var popout = window.open("/Orders/PrintReceipt/?receiptname=" + receiptname, "_blank");
+            return false;
         }
    
     </script>

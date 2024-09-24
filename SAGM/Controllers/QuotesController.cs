@@ -407,7 +407,7 @@ namespace SAGM.Controllers
             quotev.QuoteStatus = quotestatus;
             quotev.QuoteStatusId = quote.QuoteStatus.QuoteStatusId;
             quotev.Tax = quote.Tax;
-
+            quotev.ExchangeRate = quote.ExchangeRate;
 
             return View(quotev);    
            
@@ -420,6 +420,7 @@ namespace SAGM.Controllers
             var quote = await _context.Quotes
                 .Include(q => q.QuoteDetails).ThenInclude(d => d.Unit)
                 .Include(q => q.QuoteDetails).ThenInclude(d => d.Material)
+                .Include(q => q.QuoteDetails).ThenInclude(d => d.QuoteDetailComments)
                 .FirstOrDefaultAsync(m => m.QuoteId == id);
             if (quote == null)
             {
@@ -450,7 +451,7 @@ namespace SAGM.Controllers
                     {
                         archiveschain = archiveschain.Substring(0, archiveschain.Length - 1);
                     };
-
+                   
 
                     AllQuoteDetails detailsv = new()
                     {
@@ -460,7 +461,9 @@ namespace SAGM.Controllers
                         Price = detail.Price,
                         Quantity = detail.Quantity,
                         UnitName = detail.Unit.UnitName,
-                        ArchivesChain = archiveschain
+                        ArchivesChain = archiveschain,
+                        Archives = archives,
+                        QuoteDetailComments = detail.QuoteDetailComments
                     };
 
 
@@ -753,7 +756,8 @@ namespace SAGM.Controllers
                 ModifyDate = quote.ModifyDate,
                 Comments = quote.Comments,
                 CurrencyId = quote.Currency.CurrencyId,
-                Currency = currencies
+                Currency = currencies,
+                ExchangeRate = quote.ExchangeRate
 
             };
 
@@ -804,6 +808,7 @@ namespace SAGM.Controllers
                         quote.Currency = await _context.Currencies.FindAsync(model.CurrencyId);
                         quote.CreatedBy = await _userHelper.GetUserAsync(model.CreatedBy);
                         quote.QuoteStatus = quotestatus;
+                        quote.ExchangeRate = model.ExchangeRate;
                         _context.Update(quote);
                         await _context.SaveChangesAsync();
                         TempData["EditQuoteResult"] = "true";
@@ -1450,7 +1455,6 @@ namespace SAGM.Controllers
         }
 
         [HttpPost]
-        [ValidateAntiForgeryToken]
         public async Task<IActionResult> ChangeStatus(int id, int statusid)
         {
             Quote quote = await _context.Quotes
@@ -1460,7 +1464,7 @@ namespace SAGM.Controllers
             try
             {
 
-                quote.QuoteStatus.QuoteStatusId = statusid;
+                quote.QuoteStatus = await  _context.QuoteStatus.FindAsync(statusid);
                 _context.Update(quote);
                 await _context.SaveChangesAsync();  
 

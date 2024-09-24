@@ -1,11 +1,13 @@
 ﻿namespace SAGM.Enums
 {
+    //Definicion de roles
     public enum UserType
     {
         Administrador,
         Comprador,
         Finanzas,
         Vendedor,
-        Usuario
+        Usuario,
+        Receptor//Recibe materiales
     }
 }

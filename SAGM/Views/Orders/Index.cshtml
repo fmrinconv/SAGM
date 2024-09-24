@@ -101,6 +101,7 @@
         var orderid;
         var dataTableWorkOrders;
         var workorderid;
+        var statusname;
         function parseJsonDate(jsonDateString) {
             return new Date(parseInt(jsonDateString.replace('/Date(', '')));
         }
@@ -270,7 +271,14 @@
                                 }
                         },
                         
-                        { "data": "orderStatusName" },
+                        {
+                            "data": "orderStatusName",
+                            "render":
+                                function (data) {
+                                    statusname = data;
+                                    return data;
+                                }
+                        },
                         { "data": "orderId", 
                           "render": 
                           function (data) {
@@ -299,6 +307,11 @@
 
                                 result += "<a title='Comentarios' onclick=\"showInPopup('/Orders/AddOrEditComment?id=" + data + "','Agregar\ comentario','bg-primary')\" ";
                                 result += "class='btn btn-sm btn-outline-secondary'><i title='Comentarios' class='fa-solid fa-comments' style='width:17px;'></i></a>";
+
+                              if (statusname == "X RECIBIR") {
+                                        result += "<a title='Recibir pedido' href='/Orders/Receive?id=" + orderid + "' ";
+                                        result += "class='btn btn-sm btn-outline-success'><i title='Recibir pedido' class='fa fa-check' style='width:17px;'></i></a>";
+                              }
                             
                                 return result;
 
