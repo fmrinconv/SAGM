@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using SAGM.Data;
@@ -10,6 +11,7 @@ using static SAGM.Helpers.ModalHelper;
 
 namespace SAGM.Controllers
 {
+    [Authorize(Roles = "Administrador,Comprador")]
     public class SuppliersController : Controller
     {
         private readonly SAGMContext _context;

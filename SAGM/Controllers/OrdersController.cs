@@ -11,9 +11,12 @@ using System.Reflection.PortableExecutable;
 using DocumentFormat.OpenXml.InkML;
 using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.Blazor;
 using SAGM.Migrations;
+using Microsoft.AspNetCore.Authorization;
 
 namespace SAGM.Controllers
 {
+
+    [Authorize(Roles = "Administrador,Comprador")]
     public class OrdersController : Controller
     {
         private readonly SAGMContext _context;
@@ -32,6 +35,8 @@ namespace SAGM.Controllers
             _configuration = configuration;
             _reportHelper = reportHelper;
         }
+
+
         public IActionResult Index()
         {
 

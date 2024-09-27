@@ -15,6 +15,7 @@ internal class Program
         builder.Services.AddControllersWithViews();
         builder.Services.AddDbContext<SAGMContext>(o =>
         {
+            //o.UseSqlServer(builder.Configuration.GetConnectionString("AzureConnection"));
             o.UseSqlServer(builder.Configuration.GetConnectionString("LocalConnection"));
             //o.UseSqlServer(builder.Configuration.GetConnectionString("SomeeConnection"));
         });

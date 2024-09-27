@@ -20,6 +20,7 @@ using System.Data;
 using ClosedXML.Excel;
 using DocumentFormat.OpenXml.Wordprocessing;
 using DocumentFormat.OpenXml.Office2010.Excel;
+using Microsoft.AspNetCore.Authorization;
 
 
 namespace SAGM.Controllers
@@ -66,6 +67,8 @@ namespace SAGM.Controllers
 
         
         }
+
+        [Authorize(Roles = "Administrador,Vendedor")]
         public  IActionResult Index()
         {
 

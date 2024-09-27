@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -10,6 +11,7 @@ using SAGM.Data.Entities;
 
 namespace SAGM.Controllers
 {
+    [Authorize(Roles = "Administrador,Usuario,Comprador,Vendedor")]
     public class UnitsController : Controller
     {
         private readonly SAGMContext _context;

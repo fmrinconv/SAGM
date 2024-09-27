@@ -22,10 +22,12 @@ using System.Text.Json;
 using System.Diagnostics;
 using Process = SAGM.Data.Entities.Process;
 using DocumentFormat.OpenXml.ExtendedProperties;
+using Microsoft.AspNetCore.Authorization;
 
 
 namespace SAGM.Controllers
 {
+    [Authorize(Roles = "Administrador,Usuario,Comprador,Vendedor")]
     public class WorkOrdersController : Controller
     {
         private readonly SAGMContext _context;

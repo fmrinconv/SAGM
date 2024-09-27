@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SAGM.Data;
 using SAGM.Data.Entities;
@@ -9,7 +10,7 @@ using static SAGM.Helpers.ModalHelper;
 namespace SAGM.Controllers
 {
 
-
+    [Authorize(Roles = "Administrador,Usuario,Comprador,Vendedor")]
     public class ArchivesController : Controller
     {
         private readonly SAGMContext _context;

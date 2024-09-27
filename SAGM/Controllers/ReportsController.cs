@@ -1,9 +1,11 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Reporting.NETCore;
 
 
 namespace SAGM.Controllers
 {
+    [Authorize(Roles = "Administrador,Usuario,Comprador,Vendedor")]
     public class ReportsController : Controller
     {
         private readonly IWebHostEnvironment _environment;
