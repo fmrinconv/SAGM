@@ -121,6 +121,7 @@ namespace SAGM.Controllers
                  .Include(w => w.Customer)
                  .Include(w => w.WorkOrderStatus)
                  .Include(w => w.Currency)
+                 .Include(w => w.CreatedBy)
                  .OrderByDescending(w => w.WorkOrderId)
                  .ToListAsync();
 
@@ -375,6 +376,7 @@ namespace SAGM.Controllers
         }
 
         [HttpGet]
+
         public async Task<JsonResult> GetWorkOrderDetails(int id)
         {
 
@@ -481,11 +483,11 @@ namespace SAGM.Controllers
             foreach (WorkOrderDetail wod in workorder.WorkOrderDetails)
             {
                 //Obtenemos el total de la OT
-                total += total + (wod.Quantity * wod.Price);
+                total +=  (wod.Quantity * wod.Price);
                 //Por cada Detalle de OT obtenemos el costo de cada proceso y lo multiplicamos con la cantidad especificada en el detalle
                 foreach (WorkOrderDetailProcess wodp in wod.WorkOrderDetailProcess)
                 {
-                    processcost += wod.Quantity * wodp.Quantity * 200;//se va a sustituir por wodp.cost 
+                    processcost += wod.Quantity * wodp.Quantity * wodp.Cost;//se va a sustituir por wodp.cost 
 
                 }
             }
@@ -889,8 +891,6 @@ namespace SAGM.Controllers
 
         }
 
-
-
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> EditWorkOrder(EditWorkOrder model)
@@ -1135,7 +1135,6 @@ namespace SAGM.Controllers
 
 
         }
-
 
 
         [HttpPost]
@@ -2054,6 +2053,36 @@ namespace SAGM.Controllers
             return _context.WorkOrders.Any(e => e.WorkOrderId == id);
         }
 
+
+        [HttpGet]
+        public async Task<IActionResult> RemisionHistory(int id)
+        {
+            AllWorkOrderDeliveries awod = new AllWorkOrderDeliveries();
+
+            var workorder = await _context.WorkOrders
+                          .Include(w => w.Customer)
+                          .Include(w => w.WorkOrderDetails)
+                          .Include(w => w.WorkOrderStatus)
+                          .Include(w => w.Orders).ThenInclude(w => w.OrderDetails)
+                          .Include(w => w.WorkOrderDeliveries.OrderByDescending(o => o.WorkOrderDeliveryName))
+                          .FirstOrDefaultAsync(m => m.WorkOrderId == id);
+
+            Contact buyercontact =  _context.Contacts.FirstOrDefault(c => c.ContactId == workorder.BuyerContactId);
+            Contact finaluser = _context.Contacts.FirstOrDefault(c => c.ContactId == workorder.FinalUserId);
+
+
+            awod.WorkOrderName = workorder.WorkOrderName;
+            awod.Customer = workorder.Customer;
+            awod.Seller = workorder.Seller;
+            awod.BuyerContact = $"{buyercontact.Name} {buyercontact.LastName}";
+            awod.FinalUser = $"{finaluser.Name} {finaluser.LastName}";
+            awod.CustomerPO = workorder.CustomerPO;
+            awod.WorkOrderStatus = workorder.WorkOrderStatus;
+            awod.WorkOrderDeliveries = workorder.WorkOrderDeliveries;
+
+            return View(awod);
+        }
+
         [HttpGet]
         public async Task<IActionResult> Remision(int? id)
         {
@@ -2160,7 +2189,7 @@ namespace SAGM.Controllers
                         WorkOrderDetail workorderdetail = new WorkOrderDetail();
                         workorderdetail = d;
 
-                        workorderdetail.Quantity = Int32.Parse(detailid[1]);
+                        workorderdetail.Quantity = Decimal.Parse(detailid[1]);
                         lwodresult.Add(workorderdetail);
                         break;
 
@@ -2197,6 +2226,77 @@ namespace SAGM.Controllers
             return View("RemisionPreview", Worvm);
         }
 
+
+
+        [HttpGet]
+        public async Task<IActionResult> RemisionReprintPreview(int id)
+        {  //Es el id de Remision
+
+            WorkOrderDelivery wod = await _context.WorkOrderDeliveries
+                .Include(w => w.WorkOrder)
+                .Include( w => w.WorkOrderDeliveryDetails)
+                .FirstOrDefaultAsync(w => w.WorkOrderDeliveryId == id);
+
+            WorkOrder workorder = await _context.WorkOrders
+                .Include(w => w.Customer).ThenInclude(w => w.City)
+                .FirstOrDefaultAsync(w => w.WorkOrderId == wod.WorkOrder.WorkOrderId);
+
+            List<WorkOrderDetail> lwods = _context.WorkOrderDetails
+                                            .Include(w => w.Unit)
+                                            .Include(w => w.Material)
+                                            .Where(w => w.WorkOrder.WorkOrderId == wod.WorkOrder.WorkOrderId).ToList();
+            List<WorkOrderDetail> lwodresult = new List<WorkOrderDetail>();
+
+
+            foreach (WorkOrderDetail d in lwods)
+            {
+                foreach (var detail in wod.WorkOrderDeliveryDetails)
+                {
+                
+                    if (d.WorkOrderDetailId == detail.workOrderDetail.WorkOrderDetailId)
+                    {
+                        WorkOrderDetail workorderdetail = new WorkOrderDetail();
+                        workorderdetail = d;
+
+                        workorderdetail.Quantity = detail.Quantity;
+                        lwodresult.Add(workorderdetail);
+                        break;
+
+                    }
+                }
+            }
+            workorder.WorkOrderDetails = lwodresult;
+
+            WorkOrderRemisionViewModel Worvm = new WorkOrderRemisionViewModel();
+
+
+
+            Contact Buyer = await _context.Contacts.FindAsync(workorder.BuyerContactId);
+            Contact FinalUser = await _context.Contacts.FindAsync(workorder.FinalUserId);
+            User seller = await _userHelper.GetUserAsync(workorder.Seller);
+
+            var comments = "";
+
+            if (wod.Comments == null || wod.Comments == "")
+            {
+                comments = "NA";
+            }
+
+            Worvm.WorkOrder = workorder;
+            Worvm.BuyerName = $"{Buyer.Name} {Buyer.LastName}";
+            Worvm.FinalUserName = $"{FinalUser.Name} {FinalUser.LastName}";
+            Worvm.SellerName = seller.FullName;
+            Worvm.Comments = comments;
+            Worvm.WorkOrderId = wod.WorkOrder.WorkOrderId;
+            Worvm.WorkOrderDeliveryName = wod.WorkOrderDeliveryName;
+            Worvm.wodeliverydetails = "wodeliverydetails";
+            Worvm.WorkOrderDeliveryId = wod.WorkOrderDeliveryId;
+
+
+
+            return View("RemisionReprintPreview", Worvm);
+        }
+
         [HttpGet]
         public async Task<IActionResult> RemisionConfirm(int workorderid, string wodeliverydetails, string comments)
         {  //Es el id de Remision
@@ -2207,6 +2307,8 @@ namespace SAGM.Controllers
             wormvm.Comments = comments;
             return View(wormvm);
         }
+
+       
 
         [HttpPost]
         public async Task<IActionResult> RemisionConfirm(WorkOrderRemisionViewModel model) {
@@ -2294,6 +2396,36 @@ namespace SAGM.Controllers
             return RedirectToAction(nameof(Details), new { id = workorder.WorkOrderId });
       
         }
+
+        [HttpGet]
+        public async Task<IActionResult> RemisionReprintConfirm(int workorderdeliveryid)
+        {  //Es el id de Remision
+            WorkOrderDelivery wod = await _context.WorkOrderDeliveries
+                .Include(w => w.WorkOrder)
+                .FirstOrDefaultAsync(w => w.WorkOrderDeliveryId == workorderdeliveryid);
+            WorkOrderRemisionViewModel wormvm = new WorkOrderRemisionViewModel();
+            wormvm.WorkOrderId = wod.WorkOrder.WorkOrderId;
+            wormvm.WorkOrderDeliveryId = wod.WorkOrderDeliveryId;
+            wormvm.Comments = wod.Comments;
+            return View(wormvm);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> RemisionReprintConfirm(WorkOrderRemisionViewModel model)
+        {
+            WorkOrderDelivery WOD = await _context.WorkOrderDeliveries
+                .Include(w => w.WorkOrderDeliveryDetails)
+                .FirstOrDefaultAsync(w => w.WorkOrderDeliveryId == model.WorkOrderDeliveryId);
+
+
+            TempData["RemisionResult"] = "true";
+            TempData["RemisionMessage"] = $"La remisión {WOD.WorkOrderDeliveryName} fué reimpresa";
+
+
+            return RedirectToAction(nameof(Details), new { id = model.WorkOrderId });
+
+        }
+
 
         public async Task<FileResult> PrintRemision(string workorderdeliveryname) ///usuamos el nombre ya que este lo obtenemos del mensaje al crear la remision y viene en el TempData["RemisionMessage"]
         {

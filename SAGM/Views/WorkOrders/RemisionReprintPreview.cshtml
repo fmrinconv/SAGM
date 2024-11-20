@@ -1,0 +1,229 @@
+﻿@model SAGM.Models.WorkOrderRemisionViewModel
+
+@{
+    ViewData["Title"] = "Detalle " ;
+}
+<style>
+
+
+    table.radio { 
+        border-spacing: 0;
+        border-collapse: separate;
+        border: 1px solid gray;
+    }
+
+    
+</style>
+
+
+<div class="container text-center" style="border: solid 1px blue; ">
+    <div class="row justify-content-md-center">
+        <div class="col-xxl-10 col-xl-10 col-lg-10 col-md-10 col-sm-12 col-xs-12 p-2">
+            <img src="~/images/simaq_header_remision.jpg" class="img-fluid" />
+        </div>
+    </div>
+    <div class="row justify-content-md-center">
+        <div class="col-xxl-10 col-xl-10 col-lg-10 col-md-10 col-sm-12 col-xs-12  text-end">
+            <table style="width:100%;">
+                <tr>
+                    <td width="20%" style="text-align:left;"><label style="color:black; font-size:small;">@DateTime.Now</label></td>
+                    <td width="35%"<label style="color:gray; font-weight:800;"> REMISION </label></td>
+                    <td width="45%" style="text-align:right;"><b><label style="background-color:#5aede8; color:#626567">@Model.WorkOrderDeliveryName</label></b></td>
+                </tr>
+            </table>
+        </div>
+    </div>
+    <div class="row justify-content-md-center" >
+        <div class="col-xxl-10 col-xl-10 col-lg-10 col-md-10 col-sm-12 col-xs-12  text-start" style="border: solid 1px">
+            <div class="containter">
+                <div class="row">
+                    <div class="col-6">
+                        <b><label>Datos de cliente</label></b>
+                    </div>
+                    <div class="col-6">
+                        <b><label>Datos del proveedor</label></b>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-6">
+                        <label>@Model.WorkOrder.Customer.CustomerName</label>
+                    </div>
+                    <div class="col-6">
+                        <label>SILLA MAQUINADOS ALTA PRECISION</label>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-6">
+                        <label>@Model.WorkOrder.Customer.Address, @Model.WorkOrder.Customer.City.CityName </label>
+                    </div>
+                    <div class="col-6">
+                        <label>ARAMBERRI #503, LAZARO CARDENAS AMPLIACION</label>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-6">
+                        <label>Comprador: @Model.BuyerName </label>
+                    </div>
+                    <div class="col-6">
+                        <label>Vendedor: @Model.SellerName</label>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-6">
+                        <label>Usuario: @Model.FinalUserName</label>
+                    </div>
+                    <div class="col-6">
+                        <label></label>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="row justify-content-md-center">
+        <div class="col-xxl-10 col-xl-10 col-lg-10 col-md-10 col-sm-12 col-xs-12 p-2">
+                @await Html.PartialAsync("_ViewAllWorkOrderDetailsRemisionPreview", Model)
+
+        </div>
+    </div>
+    <div class="row justify-content-md-center">
+        <div class="col-xxl-10 col-xl-10 col-lg-10 col-md-10 col-sm-12 col-xs-12 p-2">
+            <table style="width:100%; text-align:left;" class="radio">
+                <tbody>
+                    <tr>
+                        <td style="width:100%; border-bottom: 1px solid gray; padding: 5px; background-color:#5aede8">Comentarios:</td>
+                    </tr>
+
+                    <tr>
+                        <td style="vertical-align:top; padding: 5px; ">
+                            <br />
+                            <label style="white-space:pre-wrap;">@Model.Comments</label>
+                            <br />
+                        </td>
+                        <td></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+
+    <div class="row justify-content-md-center">
+        <div class="col-xxl-10 col-xl-10 col-lg-10 col-md-10 col-sm-12 col-xs-12 p-2">
+            <table style="width:60%; text-align:left;" class="radio">
+                <tbody>
+                    <tr style="border-bottom: 1px solid gray;">
+                        <td style="width:50%; border-bottom: 1px solid gray;  border-right: 1px solid gray; padding: 5px;">Nombre de quien recibe:</td>
+                        <td style="width:50%; border-bottom: 1px solid gray; padding: 5px;"></td>
+                    </tr>
+                    <tr>
+                        <td style="border-bottom: 1px solid gray;  border-right: 1px solid gray; padding: 5px;">Fecha:</td>
+                        <td style="border-bottom: 1px solid gray; padding: 5px;"></td>
+                    </tr>
+                    <tr>
+                        <td style="vertical-align:top; border-right: 1px solid gray; padding: 5px;">Firma:</td>
+                        <td style="height:60px; padding: 5px;"></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="row justify-content-md-center">
+        <div class="col-xxl-10 col-xl-10 col-lg-10 col-md-10 col-sm-12 col-xs-12 p-2">
+        <table style="font-family: Tahoma; color: silver; width:100%; font-size: small;">
+            <tr>
+                <td style="text-align: left; vertical-align:bottom;">Página 1 de 1</td>
+                <td colspan="5"></td>
+                    <td style="text-align: right;"> <img src="~/images/simaq_footer_remision.jpg" class="img-fluid" width="30%;" height="30%;"/></td>
+            </tr>
+        </table>
+        </div>
+    </div>
+</div>
+<div class="container text-end" style="padding-top:5px;">
+    <div class="col-xxl-11 col-xl-11 col-lg-11 col-md-11 col-sm-12 col-xs-12 text-center">
+        @{
+            string comments = Model.Comments;
+            if (comments != null)
+            {
+                comments = comments.Replace("\n", "introespace").Replace("\r", "introespace");
+
+            }
+            else
+            {
+                comments = "";
+            }
+            var url = "/WorkOrders/RemisionReprintConfirm?workorderdeliveryid=" + @Model.WorkOrderDeliveryId ;
+
+        }
+
+        <a title='Guardar' onclick="javascript: showInPopup('@url','Continuar','bg-primary')" class='btn btn-sm btn-success'>Continuar &nbsp;<i title='Guardar y continuar' class='fa-solid fa-save'></i></a>
+
+    </div>
+</div>
+<partial name="_AddOrEditDialog" />
+@section Scripts{
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script src="~/js/showmodal.js"></script>
+
+<script type="text/javascript">
+    var count = 0;
+    $(document).ready(function () {
+     
+           $('#TableWorkOrderDetails').DataTable(
+            {
+                "language": {
+                    "url": "/lib/datatables/Spanish.json"
+                },
+                paging: false,
+                responsive: true,
+                searching: false,
+                ordering: false,
+                info: false,
+                "columnDefs": [{
+                    "targets": 0,
+                    "visible": false
+                },
+                {
+                    "targets": [1,2],
+                    "orderable": false,
+                    className: 'dt-body-right'
+                },
+                {
+                    "targets": [3, 4, 5],
+                    "orderable": false,
+                    className: 'dt-body-left'
+                }],
+                "columns": [
+                    { "data": "workOrderDetailId" },
+                    { "data": "workOrderDetailId", "render": function (data) { count = count + 1; return count.toString(); } },
+                    { "data": "workOrderDetails.quantity" },
+                    { "data": "WorkOrderDetails.material.materialName" },
+                    { "data": "WorkOrderDetails.description" },
+                    { "data": "WorkOrderDetails.Unit.UnitName" }
+                ]
+            });
+    });
+
+        // $(document).ready(function () {
+        //     new DataTable('#example', {
+        //         paging: false,
+        //         responsive: true,
+        //         searching: false,
+        //         ordering: false,
+        //         info: false,
+        //         ajax: '../arrays.txt',
+        //         columnDefs: [
+        //             {
+        //                 "targets": [5, 6],
+        //                 visible: false
+        //             }
+        //         ]
+        //     });
+        // });
+</script>
+}

@@ -29,6 +29,11 @@ namespace SAGM.Models
         [Required(ErrorMessage = "El campo {0} es obligatorio.")]
         public decimal Quantity { get; set; }
 
+        [Column(TypeName = "decimal(18,2)")]
+        [Display(Name = "Costo x unidad")]
+        [Required(ErrorMessage = "El campo {0} es obligatorio.")]
+        public decimal Cost { get; set; } = 200;
+
         [Display(Name = "Unidad")]
         public int UnitId { get; set; }
 

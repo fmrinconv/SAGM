@@ -18,8 +18,6 @@
         <div class="row">
             <div class="col-md-6">
                 <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-
-
                 <div class="form-group">
                     <label asp-for="QuoteDate" class="control-label"></label>
                     <input asp-for="QuoteDate" class="form-control"/>
@@ -94,6 +92,11 @@
                     <label asp-for="ExchangeRate" class="control-label"></label>
                     <input asp-for="ExchangeRate" class="form-control" />
                     <span asp-validation-for="ExchangeRate" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="Discount" class="control-label"></label>
+                    <input asp-for="Discount" class="form-control" />
+                    <span asp-validation-for="Discount" class="text-danger"></span>
                 </div>
                 <div class="form-group">
                     <label asp-for="Comments" class="control-label"></label>

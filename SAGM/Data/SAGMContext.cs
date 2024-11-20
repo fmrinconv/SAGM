@@ -72,6 +72,12 @@ namespace SAGM.Data
 
         public DbSet<OrderReceipt> OrderReceipts { get; set; }
         public DbSet<OrderReceiptDetail> OrderReceiptDetails { get; set; }
+        public DbSet<InvoicesTralix> invoicesTralixes { get; set; }
+
+        public DbSet<InvoicesCompacted> InvoicesCompacted { get; set; }
+
+        public DbSet<Invoice> Invoices { get; set; }
+        public DbSet<ExchangeRate> ExchangeRates { get; set; }
 
 
         internal static IConfiguration GetService(Type type)

@@ -25,6 +25,7 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace SAGM.Controllers
 {
+    [Authorize(Roles = "Administrador,Vendedor")]
     public class QuotesController : Controller
     {
         private readonly SAGMContext _context;
@@ -68,7 +69,7 @@ namespace SAGM.Controllers
         
         }
 
-        [Authorize(Roles = "Administrador,Vendedor")]
+
         public  IActionResult Index()
         {
 
@@ -148,6 +149,7 @@ namespace SAGM.Controllers
                  .Include(q => q.Customer)
                  .Include(q => q.QuoteStatus)
                  .Include(q => q.Currency)
+                 .Include(q => q.CreatedBy)
                  .OrderByDescending(q => q.QuoteId)
                  .ToListAsync();
 
@@ -211,6 +213,7 @@ namespace SAGM.Controllers
                     QuoteName = q.QuoteName,
                     Seller = seller,
                     Tax = q.Tax,
+                    Discount = q.Discount,
                     QuoteStatusName = q.QuoteStatus.QuoteStatusName,
                     validUntilDate = q.validUntilDate,
                     ArchivesNumber = archivesnumber,
@@ -411,6 +414,7 @@ namespace SAGM.Controllers
             quotev.QuoteStatusId = quote.QuoteStatus.QuoteStatusId;
             quotev.Tax = quote.Tax;
             quotev.ExchangeRate = quote.ExchangeRate;
+            quotev.Discount = quote.Discount;
 
             return View(quotev);    
            
@@ -533,9 +537,12 @@ namespace SAGM.Controllers
                 CustomerBuyerContacts = await _comboHelper.GetComboContactCustomersAsync(0),
                 CustomerFinalContacts = await _comboHelper.GetComboContactCustomersAsync(0),
                 Sellers = sellers,
+                SellerId = User.Identity.Name,
                 Tax = 16,
                 Active = true,
                 ModifiedBy = (List<SelectListItem>)await _userHelper.GetAllUsersAsync(),
+                ModifiedById = User.Identity.Name,
+                ExchangeRate = 1,
                 CurrencyId = 1,
                 Currency = currencies
             };
@@ -605,6 +612,7 @@ namespace SAGM.Controllers
                             QuoteName = quotename,
                             Seller = model.SellerId,
                             Tax = model.Tax,
+                            ExchangeRate = model.ExchangeRate,
                             validUntilDate = model.validUntilDate,
                             QuoteStatus = quotestatus,
 
@@ -690,6 +698,10 @@ namespace SAGM.Controllers
                 model.Customers = customers;
                 model.CustomerBuyerContacts = customerbuyerContacts;
                 model.CustomerFinalContacts = customerfinalContacts;
+
+                List<SelectListItem> currencies = (List<SelectListItem>)await _comboHelper.GetComboCurrenciesAsync(1);
+                model.Currency = currencies;
+                model.CurrencyId = 1;
                 return Json(new { isValid = false, html = ModalHelper.RenderRazorViewToString(this, "AddQuote", model) });
             }
 
@@ -723,6 +735,7 @@ namespace SAGM.Controllers
                   .ToList();
 
             sellers = (List<SelectListItem>)(from u in users join s in sellerlist on u.Value equals s.Value select u).ToList();
+            
 
             List<SelectListItem> customers = (List<SelectListItem>)await _comboHelper.GetComboCustomersAsync();
             List<SelectListItem> customerbuyercontacts = (List<SelectListItem>)await _comboHelper.GetComboContactCustomersAsync(quote.Customer.CustomerId);
@@ -750,7 +763,9 @@ namespace SAGM.Controllers
                 FinalUserId = quote.FinalUserId,
                 CustomerPO = quote.CustomerPO,
                 Sellers = sellers,
+                SellerId = quote.Seller,
                 Tax = quote.Tax,
+                Discount = quote.Discount,
                 Active = quote.Active,
                 ModifiedBy = (List<SelectListItem>)await _userHelper.GetAllUsersAsync(),
                 ModifiedById = quote.ModifiedBy,
@@ -807,6 +822,7 @@ namespace SAGM.Controllers
                         quote.Seller = model.SellerId;
                         quote.QuoteName = model.QuoteName;
                         quote.Tax = model.Tax;
+                        quote.Discount = model.Discount;
                         quote.validUntilDate = model.validUntilDate;
                         quote.Currency = await _context.Currencies.FindAsync(model.CurrencyId);
                         quote.CreatedBy = await _userHelper.GetUserAsync(model.CreatedBy);
@@ -1474,6 +1490,38 @@ namespace SAGM.Controllers
 
                 TempData["ChangeStatusResult"] = "true";
                 TempData["ChangeStatustMessage"] = "El estatus fué actualizado";
+
+                return Json(new { isValid = true, html = ModalHelper.RenderRazorViewToString(this, "_ViewAllQuoteDetails", _context.QuoteDetails.Where(q => q.Quote.QuoteId == quote.QuoteId).ToList()) });
+
+            }
+            catch (DbUpdateException dbUpdateException)
+            {
+
+                ModelState.AddModelError(string.Empty, dbUpdateException.Message);
+
+                return Json(new { isValid = false, html = ModalHelper.RenderRazorViewToString(this, "_ViewAllQuoteDetails", _context.QuoteDetails.Where(q => q.Quote.QuoteId == quote.QuoteId).ToList()) });
+
+            }
+
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> ChangeDiscount(int id, decimal discount)
+        {
+            Quote quote = await _context.Quotes
+                 .Include(q => q.Customer)
+                 .Include(q => q.QuoteStatus)
+                 .FirstOrDefaultAsync(m => m.QuoteId == id);
+            try
+            {
+
+                quote.Discount = discount;
+                _context.Update(quote);
+                await _context.SaveChangesAsync();
+
+
+                TempData["ChangeStatusResult"] = "true";
+                TempData["ChangeStatustMessage"] = "El descuento fué actualizado";
 
                 return Json(new { isValid = true, html = ModalHelper.RenderRazorViewToString(this, "_ViewAllQuoteDetails", _context.QuoteDetails.Where(q => q.Quote.QuoteId == quote.QuoteId).ToList()) });
 

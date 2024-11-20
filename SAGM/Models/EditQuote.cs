@@ -94,5 +94,11 @@ namespace SAGM.Models
         [Display(Name = "IVA")]
         [Required(ErrorMessage = "El campo {0} es obligatorio.")]
         public decimal Tax { get; set; }
+
+
+        [Column(TypeName = "decimal(18,2)")]
+        [Display(Name = "Descuento")]
+        [Required(ErrorMessage = "El campo {0} es obligatorio.")]
+        public decimal Discount { get; set; } = 0;
     }
 }

@@ -1,4 +1,5 @@
-﻿using DocumentFormat.OpenXml.Spreadsheet;
+﻿using DocumentFormat.OpenXml.Drawing.Charts;
+using DocumentFormat.OpenXml.Spreadsheet;
 using Microsoft.EntityFrameworkCore;
 using QuestPDF.Fluent;
 using QuestPDF.Helpers;
@@ -47,6 +48,7 @@ namespace SAGM.Helpers
                 .FirstOrDefaultAsync(q => q.QuoteId == QuoteId);
 
 
+            User seller = await _userHelper.GetUserAsync(quote.Seller);
 
             Contact finalUser = await _context.Contacts.FindAsync(quote.FinalUserId);
             Contact buyer = await _context.Contacts.FindAsync(quote.BuyerContactId);
@@ -65,6 +67,7 @@ namespace SAGM.Helpers
                 decimal total = 0;
                 decimal iva = quote.Tax / 100;
                 decimal ivatotal = 0;
+                decimal discount = quote.Discount * -1;
 
 
 
@@ -100,7 +103,7 @@ namespace SAGM.Helpers
                         table.Cell().Row(1).Column(2).PaddingLeft(2).Text("SILLA MAQUINADOS ALTA PRECISION").FontSize(9);
                         table.Cell().Row(2).Column(2).PaddingLeft(2).Text("Aramberri #503, Col. Lazaro Cardenas Ampliación, Escobedo, NL.").FontSize(9);
                         table.Cell().Row(3).Column(2).PaddingLeft(2).Text("81 83 97 66 79, 81 15 34 99 71").FontSize(9);
-
+                        table.Cell().Row(4).Column(2).PaddingLeft(2).Text($"{"Vendedor:"} {seller.FirstName} {seller.LastName}").FontSize(9);
 
                     });
                 });
@@ -136,8 +139,7 @@ namespace SAGM.Helpers
                             {
 
                                 subtotal += qd.Quantity * qd.Price;
-                                ivatotal += iva * subtotal;
-                                total = subtotal + ivatotal;
+                          
 
                                 table.Cell().Element(contenido).Padding(1).AlignCenter().Text(counter.ToString()).FontSize(9); //#
                                 table.Cell().Element(contenido).Padding(1).AlignCenter().Text(qd.Material.MaterialName).FontSize(9);
@@ -148,6 +150,8 @@ namespace SAGM.Helpers
                                 table.Cell().Element(contenido).Padding(1).AlignRight().Text((qd.Price * qd.Quantity).ToString("N", nfi)).FontSize(9);
                                 counter += 1;
                             }
+                            ivatotal += iva * (subtotal+discount);
+                            total = subtotal + discount + ivatotal ;
                         });
                         col.Item().Table(t =>
                         {
@@ -165,6 +169,10 @@ namespace SAGM.Helpers
                             t.Cell().ColumnSpan(5);
                             t.Cell().Element(totales).Padding(1).AlignRight().Text("Subtotal").FontSize(9).Bold();
                             t.Cell().Element(totales).Padding(1).AlignRight().Text(subtotal.ToString("N", nfi)).FontSize(9).Bold();
+
+                            t.Cell().ColumnSpan(5);
+                            t.Cell().Element(totales).Padding(1).AlignRight().Text("Descuento").FontSize(9).Bold();
+                            t.Cell().Element(totales).Padding(1).AlignRight().Text(discount.ToString("N", nfi)).FontSize(9).Bold();
 
                             t.Cell().ColumnSpan(5);
                             t.Cell().Element(totales).Padding(1).AlignRight().Text("IVA").FontSize(9).Bold();
@@ -453,7 +461,7 @@ namespace SAGM.Helpers
                 nfi.NumberDecimalDigits = 2;
 
 
-                Order order = await _context.Orders
+                Data.Entities.Order order = await _context.Orders
                     .Include(o => o.OrderStatus)
                     .Include(o => o.Currency)
                     .Include(o => o.Supplier)
@@ -554,8 +562,7 @@ namespace SAGM.Helpers
                             {
 
                                 subtotal += qd.Quantity * qd.Price;
-                                ivatotal += iva * subtotal;
-                                total = subtotal + ivatotal;
+                               
 
                                 table.Cell().Element(contenido).Padding(1).AlignCenter().Text(counter.ToString()).FontSize(9); //#
                                 table.Cell().Element(contenido).Padding(1).AlignCenter().Text(qd.Material.MaterialName).FontSize(9);
@@ -565,10 +572,12 @@ namespace SAGM.Helpers
                                 table.Cell().Element(contenido).Padding(1).AlignRight().Text(qd.Price.ToString("N", nfi)).FontSize(9);
                                 table.Cell().Element(contenido).Padding(1).AlignRight().Text((qd.Price * qd.Quantity).ToString("N", nfi)).FontSize(9);
                             }
+                            ivatotal += iva * subtotal;
+                            total = subtotal + ivatotal;
 
                             table.Footer(foot =>
                             {
-                                foot.Cell().Row(1).Column(1).BorderRight(1).BorderColor(Colors.BlueGrey.Lighten5).Padding(3).Text(order.Supplier.SupplierNickName).FontSize(9);
+                                //foot.Cell().Row(1).Column(1).BorderRight(1).BorderColor(Colors.BlueGrey.Lighten5).Padding(3).Text(order.Supplier.SupplierNickName).FontSize(9);
                                 //totales
                                 foot.Cell().ColumnSpan(5);
                                 foot.Cell().Element(totales).Padding(1).AlignRight().Text("Subtotal").FontSize(9).Bold();

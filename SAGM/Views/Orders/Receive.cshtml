@@ -508,7 +508,12 @@
             strdetails = "";
 
             if (checked == true) {
-                $(detailname).val(parseFloat(quantity) + parseFloat(received))
+                if (parseFloat(quantity) == parseFloat(received) || parseFloat(quantity) < parseFloat(received)) {
+                    $(detailname).val(0);
+                }
+                else {
+                    $(detailname).val(parseFloat(quantity) - parseFloat(received));
+                }
             }
             else {
                 $(detailname).val("");

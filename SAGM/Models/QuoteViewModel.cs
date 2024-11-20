@@ -98,7 +98,11 @@ namespace SAGM.Models
         [Required(ErrorMessage = "El campo {0} es obligatorio.")]
         public decimal Tax { get; set; }
 
-   
+        [Column(TypeName = "decimal(18,2)")]
+        [Display(Name = "Descuento")]
+        [Required(ErrorMessage = "El campo {0} es obligatorio.")]
+        public decimal Discount { get; set; } = 0;
+
 
         public ICollection<AllQuoteDetails> QuoteDetails { get; set; }
         public ICollection<QuoteComment> QuoteComments { get; set; }

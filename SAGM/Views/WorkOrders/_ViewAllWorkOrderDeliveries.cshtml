@@ -1,0 +1,33 @@
+﻿@model SAGM.Models.AllWorkOrderDeliveries
+@{var counter =0;}
+<table class="table table-hover responsive" id="TableWorkOrderDetails" style="font-size:small; width:100%;">
+    <thead>
+        <tr>
+            <th style="text-align:center; width:7%;">&nbsp;&emsp;#</th>
+            <th style="text-align: left;">
+                @Html.DisplayNameFor(model => model.WorkOrderDeliveries.FirstOrDefault().WorkOrderDeliveryName)
+            </th>
+            <th style="text-align: left;">
+                @Html.DisplayNameFor(model => model.WorkOrderDeliveries.FirstOrDefault().RemisionDate)
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+  
+
+        @foreach (var item in Model.WorkOrderDeliveries)
+        {
+            counter += 1;
+            <tr>
+                <td>@counter</td>
+                <td>
+                    <a asp-action="RemisionReprintPreview" asp-controller="WorkOrders" asp-route-Id="@item.WorkOrderDeliveryId">@Html.DisplayFor(modelItem => item.WorkOrderDeliveryName)</a>
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.RemisionDate)
+                </td>
+            </tr>
+        }
+    </tbody>
+
+    </table>

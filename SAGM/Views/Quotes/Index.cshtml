@@ -101,12 +101,12 @@
                         },
                         {
                             "targets": 6,
-                            className: 'dt-body-center dt-body-nowrap',
+                            className: 'dt-body-left dt-body-nowrap',
                             responsivePriority: 4
                         },
                         {
                             "targets": [5,7],
-                            className: 'dt-body-center dt-body-nowrap',
+                            className: 'dt-body-left dt-body-nowrap',
                             responsivePriority: 3
                         },
                         {
@@ -116,7 +116,7 @@
                         },
                         {
                             "targets": [9],
-                            className: 'dt-body-right dt-body-nowrap',
+                            className: 'dt-body-left dt-body-nowrap',
                             responsivePriority: 1
                         },
                         {
@@ -184,6 +184,7 @@
                        
                         { "data": "customerPO" },
                         { "data": "total", "render": $.fn.dataTable.render.number(',', '.', 2) },
+                        { "data": "discount" },
                         {
                             "data": "active",
                             "render":
@@ -208,7 +209,7 @@
                                 result += "<a title='Editar cotización' onclick=\"showInPopup('/Quotes/EditQuote?id=" + data + "','Editar\ cotización','bg-warning')\" ";
                                 result += "class='btn btn-sm btn-outline-warning'><i title='Editar cotización' class='fa-solid fa-pencil-alt'></i></a>";
 
-                                result += "<a title='Copiar cotización' onclick=\"showInPopup('/Quotes/CopyQuote?id=" + data + "','Copiar\ cotización','bg-warning')\" ";
+                                result += "<a title='Copiar cotización' onclick=\"showInPopup('/Quotes/CopyQuote?id=" + data + "','Copiar\ cotización','bg-success')\" ";
                                 result += "class='btn btn-sm btn-outline-success'><i title='Copiar cotización' class='fa fa-copy'></i></a>";
 
                                 result += "<a title='Subir archivo' onclick=\"showInPopup('/Archives/AddArchive?entityid=" + data + "&Entity=Quote','Agregar\ archivos','bg-primary')\" ";

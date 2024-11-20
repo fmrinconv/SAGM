@@ -468,8 +468,7 @@
             var table = '<table cellpadding = "12" cellspacing = "0" border = "0" style = "padding-left:50px;" ><tr style="background-color:orange;"><td><b>Maquina</b></td><td><b>Poceso</b></td><td><b>Cantidad</b></td><td><b>Unidad</b></td><td><b>Total</b></td></tr>';
             var rows = '';
 
-
-            if (d.processArray != null) {
+            if (d.processArray != null && d.processArray != 0) {
                 var quantity = d.quantity;
                 var total = 0;
                 var formatter = new Intl.NumberFormat("es-MX", {
@@ -479,6 +478,7 @@
                 });
                 
                 var arrProcess = d.processArray.split("|");
+
                 for (var i = 0; i < arrProcess.length; i++) {
                     var subtotal = 0;
                     var arrprocesspart = arrProcess[i].split("\\");

@@ -25,7 +25,7 @@
                 $('#form-modal .modal-header').addClass("text-white");
             }
 
-            if (title.substring(0, 16) == "Crear cotización" || title.substring(0, 17) == "Editar cotización" || title.substring(0, 15) == "Agregar partida") {
+            if (title.substring(0, 16) == "Crear cotización" || title.substring(0, 17) == "Editar cotización" || title.substring(0, 15) == "Agregar partida" || title.substring(0, 17) == "Copiar cotización") {
                 $('#form-modal .modal-icon').addClass("fa fa-file-invoice-dollar");
             }
             else if (title == "Hacer comentario")

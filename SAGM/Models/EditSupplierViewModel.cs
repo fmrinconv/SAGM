@@ -15,7 +15,7 @@ namespace SAGM.Models
         [Required(ErrorMessage = "El campo {0} es obligatorio.")]
         public string SupplierName { get; set; }
 
-        [Display(Name = "Cliente")]
+        [Display(Name = "Proveedor")]
         [MaxLength(50, ErrorMessage = "El campo {0} debe tener máximo {1} caractéres.")]
         [Required(ErrorMessage = "El campo {0} es obligatorio.")]
         public string SupplierNickName { get; set; }

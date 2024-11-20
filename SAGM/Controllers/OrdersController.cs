@@ -12,6 +12,7 @@ using DocumentFormat.OpenXml.InkML;
 using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.Blazor;
 using SAGM.Migrations;
 using Microsoft.AspNetCore.Authorization;
+using System.Security.Cryptography;
 
 namespace SAGM.Controllers
 {
@@ -94,6 +95,14 @@ namespace SAGM.Controllers
                 TempData.Remove("ArchiveDeleteMessage");
             }
 
+            if (TempData["CopyOrderResult"] != null)
+            {
+                ViewBag.Result = TempData["CopyOrderResult"].ToString();
+                ViewBag.Message = TempData["CopyOrderMessage"].ToString();
+                TempData.Remove("CopyOrderResult");
+                TempData.Remove("CopyOrderMessage");
+            }
+
             return View();
 
         }
@@ -111,6 +120,7 @@ namespace SAGM.Controllers
                  .Include(o => o.OrderStatus)
                  .Include(o => o.Currency)
                  .Include(o => o.WorkOrder)
+                 .Include(o => o.CreatedBy)
                  .OrderByDescending(o => o.OrderId)
                  .ToListAsync();
 
@@ -284,7 +294,7 @@ namespace SAGM.Controllers
 
                         // -------------------------
 
-                        Order Lastorder = await _context.Orders.Where(o => o.OrderName.Substring(0, 12) == ordername).OrderBy(o => o.OrderId).LastOrDefaultAsync();//Ultima OC
+                        Order Lastorder = await _context.Orders.Where(o => o.OrderName.Substring(0, 11) == ordername).OrderBy(o => o.OrderId).LastOrDefaultAsync();//Ultima OC
 
                         if (Lastorder != null)
                         {
@@ -588,6 +598,7 @@ namespace SAGM.Controllers
                         Unit = detail.Unit,
                         UnitName = detail.Unit.UnitName,
                         Archives = archives,
+                        Received = detail.Received,
                         ArchivesChain = archiveschain
 
                     };
@@ -1058,7 +1069,6 @@ namespace SAGM.Controllers
         }
 
         [HttpPost]
-        [ValidateAntiForgeryToken]
         public async Task<IActionResult> ChangeStatus(int id, int statusid)
         {
             Order order = await _context.Orders
@@ -1067,8 +1077,7 @@ namespace SAGM.Controllers
                  .FirstOrDefaultAsync(o => o.OrderId == id);
             try
             {
-
-                order.OrderStatus.OrderStatusId = statusid;
+                order.OrderStatus = await _context.OrderStatus.FindAsync(statusid);
                 _context.Update(order);
                 await _context.SaveChangesAsync();
 
@@ -1220,11 +1229,14 @@ namespace SAGM.Controllers
                     order.EstimatedDeliveryDate = model.EstimatedDeliveryDate;
                     order.Currency = await _context.Currencies.FindAsync(model.CurrencyId);
                     order.OrderStatus = orderstatus;
+                   
                     _context.Update(order);
                     await _context.SaveChangesAsync();
                     TempData["EditOrderResult"] = "true";
                     TempData["EditOrderMessage"] = "La OC fué actualizada";
-                    List<Order> lstOrders = _context.Orders.ToList();
+                    List<Order> lstOrders = _context.Orders
+                        .Include(l => l.OrderStatus)
+                        .ToList();
 
                     lstOrders = lstOrders.Where(l => l.OrderStatus.OrderStatusId == 1 ||  l.OrderStatus.OrderStatusId == 2 || l.OrderStatus.OrderStatusId == 3 || l.OrderStatus.OrderStatusId == 4).ToList();
                     return Json(new { isValid = true, html = ModalHelper.RenderRazorViewToString(this, "_ViewAllOrders", lstOrders) });
@@ -1571,6 +1583,159 @@ namespace SAGM.Controllers
             return File(stream, "application/pdf", $"{order.OrderName}{".pdf"}");
         }
 
+        [HttpGet]
+        public async Task<IActionResult> CopyOrder(int id)
+        {
+            Order order = await _context.Orders.FirstOrDefaultAsync(o => o.OrderId == id);
+            CopyOrder corder = new CopyOrder();
+            corder.OrderId = order.OrderId;
+            corder.OrderName = order.OrderName;
+            corder.copyfilesdetails = false;
+            corder.copyfilesheader = false;
+            return View(corder);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> CopyOrder(CopyOrder model)
+        {
+
+            ////Orden de la que se basa la nueva
+            ///
+            Order oldorder = await _context.Orders
+                .Include(o => o.OrderDetails).ThenInclude(o => o.Material)
+                .Include(o => o.OrderDetails).ThenInclude(o => o.Unit)
+                .Include(o => o.Supplier)
+                .Include(o => o.Currency)
+                .FirstOrDefaultAsync( o => o.OrderId == model.OrderId );    
+
+   
+
+
+            //Formamos el nombre
+
+            string ordername = DateTime.Now.ToString("yyyyMMdd");
+            string Lastnumber = ""; //Ultimo numero consecutivo de la cotización
+            string strnumber = "";
+            int Consec = 0;
+
+            ///Por default dejamos 10 dias de vigencia
+            TimeSpan validuntildate = new TimeSpan(10, 0, 0, 0); //Diez dias de vigencia por defecto
+
+            ordername = "OC-" + ordername;
+
+            // -------------------------
+
+            Order Lastorder = await _context.Orders.Where(o => o.OrderName.Substring(0, 11) == ordername.Substring(0, 11)).OrderBy(o => o.OrderId).LastOrDefaultAsync();//Ultima cotizacion
+
+
+            if (Lastorder != null)
+            {
+                Lastnumber = Lastorder.OrderName.Substring(12, 3);
+                Consec = Int32.Parse(Lastnumber);
+            }
+            else
+            {
+                Lastnumber = "000";
+                Consec = Int32.Parse(Lastnumber);
+            }
+
+            Consec += 1;
+
+            strnumber = $"000{Consec}";
+
+            ordername = ordername + "-" + strnumber.Substring(strnumber.Length - 3, 3);
+
+            //-----------------------
+
+            User createdBy = await _userHelper.GetUserAsync(User.Identity.Name);
+            OrderStatus orderstatus = await _context.OrderStatus.FindAsync(2);//Como es copia nace en modificación
+            QuoteStatus quotestatus = await _context.QuoteStatus.FindAsync(2);//Como es copia nace en modificación
+
+            Order order = new Order() { 
+                Active = true,
+                Comments = oldorder.Comments,
+                CreatedBy = createdBy,
+                Currency = oldorder.Currency,
+                Supplier = oldorder.Supplier,
+                SupplierContactId = oldorder.SupplierContactId,
+                SupplierQuote = oldorder.SupplierQuote,
+                Buyer = oldorder.Buyer,
+                OrderDate = DateTime.Now,
+                OrderName = ordername,
+                Tax = oldorder.Tax,
+                OrderStatus = orderstatus,
+                DeliveryDate = null,
+                EstimatedDeliveryDate = null,
+            };
+            _context.Add(order);
+            await _context.SaveChangesAsync();
+
+            foreach (OrderDetail ood in oldorder.OrderDetails)
+            {
+                OrderDetail od = new OrderDetail() {
+                    Order = order,
+                    Description = ood.Description,
+                    Material = ood.Material,
+                    Unit = ood.Unit,
+                    Price = ood.Price,
+                    Quantity = ood.Quantity,
+
+                };
+                _context.Add(od);
+                await _context.SaveChangesAsync();
+
+                if (model.copyfilesdetails == true)
+                {
+                    List<Archive> archives = _context.Archives.Where(a => a.Entity == "OrderDetail" && a.EntityId == ood.OrderDetailId).ToList();
+
+                    foreach (Archive arch in archives)
+                    {
+
+                        Guid archiveguid = Guid.Empty;
+
+                        archiveguid = await _blobHelper.CopyBlobAsync(arch.ArchiveGuid, "archives");
+
+                        Archive archive = new Archive();
+                        archive.ArchiveGuid = archiveguid;
+                        archive.Entity = arch.Entity;
+                        archive.EntityId = od.OrderDetailId;
+                        archive.ArchiveName = arch.ArchiveName;
+                        _context.Add(archive);
+                        await _context.SaveChangesAsync();
+                    }
+
+                }
+
+            }
+
+
+            //Si se eligio copiar archivos de cabecera los copiamos a la nueva Cotizacion
+
+            if (model.copyfilesheader == true)
+            {
+                List<Archive> qarchives = _context.Archives.Where(a => a.Entity == "Order" && a.EntityId == oldorder.OrderId).ToList();
+
+                foreach (Archive a in qarchives)
+                {
+                    Guid archiveguid = Guid.Empty;
+                    archiveguid = await _blobHelper.CopyBlobAsync(a.ArchiveGuid, "archives");
+                    Archive archive = new Archive();
+                    archive.ArchiveGuid = archiveguid;
+                    archive.Entity = a.Entity;
+                    archive.EntityId = order.OrderId;
+                    archive.ArchiveName = a.ArchiveName;
+                    _context.Add(archive);
+                    await _context.SaveChangesAsync();
+
+                }
+
+            }
+
+            TempData["CopyOrderResult"] = "true";
+            TempData["CopyOrderMessage"] = "La Orden de compra fué copiada";
+            return RedirectToAction("Index", "Orders", new { id = order.OrderId });
+        }
+
         [HttpPost]
         public async Task<IActionResult> CopyDetail(int orderDetailId)
         {
@@ -1763,9 +1928,10 @@ namespace SAGM.Controllers
                         orderdetail.OrderDetailId = d.OrderDetailId;
                         orderdetail.Unit = d.Unit;
                         orderdetail.Price = d.Price;
-                        orderdetail.Quantity = Int32.Parse(detailid[1]);
+                        orderdetail.Quantity = Decimal.Parse(detailid[1]);
                         orderdetail.Material = d.Material;
                         orderdetail.Description = d.Description;
+                        orderdetail.Received = d.Received;
                         lodresult.Add(orderdetail);
                         break;
 

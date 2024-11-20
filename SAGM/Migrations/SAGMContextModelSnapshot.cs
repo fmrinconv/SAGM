@@ -177,6 +177,9 @@ namespace SAGM.Migrations
                     b.Property<int>("EntityId")
                         .HasColumnType("int");
 
+                    b.Property<DateTime>("UploadDate")
+                        .HasColumnType("datetime2");
+
                     b.HasKey("ArchiveId");
 
                     b.ToTable("Archive");
@@ -392,6 +395,229 @@ namespace SAGM.Migrations
                         .IsUnique();
 
                     b.ToTable("Customers");
+                });
+
+            modelBuilder.Entity("SAGM.Data.Entities.ExchangeRate", b =>
+                {
+                    b.Property<int>("ExhangeRateId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ExhangeRateId"));
+
+                    b.Property<DateOnly>("Date")
+                        .HasColumnType("date");
+
+                    b.Property<decimal>("Exchangerate")
+                        .HasColumnType("decimal(18,4)");
+
+                    b.HasKey("ExhangeRateId");
+
+                    b.ToTable("ExchangeRates");
+                });
+
+            modelBuilder.Entity("SAGM.Data.Entities.Invoice", b =>
+                {
+                    b.Property<int>("InvoiceId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("InvoiceId"));
+
+                    b.Property<string>("CfdiType")
+                        .HasMaxLength(16)
+                        .HasColumnType("nvarchar(16)")
+                        .HasColumnName("Tipo de CFDI");
+
+                    b.Property<string>("Currency")
+                        .HasMaxLength(12)
+                        .HasColumnType("nvarchar(12)")
+                        .HasColumnName("Moneda");
+
+                    b.Property<DateTime?>("EmisionDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnName("Fecha de Emisión");
+
+                    b.Property<string>("EmisorName")
+                        .HasMaxLength(36)
+                        .HasColumnType("nvarchar(36)")
+                        .HasColumnName("Nombre del Emisor");
+
+                    b.Property<string>("EmisorTaxId")
+                        .HasMaxLength(36)
+                        .HasColumnType("nvarchar(36)")
+                        .HasColumnName("RFC Emisor");
+
+                    b.Property<int?>("Folio")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("PayDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnName("Fecha de pago");
+
+                    b.Property<string>("PayStatus")
+                        .HasMaxLength(32)
+                        .HasColumnType("nvarchar(32)")
+                        .HasColumnName("Pagado");
+
+                    b.Property<string>("ReceptorName")
+                        .HasMaxLength(160)
+                        .HasColumnType("nvarchar(160)")
+                        .HasColumnName("Nombre del Receptor");
+
+                    b.Property<string>("ReceptorTaxId")
+                        .HasMaxLength(36)
+                        .HasColumnType("nvarchar(36)")
+                        .HasColumnName("RFC Receptor");
+
+                    b.Property<string>("RecipeType")
+                        .HasMaxLength(32)
+                        .HasColumnType("nvarchar(32)")
+                        .HasColumnName("Tipo de Comprobante");
+
+                    b.Property<string>("Serie")
+                        .HasMaxLength(4)
+                        .HasColumnType("nvarchar(4)");
+
+                    b.Property<decimal?>("Subtotal")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("TaxStatus")
+                        .HasMaxLength(32)
+                        .HasColumnType("nvarchar(32)")
+                        .HasColumnName("Estado Fiscal");
+
+                    b.Property<decimal?>("Total")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal?>("TrasladedTax")
+                        .HasColumnType("decimal(18,2)")
+                        .HasColumnName("IVA Trasladado");
+
+                    b.Property<string>("UUID")
+                        .IsRequired()
+                        .HasMaxLength(36)
+                        .HasColumnType("nvarchar(36)");
+
+                    b.Property<string>("payComment")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)")
+                        .HasColumnName("Comentario de pago");
+
+                    b.Property<string>("payMethod")
+                        .HasMaxLength(32)
+                        .HasColumnType("nvarchar(32)")
+                        .HasColumnName("Metodo de pago");
+
+                    b.HasKey("InvoiceId");
+
+                    b.ToTable("Invoices");
+                });
+
+            modelBuilder.Entity("SAGM.Data.Entities.InvoicesCompacted", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateOnly>("Date")
+                        .HasColumnType("date");
+
+                    b.Property<int>("Day")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Month")
+                        .HasColumnType("int");
+
+                    b.Property<string>("ReceptorTaxId")
+                        .HasMaxLength(36)
+                        .HasColumnType("nvarchar(36)")
+                        .HasColumnName("RFC Receptor");
+
+                    b.Property<decimal?>("Subtotal")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal?>("Total")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("Year")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("InvoicesCompacted");
+                });
+
+            modelBuilder.Entity("SAGM.Data.Entities.InvoicesTralix", b =>
+                {
+                    b.Property<int>("InvoiceId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("InvoiceId"));
+
+                    b.Property<string>("ComentariodePago")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("EstadoFiscal")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("FechadeEmision")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("FechadePago")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Folio")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("IVATrasladado")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("MetododePago")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Moneda")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("NombredelEmisor")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("NombredelReceptor")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Pagado")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("RFCEmisor")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("RFCReceptor")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Serie")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Subtotal")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("TipodeCFDI")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("TipodeComprobante")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Total")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("UUID")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("InvoiceId");
+
+                    b.ToTable("invoicesTralixes");
                 });
 
             modelBuilder.Entity("SAGM.Data.Entities.Machine", b =>
@@ -796,6 +1022,9 @@ namespace SAGM.Migrations
                     b.Property<string>("CustomerPO")
                         .HasMaxLength(128)
                         .HasColumnType("nvarchar(128)");
+
+                    b.Property<decimal>("Discount")
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<decimal>("ExchangeRate")
                         .HasColumnType("decimal(18,2)");
@@ -1283,6 +1512,10 @@ namespace SAGM.Migrations
                     b.Property<string>("Comments")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("Creator")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<DateTime?>("RemisionDate")
                         .HasColumnType("datetime2");
 
@@ -1419,6 +1652,9 @@ namespace SAGM.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("WorkOrderDetailProcessId"));
+
+                    b.Property<decimal>("Cost")
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<int?>("MachineId")
                         .HasColumnType("int");

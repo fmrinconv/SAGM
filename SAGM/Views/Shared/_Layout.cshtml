@@ -126,6 +126,20 @@
                                         </ul>
                                     </li>
                                     <li class="nav-item dropdown">
+                                        <a class="nav-link dropdown-toggle text-secondary" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                            <b>Finanzas</b>
+                                        </a>
+                                        <ul class="dropdown-menu" style="background-color: #121247; border-color: silver">
+                                            <li class="nav-item" style="margin-left:3px;">
+                                                <a class="text-decoration-none text-secondary" asp-controller="Archives" asp-action="Index"> <i class="fa fa-gear" style="color:darkorange;"></i>  <strong>Procesar Archivo </strong></a>
+                                            </li>
+                                            <li class="nav-item" style="margin-left:3px;">
+                                                <a class="text-decoration-none text-secondary" asp-controller="Finances" asp-action="Billing"> <i class="fa fa-chart-pie" style="color:limegreen;"></i> <strong style="color:limegreen;">Facturación </strong></a>
+                                            </li>
+
+                                        </ul>
+                                    </li>
+                                    <li class="nav-item dropdown">
                                         <a class="nav-link dropdown-toggle text-primary" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                                             <b>Catálogos</b>
                                         </a>
@@ -202,7 +216,7 @@
 
     <footer class="border-top footer text-muted">
         <div class="container">
-            &copy; @DateTime.Now.Year - SAGEM by Francisco Rincón - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+            &copy; @DateTime.Now.Year - SAGEM by Francisco Rincón - Version 3.031024.1 <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
         </div>
     </footer>
 

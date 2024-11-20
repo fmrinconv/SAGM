@@ -1,0 +1,230 @@
+﻿@model SAGM.Models.BillingGraph
+<style>
+        #customers {
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: small;
+            border-collapse: collapse;
+            width: 100%;
+            
+        }
+
+        #customers td, #customers th {
+            border: 1px solid #ddd;
+            padding: 6px;
+        }
+
+        #customers tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        #customers tr:hover {
+            background-color: #ddd;
+        }
+
+        #customers th {
+            padding-top: 12px;
+            padding-bottom: 12px;
+            text-align: left;
+            background-color: #04AA6D;
+            color: white;
+        }
+</style>
+<div class="container-fluid">
+    <div class="card mt-2">
+        <div class="card-header text-success bg-secondary bg-opacity-25">
+            <table>
+                <tr>
+                    <td>
+                        <i class="fa fa-money-check-dollar"></i><strong>Facturación</strong>
+                       
+                    </td>
+                    <td>
+                        
+
+                    </td>
+                </tr>
+            </table>
+        </div>
+        <div class="card-body">
+            <div class="row ">
+                    <div class="col-md-2"></div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label asp-for="DateIni" class="control-label"></label>
+                        <input asp-for="DateIni" class="form-control" type="date" />
+                            <span asp-validation-for="DateIni" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label asp-for="DateFin" class="control-label"></label>
+                            <input asp-for="DateFin" class="form-control" type="date" />
+                            <span asp-validation-for="DateFin" class="text-danger"></span>
+                        </div>
+                    </div>
+                <div class="col-md-2">
+                    <div class="form-group">
+                            <br />
+                                <a onclick="GraphicInvoices()" class="btn btn-sm btn-outline-primary"><i class="fa-solid fa-refresh"></i></a>
+                        </div>
+                    </div>
+
+            </div>
+            <br />
+            <div class="row" >
+                    <div class="col-md-2"></div>
+                    <div class="col-md-4">
+                        <div id="container" style="width: 350px; height: 350px;" class="center-block"></div>
+                    </div>
+                    <div class="col-md-4">
+                             <div class="container" style="padding-left:35px;">
+                                <table id="customers" name="tabla">
+                                    <tbody></tbody>
+                                </table>
+                             </div>    
+                            
+          
+                    </div>
+                    <div class="col-md-2"></div>
+            </div>
+
+
+            
+        </div>
+    </div>
+</div>
+
+@section Scripts{
+    <script src="https://cdn.anychart.com/releases/8.13.0/js/anychart-base.min.js"></script>
+    <script>
+        var json
+        var dataserver;
+        $(document).ready(function () {
+            GraphicInvoices();
+        });
+
+        function formatCurrency(total) {
+            var neg = false;
+            if (total < 0) {
+                neg = true;
+                total = Math.abs(total);
+            }
+            return (neg ? "-$" : '$') + parseFloat(total, 10).toFixed(2).replace(/(\d)(?=(\d{3})+\.)/g, "$1,").toString();
+        }
+
+        function GraphicInvoices() {
+            $('#container').empty();
+            $("#customers tbody").empty();
+            $.ajax(
+                {
+                    type: "GET",
+                    contentType: "application/json; charset=utf-8",
+                    dataType: "json",
+                    url: '/Finances/GetBilling/?fini=' + $("#DateIni").val() + '&ffin=' + $("#DateFin").val(),
+                    error: function () {
+                                         alert("Ocurrio un error");
+                                       },
+                    success: function (data) {
+                        dataserver = data.serie;
+                        json = {
+                            // chart settings
+                            "chart": {
+                                // chart type
+                                "type": "pie",
+                                // chart data
+                                "data": data.serie ,
+                                // chart container
+                                "container": "container"
+                            }
+                        };
+                        console.log(json);
+
+                        var contenido = "<tr><th>Cliente</th><th>Cantidad</th><th>Porcentaje</th></tr>";
+                        $.each(data.serie, function (index, element) {
+
+                            // alert(element.x);
+                            var percentage = element.value * 100 / data.total;
+
+                            contenido += '<tr><td>' + element.x + '</td><td style="text-align:right;">' + formatCurrency(element.value) + '</td><td style="text-align:right;">&nbsp;' + percentage.toFixed(2) + '%</td></tr>';
+                            $('#customers > tbody:last-child').append(contenido);
+                            contenido = "";
+                        });
+
+                        contenido = '<tr><th>Total</th><th style="text-align:right;">' + formatCurrency(data.total) + '</th><th style="text-align:right;">&nbsp;100%</th></tr>';
+                        $('#customers > tbody:last-child').append(contenido);
+                        
+
+                        var chart = anychart.fromJson(json);
+                        chart.tooltip().useHtml(true);
+                        var tooltip = chart.tooltip();
+                        var paginator = chart.legend().paginator();
+                        chart.title("Facturación de " + $("#DateIni").val() + " a " + $("#DateFin").val());
+                        var title = chart.title();
+                        title.fontSize(11);
+                        paginator.layout("vertical");
+                        paginator.orientation("right"); 
+                        paginator.padding(10);
+                        paginator.fontColor("#dd2c00");
+                        paginator.fontSize(12);
+                        //tooltip.titleFormat("<img width='40' src='/Images/{%x}.png'>")
+                        tooltip.titleFormat("<img width='40' src='" + logo("{%x}") + "'>{%x}")
+                        tooltip.format("{%percentvalue}{numDecimals:2}%<br>${%value}{groupsSeparator:\\,}");
+                        chart.legend().useHtml(true);
+                        chart.legend().fontSize(9);
+                        chart.legend().itemsFormat("<span'>{%x}: ${%value}{groupsSeparator:\\,}</span>")
+                        chart.animation(true);
+                        chart.sort("desc");
+                        chart.draw();
+
+                        setTimeout(Graphic3d, 1700);
+                                            }
+                   
+                    
+                }
+            );
+        };
+
+        function Graphic3d() {
+            $('#container').empty();
+            chart = anychart.pie3d(dataserver);
+            chart.container("container");
+            chart.title("Facturación de " + $("#DateIni").val() + " a " + $("#DateFin").val());
+     
+            chart.tooltip().useHtml(true);
+            var tooltip = chart.tooltip();
+            var title = chart.title();
+            var paginator = chart.legend().paginator();
+            title.fontSize(11);
+
+            paginator.layout("vertical");
+            paginator.orientation("right");
+            paginator.padding(10);
+            paginator.fontColor("#dd2c00");
+            paginator.fontSize(12);
+            //tooltip.titleFormat("<img width='40' src='/Images/{%x}.png'>")
+            tooltip.titleFormat("<img width='40' src='" + logo("{%x}") + "'>{%x}")
+            tooltip.format("{%percentvalue}{numDecimals:2}%<br>${%value}{groupsSeparator:\\,}");
+            chart.legend().useHtml(true);
+            chart.legend().fontSize(9);
+            chart.legend().itemsFormat("<span'>{%x}: ${%value}{groupsSeparator:\\,}</span>")
+            chart.animation(true);
+            chart.labels().position("outside");
+            chart.sort("desc");
+            chart.draw();
+        };
+
+        function logo(valor) 
+        {
+      
+            if (valor == 'noimage.png') {
+                valor = "https://localhost:44345/images/noimage.png";
+                return valor;
+            }
+            else {
+                return "https://almacenamientomanolorin1.blob.core.windows.net/customers/" + valor;
+            }
+        }
+
+
+    </script>
+}

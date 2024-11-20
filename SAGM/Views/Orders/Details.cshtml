@@ -379,6 +379,7 @@
                             { "data": "price", "render": $.fn.dataTable.render.number(',', '.', 2) },
                             { "data": "total", "render": $.fn.dataTable.render.number(',', '.', 2) },
                             { "data": "archivesNumber" },
+                        { "data": "received" },
                             { "data": "orderDetailId", 
                                 "render": function (data) { 
                                     var result = "<div style='white-space: nowrap;'>";
@@ -529,11 +530,14 @@
         };
         function changestatus(statusid) {
             var id = $("#OrderId").val();
+            //alert("/Orders/ChangeStatus?id=" + id + " &statusid=" + statusid);
             $.ajax({
-                type: "Post",
-                url: "/Orders/ChangeStatus/",
-                dataType: 'json',
-                data: { id: id, statusid: statusid },
+                type: "POST",
+                url: "/Orders/ChangeStatus?id=" + id + "&statusid=" + statusid,
+                data: null,
+                async: true,
+                contentType: false,
+                processData: false,
                 success: function (data) {
 
                     if (data.isValid == true) {
@@ -575,7 +579,7 @@
             });
         }
         function GetWorkOrders(lorderid) {
-            alert(lorderid);
+            //alert(lorderid);
             count = 0;
             orderid = lorderid;
             dataTableWorkOrders = $('#TableWorkOrders').DataTable(

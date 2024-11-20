@@ -1,0 +1,64 @@
+﻿@model SAGM.Models.AddArchiveViewModel
+@{
+    ViewData["Title"] = "Procesar Archivo";
+    Layout = null;
+}
+
+
+
+<style>
+    .g2 {
+        background-color: #FFFFFF;
+        margin: 10px 10px 10px 10px;
+        border: 2px solid gray;
+        border-radius: 12px;
+        box-shadow: 5px 5px 5px #555;
+        background-color: white;
+        padding: 2px 3px 1px 1px;
+    }
+
+    .header2 {
+        margin: 1px 1px 1px 1px;
+        border-top-left-radius: 12px;
+        border-top-right-radius: 12px;
+    }
+</style>
+<div class="container smfont">
+            <div id="uploadform" class="modal-body">
+                   <form asp-action="UploadExchangeRateFile" autocomplete="off" enctype="multipart/form-data">
+                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                    <input type="hidden" asp-for="Entity" />
+                    <input type="hidden" asp-for="EntityId" />
+                    <div class="form-group">
+                        <div class="row" style="height:50px;">
+                             <label asp-for="ArchiveFile" class="control-label"></label>
+                        </div>
+                        <div class="row" style="height:50px;">
+                            <input asp-for="ArchiveFile" class="form-control" type="file" />        
+                        </div>
+                        <div class="row align-content-center" style="height:30px;">
+                                <span asp-validation-for="ArchiveFile" class="text-danger"></span>
+                        </div>
+                        <div class="row text-center">
+                            <div class="col-12 text-center">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" arial-label="cerrar"><i class="fa fa-ban"></i> Cancelar</button>
+                                 <input type="submit" value="Guardar" class="btn btn-primary" style="width:80px;" onclick="return Processing()" />
+                            </div>
+                        </div>
+                    </div>
+
+                </form>
+            </div>
+            <div id="uploadingform" style="display:none;" class="form-group">
+                 <img src="~/images/uploading.gif" width="10%;" height="10%;" />
+                 <label>...Subiendo Información...</label>
+            </div>
+</div>
+<script>
+    function Processing() 
+    {
+        document.getElementById("uploadform").style.display = "none";
+        document.getElementById("uploadingform").style.display = "block";
+        return true;
+    }
+</script>

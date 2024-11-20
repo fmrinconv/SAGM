@@ -18,10 +18,10 @@
 </style>
 
 <div tabindex="-1" data-bs-backdrop="static" aria-labelledby="exampleModalLabel" aria-hidden="true">
-    <form asp-action="CopyQuote" method="post">
+    <form asp-action="CopyOrder" method="post">
 
     <div class="modal-body">
-        <p>¿Estás seguro que deseas copiar la Cotización @Model.OrderName ?</p>
+        <p>¿Estás seguro que deseas copiar la Orden de compra @Model.OrderName ?</p>
         <div class="form-group">
                 <input type="checkbox" id="copyfiles" asp-for="copyfilesheader" /><span>Incluir la copia de archivos de cabecera</span><br />
                 <input type="checkbox" id="copyfilesdet" asp-for="copyfilesdetails" /><span>Incluir la copia de archivos de partidas</span>          

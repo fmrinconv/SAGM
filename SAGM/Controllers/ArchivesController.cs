@@ -1,11 +1,20 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using Azure.Storage.Blobs;
+using DocumentFormat.OpenXml.Office2010.Excel;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SAGM.Data;
 using SAGM.Data.Entities;
 using SAGM.Helpers;
 using SAGM.Models;
+using System.IO;
+using ClosedXML.Excel;
+
 using static SAGM.Helpers.ModalHelper;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System.ComponentModel;
+using System.Globalization;
+using static SkiaSharp.HarfBuzz.SKShaper;
 
 namespace SAGM.Controllers
 {
@@ -17,15 +26,317 @@ namespace SAGM.Controllers
         private readonly IBlobHelper _blobHelper;
         private readonly IUserHelper _userHelper;
         private readonly IComboHelper _comboHelper;
+        private readonly IConfiguration _configuration;
 
 
-        public ArchivesController(SAGMContext context, IBlobHelper blobHelper, IUserHelper userHelper, IComboHelper comboHelper)
+        public ArchivesController(SAGMContext context, IBlobHelper blobHelper, IUserHelper userHelper, IComboHelper comboHelper, IConfiguration configuration)
         {
             _context = context;
             _blobHelper = blobHelper;
             _userHelper = userHelper;
             _comboHelper = comboHelper;
+            _configuration = configuration;
         }
+
+
+        //Este proceso es exclusivo para Finanzas y sirve para leer un excel y poder subir su info a la BD
+        public IActionResult UploadFinanceFile(string entity = "InvoicesTralix", int entityid = 0)
+        {
+            AddArchiveViewModel model = new AddArchiveViewModel();
+            model.Entity = entity;
+            model.EntityId = entityid;
+            return View(model);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]///Este proceso es usado para almacenar archivos y dejarlo guardado ya que casi no se utilizará la funcion eliminar
+        //
+        public async Task<IActionResult> UploadFinanceFile(AddArchiveViewModel model)
+        {
+            //El siguiente proceso se ejecuta seguen el siguiente orden:
+            //1) Se sube el archivo al Blob
+            //2) Se guarda el nombre del archivo en la tabla de Archives
+            //3) Se lee el archivo subido con XLWorkBook y se carga en memoria
+            //4) Se limpia la tabla invoicesTralixes para dejar vacio el esqueleto
+            //5) Se cargan todas las facturas en el objeto lstinvoicestralix y se sube de un solo golpe todas las facturas  
+            //6) Ahora se pasaran todas las facturas de InvoicesTralix a Invoices Eliminando primero las facturas que ya existen en Invoices y que son el listado cargado en InvoicesTralix (ya que pueden haber actualizaciones de estatus
+
+            Guid archiveguid = Guid.Empty;
+
+            if (model.ArchiveFile != null)
+            {
+                archiveguid = await _blobHelper.UploadBlobAsync(model.ArchiveFile, "financefiles");
+            }
+
+            model.ArchiveGuid = archiveguid;
+
+            Archive archive = new Archive();
+            archive.ArchiveGuid = archiveguid;
+            archive.Entity = model.Entity;
+            archive.EntityId = model.EntityId;
+            archive.ArchiveName = model.ArchiveFile.FileName;
+            _context.Add(archive);
+            await _context.SaveChangesAsync();
+
+
+            string connectionstring = _configuration["Blob:ConnectionString"];
+            BlobClient blobClient = new BlobClient(connectionstring, "financefiles", archiveguid.ToString());
+            using (var stream = new MemoryStream())
+            {
+                blobClient.DownloadTo(stream);
+                stream.Position = 0;
+                var contentType = (blobClient.GetProperties()).Value.ContentType;
+                
+
+                var wb = new XLWorkbook(stream);
+                var ws = wb.Worksheets.First();
+
+                var range = ws.RangeUsed();
+                var colCount = range.ColumnCount();
+                var rowCount = range.RowCount();
+
+                var i = 2;
+
+
+                var result = await  _context.Database.ExecuteSqlRawAsync("TRUNCATE TABLE invoicesTralixes");
+
+                List<InvoicesTralix> lstinvoicestralix = new List<InvoicesTralix>();
+
+                while (i < rowCount + 1)
+                {
+                    InvoicesTralix invoiceTralix = new InvoicesTralix();
+          
+                    invoiceTralix.Serie = ws.Cell(i, 1).Value.ToString();
+                    invoiceTralix.Folio = ws.Cell(i, 2).Value.ToString();
+                    invoiceTralix.UUID = ws.Cell(i, 3).Value.ToString();
+                    invoiceTralix.FechadeEmision = ws.Cell(i, 4).Value.ToString();
+                    invoiceTralix.RFCEmisor = ws.Cell(i, 5).Value.ToString();
+                    invoiceTralix.NombredelEmisor = ws.Cell(i, 6).Value.ToString();
+                    invoiceTralix.RFCReceptor = ws.Cell(i, 7).Value.ToString();
+                    invoiceTralix.NombredelReceptor = ws.Cell(i, 8).Value.ToString();
+                    invoiceTralix.Subtotal = ws.Cell(i, 9).Value.ToString();
+                    invoiceTralix.IVATrasladado = ws.Cell(i, 10).Value.ToString();
+                    invoiceTralix.Total = ws.Cell(i, 11).Value.ToString();
+                    invoiceTralix.Moneda = ws.Cell(i, 12).Value.ToString();
+                    invoiceTralix.EstadoFiscal = ws.Cell(i, 13).Value.ToString();
+                    invoiceTralix.Pagado = ws.Cell(i, 14).Value.ToString();
+                    invoiceTralix.TipodeComprobante = ws.Cell(i, 15).Value.ToString();
+                    invoiceTralix.TipodeCFDI = ws.Cell(i, 16).Value.ToString();
+                    invoiceTralix.FechadePago = ws.Cell(i, 17).Value.ToString();
+                    invoiceTralix.ComentariodePago = ws.Cell(i, 18).Value.ToString();
+                    invoiceTralix.MetododePago = ws.Cell(i, 19).Value.ToString();
+
+                    lstinvoicestralix.Add(invoiceTralix);
+                    i++;
+                }
+
+
+                _context.invoicesTralixes.AddRange(lstinvoicestralix);
+                result = await _context.SaveChangesAsync();
+
+                /* Aqui seleccionamos todas los UUID de InvoicesTralix para que sean el WHERE de lo que vamos a Eliminar de Invoices*/
+                    List<string> lstIdsInvoicesTralix = new List<string>();
+                    lstIdsInvoicesTralix = await _context.invoicesTralixes.Select( c => c.UUID ).ToListAsync();
+                /**-----------------------------------------------------------------------------------------------------------*/
+
+
+
+                /*Ahora seleccionamos todos los Invoices a eliminar con el criterios de lstIdsInvoicesTralix y los eliminamos*/
+                    List<Invoice> LstInvoices = _context.Invoices.Where( r=>lstIdsInvoicesTralix.Contains(r.UUID)).ToList();
+                    _context.Invoices.RemoveRange(LstInvoices);
+                    result = await _context.SaveChangesAsync();
+                //-------------------------------------------------------------------------------------------------------------*/
+
+
+                List<InvoicesTralix> InvoicesTralix = await _context.invoicesTralixes.ToListAsync();
+                List<Invoice> Invoices = new List<Invoice>();
+
+               
+                foreach (var invoicetralix in InvoicesTralix)
+                {
+                    Invoice invoice = new Invoice();
+                    invoice.Serie = invoicetralix.Serie;
+                    invoice.Folio = ToNullableInt(invoicetralix.Folio);
+                    invoice.UUID = invoicetralix.UUID;
+                    invoice.EmisionDate = ToNullableDate(invoicetralix.FechadeEmision);
+                    invoice.EmisorTaxId = invoicetralix.RFCEmisor;
+                    invoice.EmisorName = invoicetralix.NombredelEmisor;
+                    invoice.ReceptorTaxId = invoicetralix.RFCReceptor;
+                    invoice.ReceptorName = invoicetralix.NombredelReceptor;
+                    invoice.Subtotal = ToNullableDecimal(invoicetralix.Subtotal);
+                    invoice.TrasladedTax = ToNullableDecimal(invoicetralix.IVATrasladado);
+                    invoice.Total = ToNullableDecimal(invoicetralix.Total);
+                    invoice.Currency = invoicetralix.Moneda;
+                    invoice.TaxStatus = invoicetralix.EstadoFiscal;
+                    invoice.PayStatus = invoicetralix.Pagado;
+                    invoice.RecipeType = invoicetralix.TipodeComprobante;
+                    invoice.CfdiType = invoicetralix.TipodeCFDI;
+                    invoice.PayDate = ToNullableDate(invoicetralix.FechadePago);
+                    invoice.payMethod = invoicetralix.MetododePago;
+                    Invoices.Add(invoice);  
+
+                   
+                }
+
+                _context.Invoices.AddRange(Invoices);
+                result = await _context.SaveChangesAsync();
+
+                result = await _context.Database.ExecuteSqlRawAsync("TRUNCATE TABLE InvoicesCompacted");
+                result = await _context.SaveChangesAsync();
+
+                string command = "SELECT  [RFC Receptor], " +
+                                         "CASE I.Moneda " +
+                                            "WHEN 'USD' THEN  (SELECT [ExchangeRate]*Subtotal " +
+                                                              "FROM ExchangeRates " +
+                                                              "WHERE [Date] = IIF((SELECT [Date] FROM ExchangeRates WHERE [Date] =[Fecha de Emisión]) IS NULL, " +
+                                                                                " (SELECT MAX([Date]) FROM ExchangeRates WHERE [Date] < [Fecha de Emisión]), " +
+                                                                                " (SELECT [Date] FROM ExchangeRates WHERE [Date] =[Fecha de Emisión]))) " +
+                                            "ELSE I.Subtotal " +
+                                            "END AS Subtotal," +
+                                         "CASE I.Moneda " +
+                                            "WHEN 'USD' THEN  (SELECT [ExchangeRate]*Total " +
+                                                             "FROM ExchangeRates " +
+                                                             "WHERE [Date] = IIF((SELECT [Date] FROM ExchangeRates WHERE [Date] =[Fecha de Emisión]) IS NULL, " +
+                                                                                "(SELECT MAX([Date]) FROM ExchangeRates WHERE [Date] < [Fecha de Emisión]), " +
+                                                                                "(SELECT [Date] FROM ExchangeRates WHERE [Date] =[Fecha de Emisión]))) " +
+                                            "ELSE I.Total " +
+                                            "END AS Total, " +
+                                         "CONVERT(date,[Fecha de Emisión]) AS [Fecha de Emisión] " +
+                                   "INTO #TMP1 " +
+                                   "FROM Invoices I " +
+                                   "WHERE [Tipo de Comprobante] = 'FACTURA' " +
+                                   "AND [Estado Fiscal] IN ('ACTIVO','VIGENTE','VIGENTE:NO CANCELABLE', 'VIGENTE:SIN ACEPTACIÓN', 'VIGENTE:CON ACEPTACIÓN') " +
+                                   "INSERT INTO InvoicesCompacted (Day,Month,Year,Subtotal,Total,[RFC Receptor],[Date] ) " +
+                                   "SELECT DAY([Fecha de Emisión]) AS Dia, " +
+                                          "MONTH([Fecha de Emisión]) AS Mes, " +
+                                          "YEAR([Fecha de Emisión]) AS Año, " +
+                                          "SUM(Subtotal) As Subtotal, " +
+                                          "SUM(Total) As Total, " +
+                                          "[RFC Receptor], " +
+                                          "[Fecha de Emisión] AS [Date] " +                                         
+                                   "FROM #TMP1 " +
+                                   "GROUP BY [RFC Receptor], [Fecha de Emisión],  DAY([Fecha de Emisión]), MONTH([Fecha de Emisión]), YEAR([Fecha de Emisión]) " +
+                                   "DROP TABLE #TMP1";
+                result = await _context.Database.ExecuteSqlRawAsync(command);
+                result = await _context.SaveChangesAsync();
+
+                return RedirectToAction("Index", "Archives");
+            }
+
+      
+          
+
+            return View();
+        }
+
+
+        //Este proceso es exclusivo para Finanzas y sirve para leer un excel y poder subir su info a la BD
+        public IActionResult UploadExchangeRateFile(string entity = "ExchangeRate", int entityid = 0)
+        {
+            AddArchiveViewModel model = new AddArchiveViewModel();
+            model.Entity = entity;
+            model.EntityId = entityid;
+            return View(model);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]///Este proceso es usado para almacenar archivos y dejarlo guardado ya que casi no se utilizará la funcion eliminar
+        //
+        public async Task<IActionResult> UploadExchangeRateFile(AddArchiveViewModel model)
+        {
+            //El siguiente proceso se ejecuta seguen el siguiente orden:
+            //1) Se sube el archivo al Blob
+            //2) Se guarda el nombre del archivo en la tabla de Archives
+            //3) Se lee el archivo subido con XLWorkBook y se carga en memoria
+            //4) Se elimina de la tabla ExchangeRate solo las fechas a modificarse
+            //5) Se cargan las fechas nuevas en el objeto lstExchangeRate y se sube de un solo golpe todas los registros nuevos  
+            //6) Ahora se pasaran todas las facturas de InvoicesTralix a Invoices Eliminando primero las facturas que ya existen en Invoices y que son el listado cargado en InvoicesTralix (ya que pueden haber actualizaciones de estatus
+
+            Guid archiveguid = Guid.Empty;
+
+            if (model.ArchiveFile != null)
+            {
+                archiveguid = await _blobHelper.UploadBlobAsync(model.ArchiveFile, "financefiles");
+            }
+
+            model.ArchiveGuid = archiveguid;
+
+            Archive archive = new Archive();
+            archive.ArchiveGuid = archiveguid;
+            archive.Entity = model.Entity;
+            archive.EntityId = model.EntityId;
+            archive.ArchiveName = model.ArchiveFile.FileName;
+            _context.Add(archive);
+            await _context.SaveChangesAsync();
+
+
+            string connectionstring = _configuration["Blob:ConnectionString"];
+            BlobClient blobClient = new BlobClient(connectionstring, "financefiles", archiveguid.ToString());
+            using (var stream = new MemoryStream())
+            {
+                blobClient.DownloadTo(stream);
+                stream.Position = 0;
+                var contentType = (blobClient.GetProperties()).Value.ContentType;
+
+
+                var wb = new XLWorkbook(stream);
+                var ws = wb.Worksheets.First();
+
+                var range = ws.RangeUsed();
+                var colCount = range.ColumnCount();
+                var rowCount = range.RowCount();
+
+                var i = 2;
+
+
+          
+                List<ExchangeRate> lstexchangerates = new List<ExchangeRate>();
+
+                List<DateOnly> lstdates = new List<DateOnly>();
+
+             
+
+                while (i < rowCount + 1)
+                {
+                    ExchangeRate exchangeRate = new ExchangeRate();
+
+                    DateOnly date = new DateOnly();
+                    string datestring = ws.Cell(i, 1).Value.ToString();
+
+
+                    date = new DateOnly(Convert.ToInt32(datestring.Substring(6, 4)), Convert.ToInt32(datestring.Substring(3, 2)), Convert.ToInt32(datestring.Substring(0, 2)));
+
+                    exchangeRate.Date = date;
+                    exchangeRate.Exchangerate = Convert.ToDecimal(ws.Cell(i, 2).Value.ToString());
+
+
+                    lstexchangerates.Add(exchangeRate);
+                    lstdates.Add(date);
+                    i++;
+                }
+
+                /*Ahora seleccionamos todos los Invoices a eliminar con el criterios de lstIdsInvoicesTralix y los eliminamos*/
+                List<ExchangeRate> lstexchangeratesToDelete = _context.ExchangeRates.Where(r => lstdates.Contains(r.Date)).ToList();
+                _context.ExchangeRates.RemoveRange(lstexchangeratesToDelete);
+                await _context.SaveChangesAsync();
+                //-------------------------------------------------------------------------------------------------------------*/
+
+
+                _context.ExchangeRates.AddRange(lstexchangerates);
+                await _context.SaveChangesAsync();
+
+
+
+
+                return RedirectToAction("Index", "Archives");
+            }
+
+
+
+
+            return View();
+        }
+
 
         public IActionResult AddArchive(string entity = "", int entityid=0)
         {
@@ -37,8 +348,9 @@ namespace SAGM.Controllers
 
 
 
-
         [HttpPost]
+        [ValidateAntiForgeryToken]///Este proceso es usado para almacenar archivos y dejarlo guardado ya que casi no se utilizará la funcion eliminar
+        //
         public async Task<IActionResult> AddArchive(AddArchiveViewModel model)
         {
             Guid archiveguid = Guid.Empty;
@@ -156,7 +468,7 @@ namespace SAGM.Controllers
         // GET: Archives
         public async Task<IActionResult> Index()
         {
-            return View(await _context.Archives.ToListAsync());
+            return View(await _context.Archives.Where(a => a.Entity == "InvoicesTralix" || a.Entity == "ExchangeRate").OrderByDescending(a => a.UploadDate).ToListAsync());
         }
 
         // GET: Archives/Details/5
@@ -367,6 +679,36 @@ namespace SAGM.Controllers
         {
             return _context.Archives.Any(e => e.ArchiveId == id);
         }
+
+
+        private int? ToNullableInt(string s)
+        {
+            int i;
+            if (Int32.TryParse(s, out i)) return i;
+            return null;
+        }
+
+        private DateTime? ToNullableDate(string s)
+        {
+            if(s != null && s != "")
+            {
+                DateTime dt;
+                var cultureInfo = new CultureInfo("es-MX");
+                dt = DateTime.Parse(s, cultureInfo);
+                return dt;
+            }
+           
+            return null;
+        }
+
+        private Decimal? ToNullableDecimal(string s)
+        {
+            Decimal i;
+            if (Decimal.TryParse(s, out i)) return i;
+            return null;
+        }
+
+
     }
 
 
