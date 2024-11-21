@@ -15,9 +15,10 @@ internal class Program
         builder.Services.AddControllersWithViews();
         builder.Services.AddDbContext<SAGMContext>(o =>
         {
-            //o.UseSqlServer(builder.Configuration.GetConnectionString("AzureConnection"));
-            o.UseSqlServer(builder.Configuration.GetConnectionString("LocalConnection"));
+            o.UseSqlServer(builder.Configuration.GetConnectionString("AzureConnection"), sqlServerOptionsAction =>sqlServerOptionsAction.CommandTimeout(300));
+            //o.UseSqlServer(builder.Configuration.GetConnectionString("LocalConnection"));
             //o.UseSqlServer(builder.Configuration.GetConnectionString("SomeeConnection"));
+            
         });
 
         builder.Services.AddIdentity<User, IdentityRole>(cfg =>

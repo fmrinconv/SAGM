@@ -15,6 +15,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.ComponentModel;
 using System.Globalization;
 using static SkiaSharp.HarfBuzz.SKShaper;
+using DocumentFormat.OpenXml.Wordprocessing;
 
 namespace SAGM.Controllers
 {
@@ -54,13 +55,19 @@ namespace SAGM.Controllers
         public async Task<IActionResult> UploadFinanceFile(AddArchiveViewModel model)
         {
             //El siguiente proceso se ejecuta seguen el siguiente orden:
-            //1) Se sube el archivo al Blob
-            //2) Se guarda el nombre del archivo en la tabla de Archives
-            //3) Se lee el archivo subido con XLWorkBook y se carga en memoria
-            //4) Se limpia la tabla invoicesTralixes para dejar vacio el esqueleto
-            //5) Se cargan todas las facturas en el objeto lstinvoicestralix y se sube de un solo golpe todas las facturas  
-            //6) Ahora se pasaran todas las facturas de InvoicesTralix a Invoices Eliminando primero las facturas que ya existen en Invoices y que son el listado cargado en InvoicesTralix (ya que pueden haber actualizaciones de estatus
+            //1) Para eficientar el proceso vamos a seleccionar solo el año actual y el año anterior seran calculados a partir de la fecha de hoy
+            //2) Se sube el archivo al Blob
+            //3) Se guarda el nombre del archivo en la tabla de Archives
+            //4) Se lee el archivo subido con XLWorkBook y se carga en memoria
+            //5) Se limpia la tabla invoicesTralixes para dejar vacio el esqueleto
+            //6) Se cargan todas las facturas en el objeto lstinvoicestralix y se sube de un solo golpe todas las facturas  
+            //7) Ahora se pasaran todas las facturas de InvoicesTralix a Invoices Eliminando primero las facturas que ya existen en Invoices y que son el listado cargado en InvoicesTralix (ya que pueden haber actualizaciones de estatus
 
+            string act_year;
+            string old_year;
+
+            act_year = DateTime.Now.Year.ToString();
+            old_year = Convert.ToString(DateTime.Now.Year - 1);
             Guid archiveguid = Guid.Empty;
 
             if (model.ArchiveFile != null)
@@ -104,29 +111,33 @@ namespace SAGM.Controllers
 
                 while (i < rowCount + 1)
                 {
-                    InvoicesTralix invoiceTralix = new InvoicesTralix();
-          
-                    invoiceTralix.Serie = ws.Cell(i, 1).Value.ToString();
-                    invoiceTralix.Folio = ws.Cell(i, 2).Value.ToString();
-                    invoiceTralix.UUID = ws.Cell(i, 3).Value.ToString();
-                    invoiceTralix.FechadeEmision = ws.Cell(i, 4).Value.ToString();
-                    invoiceTralix.RFCEmisor = ws.Cell(i, 5).Value.ToString();
-                    invoiceTralix.NombredelEmisor = ws.Cell(i, 6).Value.ToString();
-                    invoiceTralix.RFCReceptor = ws.Cell(i, 7).Value.ToString();
-                    invoiceTralix.NombredelReceptor = ws.Cell(i, 8).Value.ToString();
-                    invoiceTralix.Subtotal = ws.Cell(i, 9).Value.ToString();
-                    invoiceTralix.IVATrasladado = ws.Cell(i, 10).Value.ToString();
-                    invoiceTralix.Total = ws.Cell(i, 11).Value.ToString();
-                    invoiceTralix.Moneda = ws.Cell(i, 12).Value.ToString();
-                    invoiceTralix.EstadoFiscal = ws.Cell(i, 13).Value.ToString();
-                    invoiceTralix.Pagado = ws.Cell(i, 14).Value.ToString();
-                    invoiceTralix.TipodeComprobante = ws.Cell(i, 15).Value.ToString();
-                    invoiceTralix.TipodeCFDI = ws.Cell(i, 16).Value.ToString();
-                    invoiceTralix.FechadePago = ws.Cell(i, 17).Value.ToString();
-                    invoiceTralix.ComentariodePago = ws.Cell(i, 18).Value.ToString();
-                    invoiceTralix.MetododePago = ws.Cell(i, 19).Value.ToString();
+                    if (ws.Cell(i, 4).Value.ToString().Contains(old_year) || ws.Cell(i, 4).Value.ToString().Contains(act_year))
+                    {
+                        InvoicesTralix invoiceTralix = new InvoicesTralix();
 
-                    lstinvoicestralix.Add(invoiceTralix);
+                        invoiceTralix.Serie = ws.Cell(i, 1).Value.ToString();
+                        invoiceTralix.Folio = ws.Cell(i, 2).Value.ToString();
+                        invoiceTralix.UUID = ws.Cell(i, 3).Value.ToString();
+                        invoiceTralix.FechadeEmision = ws.Cell(i, 4).Value.ToString();
+                        invoiceTralix.RFCEmisor = ws.Cell(i, 5).Value.ToString();
+                        invoiceTralix.NombredelEmisor = ws.Cell(i, 6).Value.ToString();
+                        invoiceTralix.RFCReceptor = ws.Cell(i, 7).Value.ToString();
+                        invoiceTralix.NombredelReceptor = ws.Cell(i, 8).Value.ToString();
+                        invoiceTralix.Subtotal = ws.Cell(i, 9).Value.ToString();
+                        invoiceTralix.IVATrasladado = ws.Cell(i, 10).Value.ToString();
+                        invoiceTralix.Total = ws.Cell(i, 11).Value.ToString();
+                        invoiceTralix.Moneda = ws.Cell(i, 12).Value.ToString();
+                        invoiceTralix.EstadoFiscal = ws.Cell(i, 13).Value.ToString();
+                        invoiceTralix.Pagado = ws.Cell(i, 14).Value.ToString();
+                        invoiceTralix.TipodeComprobante = ws.Cell(i, 15).Value.ToString();
+                        invoiceTralix.TipodeCFDI = ws.Cell(i, 16).Value.ToString();
+                        invoiceTralix.FechadePago = ws.Cell(i, 17).Value.ToString();
+                        invoiceTralix.ComentariodePago = ws.Cell(i, 18).Value.ToString();
+                        invoiceTralix.MetododePago = ws.Cell(i, 19).Value.ToString();
+
+                        lstinvoicestralix.Add(invoiceTralix);
+                    }
+                    
                     i++;
                 }
 
@@ -181,42 +192,10 @@ namespace SAGM.Controllers
                 _context.Invoices.AddRange(Invoices);
                 result = await _context.SaveChangesAsync();
 
-                result = await _context.Database.ExecuteSqlRawAsync("TRUNCATE TABLE InvoicesCompacted");
+                result = await _context.Database.ExecuteSqlRawAsync("DELETE FROM InvoicesCompacted WHERE [Year] IN(" + act_year + ", " + old_year + ")");
                 result = await _context.SaveChangesAsync();
 
-                string command = "SELECT  [RFC Receptor], " +
-                                         "CASE I.Moneda " +
-                                            "WHEN 'USD' THEN  (SELECT [ExchangeRate]*Subtotal " +
-                                                              "FROM ExchangeRates " +
-                                                              "WHERE [Date] = IIF((SELECT [Date] FROM ExchangeRates WHERE [Date] =[Fecha de Emisión]) IS NULL, " +
-                                                                                " (SELECT MAX([Date]) FROM ExchangeRates WHERE [Date] < [Fecha de Emisión]), " +
-                                                                                " (SELECT [Date] FROM ExchangeRates WHERE [Date] =[Fecha de Emisión]))) " +
-                                            "ELSE I.Subtotal " +
-                                            "END AS Subtotal," +
-                                         "CASE I.Moneda " +
-                                            "WHEN 'USD' THEN  (SELECT [ExchangeRate]*Total " +
-                                                             "FROM ExchangeRates " +
-                                                             "WHERE [Date] = IIF((SELECT [Date] FROM ExchangeRates WHERE [Date] =[Fecha de Emisión]) IS NULL, " +
-                                                                                "(SELECT MAX([Date]) FROM ExchangeRates WHERE [Date] < [Fecha de Emisión]), " +
-                                                                                "(SELECT [Date] FROM ExchangeRates WHERE [Date] =[Fecha de Emisión]))) " +
-                                            "ELSE I.Total " +
-                                            "END AS Total, " +
-                                         "CONVERT(date,[Fecha de Emisión]) AS [Fecha de Emisión] " +
-                                   "INTO #TMP1 " +
-                                   "FROM Invoices I " +
-                                   "WHERE [Tipo de Comprobante] = 'FACTURA' " +
-                                   "AND [Estado Fiscal] IN ('ACTIVO','VIGENTE','VIGENTE:NO CANCELABLE', 'VIGENTE:SIN ACEPTACIÓN', 'VIGENTE:CON ACEPTACIÓN') " +
-                                   "INSERT INTO InvoicesCompacted (Day,Month,Year,Subtotal,Total,[RFC Receptor],[Date] ) " +
-                                   "SELECT DAY([Fecha de Emisión]) AS Dia, " +
-                                          "MONTH([Fecha de Emisión]) AS Mes, " +
-                                          "YEAR([Fecha de Emisión]) AS Año, " +
-                                          "SUM(Subtotal) As Subtotal, " +
-                                          "SUM(Total) As Total, " +
-                                          "[RFC Receptor], " +
-                                          "[Fecha de Emisión] AS [Date] " +                                         
-                                   "FROM #TMP1 " +
-                                   "GROUP BY [RFC Receptor], [Fecha de Emisión],  DAY([Fecha de Emisión]), MONTH([Fecha de Emisión]), YEAR([Fecha de Emisión]) " +
-                                   "DROP TABLE #TMP1";
+                string command = "INSERT INTO InvoicesCompacted (Day,Month,Year,Subtotal,Total,[RFC Receptor],[Date])\r\n\t\tSELECT DAY(E.[Date]) AS Dia,\r\n\t\t\t   MONTH(E.[Date]) AS Mes,\r\n\t\t\t   YEAR(E.[Date]) AS Año,\r\n\t\tSUM(CASE I.Moneda\r\n\t\t\tWHEN 'USD' THEN Subtotal*E.Exchangerate\r\n\t\t\tELSE Subtotal\r\n\t\tEND) AS Subtotal,\r\n\t\tSUM(CASE I.Moneda\r\n\t\t\tWHEN 'USD' THEN Total*E.Exchangerate\r\n\t\t\tELSE Total\r\n\t\tEND) As Total,\r\n\t\t[RFC Receptor], \r\n\t\tE.[Date]\r\n\t\t--INTO #TMP1\r\n\t\tFROM Invoices I\r\n\t\tINNER JOIN ExchangeRates E ON (CONVERT(date,I.[Fecha de Emisión]) = E.[Date]  AND YEAR(E.[Date]) IN (" + act_year + "," + old_year + "))\r\n\t\t\tWHERE [Tipo de Comprobante] = 'FACTURA'\r\n\t\tAND [Estado Fiscal] IN ('ACTIVO','VIGENTE','VIGENTE:NO CANCELABLE', 'VIGENTE:SIN ACEPTACIÓN', 'VIGENTE:CON ACEPTACIÓN')\r\n\t\tGroup By  [RFC Receptor],E.[Date]\r\n";
                 result = await _context.Database.ExecuteSqlRawAsync(command);
                 result = await _context.SaveChangesAsync();
 
@@ -250,7 +229,7 @@ namespace SAGM.Controllers
             //3) Se lee el archivo subido con XLWorkBook y se carga en memoria
             //4) Se elimina de la tabla ExchangeRate solo las fechas a modificarse
             //5) Se cargan las fechas nuevas en el objeto lstExchangeRate y se sube de un solo golpe todas los registros nuevos  
-            //6) Ahora se pasaran todas las facturas de InvoicesTralix a Invoices Eliminando primero las facturas que ya existen en Invoices y que son el listado cargado en InvoicesTralix (ya que pueden haber actualizaciones de estatus
+            //6) Se Agregan las fechas que no existan en ExchangeRates para poder hacer en el proceso de concentrado el Join con los tipos de cambio de las fechas que no existen  esto debido a aquellas facturas que se hicieron en dian inhábil o donde no hay un puntal día con fecha de cambio 
 
             Guid archiveguid = Guid.Empty;
 
@@ -325,8 +304,17 @@ namespace SAGM.Controllers
                 _context.ExchangeRates.AddRange(lstexchangerates);
                 await _context.SaveChangesAsync();
 
+                string Command = "SELECT  distinct CONVERT(date,[Fecha de Emisión]) As NoDate , \r\n\t\t\t\tCONVERT([Date],GETDATE()) AS NewDate,\r\n\t\t\t\tCONVERT(decimal(18,4),0) AS ChangeRate\r\n\t\tinto #tmp\r\nFROM Invoices\r\nWHERE  CONVERT(date,[Fecha de Emisión]) NOT IN (SELECT [Date] FROM ExchangeRates)";
+
+                Command += "UPDATE #tmp\r\nSET NewDate = (SELECT MAX([Date]) FROM ExchangeRates  WHERE [Date] <NoDate)\r\nFROM #tmp \r\n";
+
+                Command += "UPDATE #tmp\r\nSET ChangeRate = B.ExchangeRate\r\nFROM #tmp A\r\nINNER JOIN ExchangeRates B ON (A.NewDate = B.[Date])\r\n";
+
+                Command += "\r\nINSERT INTO ExchangeRates\r\n([Date],Exchangerate)\r\nSELECT [NoDate], changeRate\r\nFROM #tmp\r\n\r\nDROP TABLE #tmp";
 
 
+                var result = await _context.Database.ExecuteSqlRawAsync(Command);
+                result = await _context.SaveChangesAsync();
 
                 return RedirectToAction("Index", "Archives");
             }
@@ -334,7 +322,6 @@ namespace SAGM.Controllers
 
 
 
-            return View();
         }
 
 
@@ -367,6 +354,7 @@ namespace SAGM.Controllers
             archive.Entity = model.Entity;
             archive.EntityId = model.EntityId;
             archive.ArchiveName = model.ArchiveFile.FileName;
+            archive.UploadDate = DateTime.Now;
             _context.Add(archive);
             await _context.SaveChangesAsync();
 
