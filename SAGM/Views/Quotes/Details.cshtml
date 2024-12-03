@@ -50,9 +50,9 @@
     <input type="hidden" id="currencyname" value="@Model.Currency.Curr" />
 
 
-    <div class="contenido container-fluid">
+    <div class="container-fluid contenido">
         <div class="row">
-            <div class="col-6">
+            <div class="col-sm-12 col-md-6 col-lg-5 col-xl-5">
                 <dl class="row">
                     <dt class="col-sm-3">
                         @Html.DisplayNameFor(model => model.Customer.CustomerNickName)
@@ -89,11 +89,12 @@
                         Comentarios
                     </dt>
                     <dd class="col-sm-9" >
-                        @Html.DisplayFor(model => model.Comments)
+                        @Html.TextAreaFor(model => model.Comments, new { @class = "form-control", @style = "height:100px; font-size: x-small", @onchange = "changecomments(this.value)" })
+                   
                     </dd>
                 </dl>
             </div>
-            <div class="col-6">
+            <div class="col-sm-12 col-md-6 col-lg-5 col-xl-5">
                 <dl class="row">
                     <dt class="col-sm-4">
                         @Html.DisplayNameFor(model => model.Currency)
@@ -140,7 +141,7 @@
                         {
                             <a onclick="PrintReport('@Model.QuoteId')" class="btn btn-primary"><i title='Imprimir cotización' class='fa-solid fa-print'></i></a>
                         }
-                        <a id="btnCreateWorkOrder" name="btnCreateWorkOrder" onclick="showInPopup('@Url.Action("CreateWorkOrder", "Quotes", new { id = Model.QuoteId}, Context.Request.Scheme)','Crear Orden de trabajo','bg-success')" @if (Model.QuoteStatusId != 5) { Write("class=invisible"); } else { var clase = "class=btn\nbtn-success"; Write(clase); }><i class="fa fa-share-square" aria-hidden="true" title="Crear Orden de trabajo"></i></a>
+                        <a id="btnCreateWorkOrder" name="btnCreateWorkOrder" onclick="showInPopup('@Url.Action("CreateWorkOrder", "Quotes", new { id = Model.QuoteId}, Context.Request.Scheme)','Crear Orden de trabajo','bg-success')" @if (Model.QuoteStatusId != 5) { Write("class=invisible"); } else { Write("class=btn\nbtn-success"); }><i class="fa fa-share-square" aria-hidden="true" title="Crear Orden de trabajo"></i></a>
 
                     </dd>
                     
@@ -195,6 +196,11 @@
             else if ($("#Result").val() == "false") {
                 $.notify('@Html.Raw(ViewBag.Message)', "error", { globalPosition: "top center" });
             }
+            getDetails();
+        });
+
+        function getDetails() {
+            //dataTable.destroy();
             dataTable = $('#TableQuoteDetails').DataTable(
                 {
                     "ajax": {
@@ -242,21 +248,21 @@
                         var htmlres = "<div><div class='row'><span style='text-align:right;'>Subtotal</span></div>";
                         htmlres += "<div class='row'><span style='text-align:right;'>Descuento</span></div> ";
                         htmlres += "<div class='row'><span style='text-align:right;'>IVA(" + $("#Tax").val().toString() + "%)</span></div>";
-                        htmlres += "<div class='row'><span style='text-align:right;'>Total(" + $("#currencyname").val().toString()  + ")$</span></div> </div>";
+                        htmlres += "<div class='row'><span style='text-align:right;'>Total(" + $("#currencyname").val().toString() + ")$</span></div> </div>";
                         $(api.column(6).footer()).html(htmlres);
 
-                        var iva = parseFloat($("#Tax").val())/100;
+                        var iva = parseFloat($("#Tax").val()) / 100;
                         var ivaplus = parseFloat(1) + parseFloat(iva);
-                        var descuento = parseFloat($("#Discount").val())*(-1);
+                        var descuento = parseFloat($("#Discount").val()) * (-1);
                         var IVA = (subtotal + descuento) * parseFloat(iva);
                         var Total = (subtotal + descuento) * parseFloat(ivaplus);
                         htmlres = "<div>" +
                             "<div class='row'><span style='text-align:right;'>" + parseFloat(subtotal, 8).toFixed(2).replace(/(\d)(?=(\d{3})+\.)/g, "$1,").toString() + "</span></div>" +
                             "<div class='row'><span style='text-align:right;'>" + descuento.toFixed(2).replace(/(\d)(?=(\d{3})+\.)/g, "$1,").toString() + "</span></div>" +
-                            "<div class='row'><span style='text-align:right;'>" + IVA.toFixed(2).replace(/(\d)(?=(\d{3})+\.)/g, "$1,").toString() +  "</span></div>" +
+                            "<div class='row'><span style='text-align:right;'>" + IVA.toFixed(2).replace(/(\d)(?=(\d{3})+\.)/g, "$1,").toString() + "</span></div>" +
                             "<div class='row'><span style='text-align:right;'>" + Total.toFixed(2).replace(/(\d)(?=(\d{3})+\.)/g, "$1,").toString() + "</span></div>" +
                             "</div>"
-                        
+
                         $(api.column(7).footer()).html(htmlres);
                         //$(api.column(7).footer(1)).html("IVA $ " + parseFloat(total*.16, 8).toFixed(2).replace(/(\d)(?=(\d{3})+\.)/g, "$1,").toString());
                     },
@@ -270,21 +276,21 @@
                             "targets": 1,
                             visible: true,
                             responsivePriority: 1,
-                                orderable: false
+                            orderable: false
                         },
                         {
                             "targets": 2,  //Cantidad
                             className: 'dt-body-center',
                             visible: true,
                             responsivePriority: 1,
-                                orderable: false
+                            orderable: false
                         },
                         {
                             "targets": [3, 4],//Unidad y Material
                             className: 'dt-body-left',
                             orderable: false,
                             responsivePriority: 3,
-                                orderable: false
+                            orderable: false
                         },
                         {
                             "targets": 5,  //Cantidad
@@ -319,45 +325,47 @@
 
                     ],
                     "columns": [
-                            { "data": "quoteDetailId" },
-                            { "data": "quoteDetailId", "render": function (data) { count = count + 1; detailid = data; return "<span>" + count.toString() + "</span>"; } },
-                            { "data": "quantity" },
-                            { "data": "unitName" },
-                            { "data": "materialName" },
-                            { "data": "description" },
-                            { "data": "price", "render": $.fn.dataTable.render.number(',', '.', 2) },
-                            { "data": "total", "render": $.fn.dataTable.render.number(',', '.', 2) },
-                            { "data": "archivesNumber",
-                                "render": function (data) { archivesnumber = data; return data; },
-},
-                            { "data": "commentsNumber", "render": function (data) { commentsnumber = data; return data; }  },
-                            { "data": "quoteDetailId", 
-                                "render": function (data) { 
-                                    var result = "<div style='white-space: nowrap;'>";
-                                    result += "<a title='Copiar partida' onclick=\"CopyDetail('" + data + "')\" ";
-                                    result += "class='btn btn-sm btn-outline-success'><i class='fa-solid fa-copy' title='Copiar partida'></i></a>";
+                        { "data": "quoteDetailId" },
+                        { "data": "quoteDetailId", "render": function (data) { count = count + 1; detailid = data; return "<span>" + count.toString() + "</span>"; } },
+                        { "data": "quantity" },
+                        { "data": "unitName" },
+                        { "data": "materialName" },
+                        { "data": "description" },
+                        { "data": "price", "render": $.fn.dataTable.render.number(',', '.', 2) },
+                        { "data": "total", "render": $.fn.dataTable.render.number(',', '.', 2) },
+                        {
+                            "data": "archivesNumber",
+                            "render": function (data) { archivesnumber = data; return data; },
+                        },
+                        { "data": "commentsNumber", "render": function (data) { commentsnumber = data; return data; } },
+                        {
+                            "data": "quoteDetailId",
+                            "render": function (data) {
+                                var result = "<div style='white-space: nowrap;'>";
+                                result += "<a title='Copiar partida' onclick=\"CopyDetail('" + data + "')\" ";
+                                result += "class='btn btn-sm btn-outline-success'><i class='fa-solid fa-copy' title='Copiar partida'></i></a>";
 
-                                    result += "<a title='Editar partida' onclick=\"showInPopup('/Quotes/AddOrEditDetail?id=" + $("#QuoteId").val() + "&detailid=" + detailid + "','Editar\ partida','bg-warning')\"";
-                                    result += "class='btn btn-sm btn-outline-warning'><i title='Editar partida' class='fa-solid fa-pencil-alt'></i></a>";
+                                result += "<a title='Editar partida' onclick=\"showInPopup('/Quotes/AddOrEditDetail?id=" + $("#QuoteId").val() + "&detailid=" + detailid + "','Editar\ partida','bg-warning')\"";
+                                result += "class='btn btn-sm btn-outline-warning'><i title='Editar partida' class='fa-solid fa-pencil-alt'></i></a>";
 
-                                    result += "<a title='Agregar archivos' onclick=\"showInPopup('/Archives/AddArchive?entityid=" + data + "&Entity=QuoteDetail','Agregar\archivos','bg-primary')\"";
+                                result += "<a title='Agregar archivos' onclick=\"showInPopup('/Archives/AddArchive?entityid=" + data + "&Entity=QuoteDetail','Agregar\archivos','bg-primary')\"";
                                 result += "class='btn btn-sm btn-outline-primary'>" + archivesnumber + "<i title='Agregar archivos' class='fa-solid fa-file-circle-plus'></i></a>";
 
-                                    result += "<a title='Comentarios' onclick=\"showInPopup('/Quotes/AddOrEditDetailComment?id=" + data + "','Agregar\ comentario','bg-primary')\" ";
-                                    result += "class='btn btn-sm btn-outline-secondary'>" + commentsnumber + "<i class='fa-solid fa-comments' title='Comentarios'></i></a>";
+                                result += "<a title='Comentarios' onclick=\"showInPopup('/Quotes/AddOrEditDetailComment?id=" + data + "','Agregar\ comentario','bg-primary')\" ";
+                                result += "class='btn btn-sm btn-outline-secondary'>" + commentsnumber + "<i class='fa-solid fa-comments' title='Comentarios'></i></a>";
 
-                                    result += "<a title='Eliminar partida' onclick=\"showInPopup('/Quotes/DeleteQuoteDetail?id=" + data + "','Eliminar\ partida','bg-danger')\"";
-                                    result += "class='btn btn-sm btn-outline-danger'><i title='Eliminar partida' class='fa-solid fa-trash'></i></a>";
+                                result += "<a title='Eliminar partida' onclick=\"showInPopup('/Quotes/DeleteQuoteDetail?id=" + data + "','Eliminar\ partida','bg-danger')\"";
+                                result += "class='btn btn-sm btn-outline-danger'><i title='Eliminar partida' class='fa-solid fa-trash'></i></a>";
 
-                                    result += "</div>";
-                                    
-                                   
-                                    return result;
-                                }
-                            
-                                },
-                            {
-                                "data": "archivesChain",
+                                result += "</div>";
+
+
+                                return result;
+                            }
+
+                        },
+                        {
+                            "data": "archivesChain",
                             "render": function (data) {
                                 var result = "";
 
@@ -382,7 +390,7 @@
                                         // result += "<a onclick=deleteArchive('" + id + "') class= 'btn btn-sm btn-outline-danger' > <i class='fa fa-trash' title = 'Eliminar archivo' > </i></a >";
                                         result += "<a onclick=\"showInPopup('/Archives/Delete?id=" + id + "','Eliminar\ archivo','bg-secondary')\"";
                                         result += "class='btn btn-sm btn-outline-danger'><i title='Eliminar archivo' class='fa fa-trash'></i></a>";
-                             
+
 
                                         result += "</td></tr>";
 
@@ -395,13 +403,7 @@
                         }
                     ]
                 });
-        });
-        function actualiza() {
-            
-                dataTable.ajax.reload();
-            
-            return false;
-        };
+        }
         function deleteArchive(id) {
                 $.ajax({
                     type: "Post",
@@ -415,8 +417,8 @@
                                 globalPosition: "top center",
                                 className: "success"
                             });
-                        
-                            dataTable.ajax.reload()
+
+                        dataTable.ajax.reload()
                             //Popup.dialog('close');
                         }
 
@@ -496,10 +498,12 @@
                             className: "success"
                         });
                         if (statusid == 5) {
-                            $("#btnCreateWorkOrder").removeClass("invisible").addClass("btn btn-succes");
+                            $("#btnCreateWorkOrder").removeClass("invisible");
+                            $("#btnCreateWorkOrder").addClass("btn btn-success");
                         }
                         else {
-                            $("#btnCreateWorkOrder").removeClass("btn btn-succes").addClass("invisible");
+                            $("#btnCreateWorkOrder").removeClass("btn btn-success");
+                            $("#btnCreateWorkOrder").addClass("invisible");
                         }
                             
 
@@ -525,12 +529,37 @@
                             globalPosition: "top center",
                             className: "success"
                         });
-
+                        $("#Discount").val(discount);
+                        dataTable.destroy();
+                        getDetails();
                     }
 
                 }
             });
         };
+
+        function changecomments(comments) {
+            var id = $("#QuoteId").val();
+            $.ajax({
+                type: "POST",
+                url: "/Quotes/ChangeComments?id=" + id + "&comments=" + comments,
+                data: null,
+                async: true,
+                contentType: false,
+                processData: false,
+                success: function (data) {
+
+                    if (data.isValid == true) {
+                        $.notify("El comentario ha sido modificado", {
+                            globalPosition: "top center",
+                            className: "success"
+                        });
+
+                    }
+
+                }
+            });
+        }
    
     </script>
 

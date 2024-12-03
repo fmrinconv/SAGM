@@ -21,6 +21,7 @@ using ClosedXML.Excel;
 using DocumentFormat.OpenXml.Wordprocessing;
 using DocumentFormat.OpenXml.Office2010.Excel;
 using Microsoft.AspNetCore.Authorization;
+using System.Globalization;
 
 
 namespace SAGM.Controllers
@@ -75,6 +76,12 @@ namespace SAGM.Controllers
 
             ViewBag.Result = "";
             ViewBag.Message = "";
+
+            
+            ViewBag.DateIni = DateOnly.FromDateTime(DateTime.Now).AddMonths(-1).ToString("yyyy-MM-dd");
+            ViewBag.DateFin = DateOnly.FromDateTime(DateTime.Now).ToString("yyyy-MM-dd");
+
+
 
 
             if (TempData["AddQuoteResult"] != null)
@@ -141,7 +148,7 @@ namespace SAGM.Controllers
 
 
         [HttpGet]
-        public async Task<JsonResult> GetQuotes()
+        public async Task<JsonResult> GetQuotes(DateTime fini, DateTime ffin)
         {
             List<Quote> quotes = await _context.Quotes
                  .Include(q => q.QuoteDetails)
@@ -150,6 +157,7 @@ namespace SAGM.Controllers
                  .Include(q => q.QuoteStatus)
                  .Include(q => q.Currency)
                  .Include(q => q.CreatedBy)
+                 .Where(q => q.QuoteDate >= fini && q.QuoteDate <= ffin.AddHours(23).AddMinutes(59).AddSeconds(59))
                  .OrderByDescending(q => q.QuoteId)
                  .ToListAsync();
 
@@ -615,6 +623,7 @@ namespace SAGM.Controllers
                             ExchangeRate = model.ExchangeRate,
                             validUntilDate = model.validUntilDate,
                             QuoteStatus = quotestatus,
+                            Subtotal = 0
 
                     };
                         _context.Add(quote);
@@ -1232,7 +1241,18 @@ namespace SAGM.Controllers
                         _context.Update(q);
 
                         await _context.SaveChangesAsync();
-     
+
+                        //Actualizamos el subtotal
+                        decimal subtotal = 0;
+                        List<QuoteDetail> lstquotedetails = _context.QuoteDetails.Where(d => d.Quote == q).ToList();
+                        foreach (QuoteDetail d in lstquotedetails)
+                        {
+                            subtotal += d.Quantity * d.Price;
+                        }
+                        q.Subtotal = subtotal;
+                        _context.Update(q);
+                        await _context.SaveChangesAsync();
+
 
                         TempData["AddOrEditQuoteDetailResult"] = "true";
                         TempData["AddOrEditQuoteDetailMessage"] = "La partida fué creada";
@@ -1427,6 +1447,8 @@ namespace SAGM.Controllers
                 //Borrar archivos
 
                 int quoteid = model.Quote.QuoteId;
+
+
                 List<QuoteDetailComment> lqdc = new List<QuoteDetailComment>(); 
 
                 List<Archive> archives = _context.Archives.Where(a => a.Entity == "QuoteDetail" && a.EntityId == model.QuoteDetailId).ToList();
@@ -1455,6 +1477,19 @@ namespace SAGM.Controllers
                 await _context.SaveChangesAsync();
 
                 _context.QuoteDetails.Remove(model);
+                await _context.SaveChangesAsync();
+
+                ///Recalculamos el subtotal a nivel Cotización
+                ///
+                Quote q = await _context.Quotes.FindAsync(quoteid);
+                decimal subtotal = 0;
+                List<QuoteDetail> lstquotedetails = _context.QuoteDetails.Where(d => d.Quote == q).ToList();
+                foreach (QuoteDetail d in lstquotedetails)
+                {
+                    subtotal += d.Quantity * d.Price;
+                }
+                q.Subtotal = subtotal;
+                _context.Update(q);
                 await _context.SaveChangesAsync();
 
                 TempData["DeleteQuoteDetailtResult"] = "true";
@@ -1487,10 +1522,6 @@ namespace SAGM.Controllers
                 _context.Update(quote);
                 await _context.SaveChangesAsync();  
 
-
-                TempData["ChangeStatusResult"] = "true";
-                TempData["ChangeStatustMessage"] = "El estatus fué actualizado";
-
                 return Json(new { isValid = true, html = ModalHelper.RenderRazorViewToString(this, "_ViewAllQuoteDetails", _context.QuoteDetails.Where(q => q.Quote.QuoteId == quote.QuoteId).ToList()) });
 
             }
@@ -1518,10 +1549,32 @@ namespace SAGM.Controllers
                 quote.Discount = discount;
                 _context.Update(quote);
                 await _context.SaveChangesAsync();
+                
 
+                return Json(new { isValid = true, html = ModalHelper.RenderRazorViewToString(this, "_ViewAllQuoteDetails", _context.QuoteDetails.Where(q => q.Quote.QuoteId == quote.QuoteId).ToList()) });
 
-                TempData["ChangeStatusResult"] = "true";
-                TempData["ChangeStatustMessage"] = "El descuento fué actualizado";
+            }
+            catch (DbUpdateException dbUpdateException)
+            {
+
+                ModelState.AddModelError(string.Empty, dbUpdateException.Message);
+
+                return Json(new { isValid = false, html = ModalHelper.RenderRazorViewToString(this, "_ViewAllQuoteDetails", _context.QuoteDetails.Where(q => q.Quote.QuoteId == quote.QuoteId).ToList()) });
+
+            }
+
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> ChangeComments(int id, string comments)
+        {
+            Quote quote = await _context.Quotes.FirstOrDefaultAsync(m => m.QuoteId == id);
+            try
+            {
+
+                quote.Comments = comments;
+                _context.Update(quote);
+                await _context.SaveChangesAsync();
 
                 return Json(new { isValid = true, html = ModalHelper.RenderRazorViewToString(this, "_ViewAllQuoteDetails", _context.QuoteDetails.Where(q => q.Quote.QuoteId == quote.QuoteId).ToList()) });
 
@@ -1759,6 +1812,7 @@ namespace SAGM.Controllers
             workOrder.Tax = quote.Tax;
             workOrder.WorkOrderDate = DateTime.Now;
             workOrder.WorkOrderName = workordername;
+            workOrder.ExchangeRate = quote.ExchangeRate;
             workOrder.WorkOrderStatus = await _context.WorkOrderStatus.FindAsync(1);
             
             _context.Add(workOrder);

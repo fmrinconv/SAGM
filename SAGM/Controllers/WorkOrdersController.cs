@@ -305,6 +305,8 @@ namespace SAGM.Controllers
                 .Include(w => w.Customer)
                 .Include(w => w.WorkOrderDetails)
                 .Include(w => w.WorkOrderStatus)
+                .Include(w => w.Currency)
+                .Include(w => w.Orders).ThenInclude(w => w.Currency)
                 .Include(w => w.Orders).ThenInclude(w => w.OrderDetails)
                 .FirstOrDefaultAsync(m => m.WorkOrderId == id);
 
@@ -346,7 +348,7 @@ namespace SAGM.Controllers
             workorderv.Tax = workorder.Tax;
 
             decimal total = 0;
-            decimal spent = 0;
+            //decimal spent = 0;
 
             if (workorder.WorkOrderDetails != null)
             {
@@ -357,18 +359,7 @@ namespace SAGM.Controllers
                 }
             }
 
-            if (workorder.Orders != null)
-            {
-                List<Order> orders = workorder.Orders.ToList();
-                foreach (Order o in orders)
-                {
-                    foreach (OrderDetail od in o.OrderDetails)
-                    {
-                        spent += (od.Quantity * od.Price);
-                    }
-                }
 
-            }
 
 
             return View(workorderv);
@@ -470,7 +461,9 @@ namespace SAGM.Controllers
         {
             WorkOrder workorder = await _context.WorkOrders
                 .Include(wo => wo.WorkOrderDetails).ThenInclude(wo => wo.WorkOrderDetailProcess)
+                .Include(w => w.Currency)
                 .Include(w => w.Orders).ThenInclude(w => w.OrderDetails)
+                .Include(w => w.Orders).ThenInclude(w => w.Currency)
                 .FirstOrDefaultAsync(wo => wo.WorkOrderId == workorderid);
 
             decimal total = 0;
@@ -495,7 +488,20 @@ namespace SAGM.Controllers
             {
                 foreach (OrderDetail od in wod.OrderDetails)
                 {
-                    materialcost += od.Quantity * od.Price;
+
+                    if (wod.Currency != workorder.Currency)
+                    {
+                        if (wod.Currency.CurrencyId == 1)//si esta lo OC hacia el proveedor en Pesos y la OT esta en Dólares
+                        {
+                            materialcost += od.Quantity * od.Price / workorder.ExchangeRate; //tomamos el tipo de cambio de la OT
+                        }
+                        else {
+                            materialcost += od.Quantity * od.Price * wod.ExchangeRate;  //tomamos en cuenta el Tipo de cambio de la OC   ya que la que viene en dolares es la Compra hacia proveedor
+                        }
+                    }
+                    else {
+                        materialcost += od.Quantity * od.Price;
+                    }
                 }
             }
             WorkOrderForecastModel forecastModel = new WorkOrderForecastModel();

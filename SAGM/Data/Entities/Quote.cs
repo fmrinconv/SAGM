@@ -87,6 +87,10 @@ namespace SAGM.Data.Entities
         [Required(ErrorMessage = "El campo {0} es obligatorio.")]
         public decimal Discount { get; set; } = 0;
 
+        [Column(TypeName = "decimal(18,2)")]
+        [Display(Name = "Subtotal")]
+        public decimal? Subtotal { get; set; } = 0;
+
         public ICollection<QuoteDetail> QuoteDetails { get; set; }
         public ICollection<QuoteComment> QuoteComments { get; set; }
 

@@ -536,6 +536,7 @@ namespace SAGM.Controllers
             orderv.Buyer = order.Buyer;
             orderv.BuyerName = buyer.FullName;
             orderv.OrderName = order.OrderName;
+            orderv.ExchangeRate = order.ExchangeRate;
             orderv.OrderStatus = orderstatus;
             orderv.WorkOrderId = workorderid;
             orderv.WorkOrderName = workordername;
@@ -1188,7 +1189,8 @@ namespace SAGM.Controllers
                 OrderStatusId = order.OrderStatus.OrderStatusId,
                 Comments = order.Comments,
                 CurrencyId = order.Currency.CurrencyId,
-                Currency = currencies
+                Currency = currencies,
+                ExchangeRate = order.ExchangeRate
 
             };
 
@@ -1227,6 +1229,7 @@ namespace SAGM.Controllers
                     order.OrderName = model.OrderName;
                     order.Tax = model.Tax;
                     order.EstimatedDeliveryDate = model.EstimatedDeliveryDate;
+                    order.ExchangeRate = model.ExchangeRate;
                     order.Currency = await _context.Currencies.FindAsync(model.CurrencyId);
                     order.OrderStatus = orderstatus;
                    

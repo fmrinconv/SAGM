@@ -81,6 +81,7 @@ namespace SAGM.Controllers
             archive.ArchiveGuid = archiveguid;
             archive.Entity = model.Entity;
             archive.EntityId = model.EntityId;
+            archive.UploadDate = DateTime.Now;
             archive.ArchiveName = model.ArchiveFile.FileName;
             _context.Add(archive);
             await _context.SaveChangesAsync();
@@ -195,7 +196,7 @@ namespace SAGM.Controllers
                 result = await _context.Database.ExecuteSqlRawAsync("DELETE FROM InvoicesCompacted WHERE [Year] IN(" + act_year + ", " + old_year + ")");
                 result = await _context.SaveChangesAsync();
 
-                string command = "INSERT INTO InvoicesCompacted (Day,Month,Year,Subtotal,Total,[RFC Receptor],[Date])\r\n\t\tSELECT DAY(E.[Date]) AS Dia,\r\n\t\t\t   MONTH(E.[Date]) AS Mes,\r\n\t\t\t   YEAR(E.[Date]) AS Año,\r\n\t\tSUM(CASE I.Moneda\r\n\t\t\tWHEN 'USD' THEN Subtotal*E.Exchangerate\r\n\t\t\tELSE Subtotal\r\n\t\tEND) AS Subtotal,\r\n\t\tSUM(CASE I.Moneda\r\n\t\t\tWHEN 'USD' THEN Total*E.Exchangerate\r\n\t\t\tELSE Total\r\n\t\tEND) As Total,\r\n\t\t[RFC Receptor], \r\n\t\tE.[Date]\r\n\t\t--INTO #TMP1\r\n\t\tFROM Invoices I\r\n\t\tINNER JOIN ExchangeRates E ON (CONVERT(date,I.[Fecha de Emisión]) = E.[Date]  AND YEAR(E.[Date]) IN (" + act_year + "," + old_year + "))\r\n\t\t\tWHERE [Tipo de Comprobante] = 'FACTURA'\r\n\t\tAND [Estado Fiscal] IN ('ACTIVO','VIGENTE','VIGENTE:NO CANCELABLE', 'VIGENTE:SIN ACEPTACIÓN', 'VIGENTE:CON ACEPTACIÓN')\r\n\t\tGroup By  [RFC Receptor],E.[Date]\r\n";
+                string command = "INSERT INTO InvoicesCompacted (Day,Month,Year,Subtotal,Total,[RFC Receptor],[Date])\r\n\t\tSELECT DAY(I.[Fecha de Emisión]) AS Dia,\r\n\t\t\t   MONTH(I.[Fecha de Emisión]) AS Mes,\r\n\t\t\t   YEAR(I.[Fecha de Emisión]) AS Año,\r\n\t\tSUM(CASE I.Moneda\r\n\t\t\tWHEN 'USD' THEN Subtotal*E.Exchangerate\r\n\t\t\tELSE Subtotal\r\n\t\tEND) AS Subtotal,\r\n\t\tSUM(CASE I.Moneda\r\n\t\t\tWHEN 'USD' THEN Total*E.Exchangerate\r\n\t\t\tELSE Total\r\n\t\tEND) As Total,\r\n\t\t[RFC Receptor], \r\n\t\t I.[Fecha de Emisión]\r\n\t\t FROM Invoices I\r\n\t\tLEFT JOIN ExchangeRates E ON (CONVERT(date,I.[Fecha de Emisión]) = E.[Date]  AND YEAR(E.[Date]) IN (" + act_year + "," + old_year + "))\r\n\t\t\tWHERE [Tipo de Comprobante] = 'FACTURA'\r\n\t\tAND [Estado Fiscal] IN ('ACTIVO','VIGENTE','VIGENTE:NO CANCELABLE', 'VIGENTE:SIN ACEPTACIÓN', 'VIGENTE:CON ACEPTACIÓN')\r\n\t\tGroup By  [RFC Receptor],I.[Fecha de Emisión]\r\n";
                 result = await _context.Database.ExecuteSqlRawAsync(command);
                 result = await _context.SaveChangesAsync();
 
@@ -280,10 +281,17 @@ namespace SAGM.Controllers
                     ExchangeRate exchangeRate = new ExchangeRate();
 
                     DateOnly date = new DateOnly();
-                    string datestring = ws.Cell(i, 1).Value.ToString();
 
 
-                    date = new DateOnly(Convert.ToInt32(datestring.Substring(6, 4)), Convert.ToInt32(datestring.Substring(3, 2)), Convert.ToInt32(datestring.Substring(0, 2)));
+                    DateTime datetime = new DateTime();
+
+                    if (ws.Cell(i, 1).TryGetValue(out datetime))
+                    {
+                        datetime = ws.Cell(i, 1).GetDateTime();
+                        date = new DateOnly(datetime.Year, datetime.Month, datetime.Day);                  
+                    }
+
+
 
                     exchangeRate.Date = date;
                     exchangeRate.Exchangerate = Convert.ToDecimal(ws.Cell(i, 2).Value.ToString());
@@ -304,9 +312,9 @@ namespace SAGM.Controllers
                 _context.ExchangeRates.AddRange(lstexchangerates);
                 await _context.SaveChangesAsync();
 
-                string Command = "SELECT  distinct CONVERT(date,[Fecha de Emisión]) As NoDate , \r\n\t\t\t\tCONVERT([Date],GETDATE()) AS NewDate,\r\n\t\t\t\tCONVERT(decimal(18,4),0) AS ChangeRate\r\n\t\tinto #tmp\r\nFROM Invoices\r\nWHERE  CONVERT(date,[Fecha de Emisión]) NOT IN (SELECT [Date] FROM ExchangeRates)";
+                string Command = "SELECT  distinct CONVERT(date,[Fecha de Emisión]) As NoDate , \r\n\t\t\t\tCONVERT(Date,GETDATE()) AS NewDate,\r\n\t\t\t\tCONVERT(decimal(18,4),0) AS ChangeRate\r\n\t\tinto #tmp\r\nFROM Invoices\r\nWHERE  CONVERT(date,[Fecha de Emisión]) NOT IN (SELECT [Date] FROM ExchangeRates)";
 
-                Command += "UPDATE #tmp\r\nSET NewDate = (SELECT MAX([Date]) FROM ExchangeRates  WHERE [Date] <NoDate)\r\nFROM #tmp \r\n";
+                Command += "UPDATE #tmp\r\nSET NewDate = (SELECT MAX([Date]) FROM ExchangeRates  WHERE [Date] < NoDate)\r\nFROM #tmp \r\n";
 
                 Command += "UPDATE #tmp\r\nSET ChangeRate = B.ExchangeRate\r\nFROM #tmp A\r\nINNER JOIN ExchangeRates B ON (A.NewDate = B.[Date])\r\n";
 
