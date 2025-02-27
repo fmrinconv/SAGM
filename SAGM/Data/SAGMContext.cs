@@ -77,6 +77,8 @@ namespace SAGM.Data
         public DbSet<InvoicesCompacted> InvoicesCompacted { get; set; }
 
         public DbSet<Invoice> Invoices { get; set; }
+
+        public DbSet<InvoiceDetail> InvoiceDetails { get; set; }
         public DbSet<ExchangeRate> ExchangeRates { get; set; }
 
 

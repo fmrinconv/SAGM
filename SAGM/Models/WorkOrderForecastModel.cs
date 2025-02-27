@@ -20,5 +20,6 @@ namespace SAGM.Models
         [Range(.01, double.MaxValue, ErrorMessage = "El precio debe ser mayo que cero.")]
         public decimal ProcessCost { get; set; }
 
+
     }
 }

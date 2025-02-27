@@ -23,8 +23,13 @@ namespace SAGM.Helpers
         Task RemoveFromRoleAsync(User user, string roleName);
 
         Task<bool> IsUserInRoleAsync(User user, string roleName);
+        
 
         Task<SignInResult> LoginAsync(LoginViewModel model);
+
+
+        
+        Task<SignInResult> TwoFactorAuthenticatorSignInAsync(string code, bool x, bool y);
 
         Task LogoutAsync();
 
@@ -51,5 +56,7 @@ namespace SAGM.Helpers
         Task<IEnumerable<SelectListItem>> GetAllUsersAsync();
 
         Task<IEnumerable<SelectListItem>> GetUsersByRoleAsync(UserType role);
+
+
     }
 }

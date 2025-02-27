@@ -451,6 +451,15 @@ namespace SAGM.Migrations
                     b.Property<int?>("Folio")
                         .HasColumnType("int");
 
+                    b.Property<string>("LoadType")
+                        .HasMaxLength(16)
+                        .HasColumnType("nvarchar(16)")
+                        .HasColumnName("Tipo de carga");
+
+                    b.Property<DateTime?>("LoadedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnName("Fecha de carga");
+
                     b.Property<DateTime?>("PayDate")
                         .HasColumnType("datetime2")
                         .HasColumnName("Fecha de pago");
@@ -512,6 +521,48 @@ namespace SAGM.Migrations
                     b.HasKey("InvoiceId");
 
                     b.ToTable("Invoices");
+                });
+
+            modelBuilder.Entity("SAGM.Data.Entities.InvoiceDetail", b =>
+                {
+                    b.Property<int>("InvoiceDetailId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("InvoiceDetailId"));
+
+                    b.Property<decimal>("Cantidad")
+                        .HasColumnType("decimal(18,4)");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("Folio")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("Importe")
+                        .HasColumnType("decimal(18,4)");
+
+                    b.Property<int>("InvoiceId")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("PU")
+                        .HasColumnType("decimal(18,4)");
+
+                    b.Property<string>("UM")
+                        .IsRequired()
+                        .HasMaxLength(16)
+                        .HasColumnType("nvarchar(16)");
+
+                    b.Property<string>("UUID")
+                        .IsRequired()
+                        .HasMaxLength(36)
+                        .HasColumnType("nvarchar(36)");
+
+                    b.HasKey("InvoiceDetailId");
+
+                    b.ToTable("InvoiceDetails");
                 });
 
             modelBuilder.Entity("SAGM.Data.Entities.InvoicesCompacted", b =>

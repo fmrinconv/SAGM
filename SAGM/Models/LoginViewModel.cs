@@ -21,5 +21,11 @@ namespace SAGM.Models
 
         [Display(Name = "Recordarme en este navegador")]
         public bool RememberMe { get; set; }
+
+        [Display(Name = "Doble factor de autenticacion")]
+        public bool TwoFactorEnabled { get; set; }
+
+        [Display(Name = "Código doble factor")]
+        public int mfaCode { get; set; }
     }
 }

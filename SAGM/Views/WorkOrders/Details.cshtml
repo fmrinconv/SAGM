@@ -137,8 +137,9 @@
                         {
                             <a onclick="PrintReport('@Model.WorkOrderId')" class="btn btn-primary">OT <i title='Imprimir Orden de Trabajo' class='fa-solid fa-print'></i></a>
 
-                            <a href='@Url.Action("Remision", "WorkOrders", new { id = @Model.WorkOrderId }, Context.Request.Scheme)' class="btn btn-outline-primary" title="Imprimir remisión">Remisión<i class="fa-solid fa-list-check"></i></a>
-                            <a href='@Url.Action("RemisionHistory", "WorkOrders", new { id = @Model.WorkOrderId }, Context.Request.Scheme)' class="btn btn-outline-primary" title="Histórico remisiones">Historico Remisiones<i class="fa-solid fa-list-check"></i></a>
+                            <a href='@Url.Action("Remision", "WorkOrders", new { id = @Model.WorkOrderId }, Context.Request.Scheme)' class="btn btn-outline-primary" title="Imprimir remisión">Remisión <i class="fa-solid fa-list-check"></i></a>
+                            <a href='@Url.Action("RemisionHistory", "WorkOrders", new { id = @Model.WorkOrderId }, Context.Request.Scheme)' class="btn btn-outline-primary" title="Historia remisiones">Historia Rem <i class="fa-solid fa-list-check"></i></a>
+                            <a class="btn btn-outline-danger" onclick="window.open('/WorkOrders/Orders/@Model.WorkOrderId','_blank','location=0,height=350,width=620,scrollbars=no,status=no')" href="#">Compras <i title='Ordenes de compra' class="fa-solid fa-money-check-dollar"></i></a>
                         }
                     </dd>
 
@@ -146,12 +147,8 @@
             </div>
             <div class="col-sm-8 col-md-4 col-lg-3 col-xl-3">
                 <dl class="row" style="width:100%;">
-                    <div class="row justify-content-md-right">
-                        <div class="col-lg-12 justify-content-right">
-                            <canvas id="myChart" width="400" height="400"></canvas>
-                        </div>
+                    <dd> <div id="container" style="width: 350px; height: 350px;" class="center-block"></div></dd>
 
-                    </div>
                 </dl>
             </div>
         </div>
@@ -183,10 +180,12 @@
 
 
 @section Scripts{
+    <script src="https://cdn.anychart.com/releases/8.13.0/js/anychart-base.min.js"></script>
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
     <script src="~/js/showmodal.js"></script>
+   
 
     <script type="text/javascript">
         var count = 0;
@@ -196,6 +195,7 @@
         var quantity = 0;
 
         var controlGraphic = window.document.getElementById("myChart");
+        var graficoBar;
 
 
         $(document).ready(function () {
@@ -217,7 +217,8 @@
                 $.notify('@Html.Raw(ViewBag.Message)', "error", { globalPosition: "top center" });
             }
 
-            graphic($("#WorkOrderId").val().toString());
+           
+            
          
             dataTable = $('#TableWorkOrderDetails').DataTable(
                 {
@@ -532,8 +533,13 @@
                         }
                     ]
                 });
+
+            graphic($("#WorkOrderId").val().toString());
+           
           
         });
+
+    
         function actualiza() {
             
                 dataTable.ajax.reload();
@@ -639,83 +645,99 @@
 
         function graphic(workorderid) {
 
-            var totales = [];
-            var ut = 0;
-            var utp = 0;
-            var mp = 0;
-            var mpp = 0;
-            var mo = 0;
-            var mop = 0;
-
-            var uti = "";
-            var map = "";
-            var mao = "";
-            
+   
+            var json;
+            var dataserver;
 
             jQuery.ajax(
                 {
-                    url: '@Url.Action("GetForecast","WorkOrders")',
-                    data: { workorderid: workorderid },
                     type: "GET",
-                    dataType: "json",
                     contentType: "application/json; charset=utf-8",
-                    success: function (data) { 
-                       // console.log(data);//para mostrar los datos en la consola
+                    dataType: "json",
+                    url: '/WorkOrders/GetForecast2/?workorderid=' + workorderid,
+                    error: function () {
+                        alert("Ocurrio un error");
+                    },
+                    
+                    success: function (data) {
+                        dataserver = data.serie;
+                        json = {
+                            // chart settings
+                            "chart": {
+                                // chart type
+                                "type": "pie",
+                                // chart data
+                                "data": data.serie,
 
-                        mp = data.materialCost;
-                        mo = data.processCost;
-                        ut = data.total - data.materialCost - data.processCost;
+                                "fill": ['#37EB34','#BB2100', '#EB8934'],
+                                // chart container
+                                "container": "container"
+                            }
+                        };
+                        console.log(json);
 
-                        utp =(ut / data.total) * 100;
-                        mpp = (mp / data.total) * 100;
-                        mop = (mo / data.total) * 100;
 
+                        var chart = anychart.fromJson(json);
+                        chart.tooltip().useHtml(true);
+                        var tooltip = chart.tooltip();
+                        var paginator = chart.legend().paginator();
+                        chart.title("Rendimiento");
+                        var title = chart.title();
+                        title.fontSize(8);
 
-                        map = 'MP ' + Math.round(mpp) + '%';
-                        mao = 'MO ' + Math.round(mop) + '%';
-                        uti = 'UT ' + Math.round(utp) + '%';
-
-                        totales.push(mp);
-                        totales.push(mo);
-                        totales.push(ut);
+                        paginator.layout("vertical");
+                        paginator.orientation("right");
+                        paginator.padding(10);
+                        paginator.fontColor("#dd2c00");
+                        paginator.fontSize(12);
+                        //tooltip.titleFormat("<img width='40' src='/Images/{%x}.png'>")
+                       // tooltip.titleFormat("<img width='40' src='" + logo("{%x}") + "'>{%x}")
+                        tooltip.format("{%percentvalue}{numDecimals:2}%<br>${%value}{groupsSeparator:\\,}");
+                        chart.legend().useHtml(true);
+                        chart.legend().fontSize(9);
+                        chart.legend().itemsFormat("<span'>{%x}: ${%value}{groupsSeparator:\\,}</span>")
+                        chart.animation(true);
+                        chart.sort("desc");
+                        chart.listen("pointClick", function (e) { var x = e.point.get('value'); alert(x); });
+                        chart.draw();
+                      
+                        // graficoBar = new Chart(controlGraphic, {
+                        //     type: 'pie',
+                        //     data: {
+                        //         labels: [map, mao, uti],
+                        //         datasets: [
+                        //             {
+                        //                 label: 'Dataset 1',
+                        //                 data: totales,
+                        //                 backgroundColor: ['#BB2100', '#EB8934', '#37EB34']
+                        //             }
+                        //         ]
+                        //     },
+                        //     options: {
+                        //         responsive: true,
+                        //         plugins: {
+                        //             legend: {
+                        //                 position: 'bottom',
+                        //             },
+                        //             title: {
+                        //                 display: true,
+                        //                 text: 'Rendimiento'
+                        //             }
+                        //         }
+                        //     }
+                        // });
                         
-                        console.log(totales);
-
-                        var graficoBar = new Chart(controlGraphic, {
-                            type: 'pie',
-                            data: {
-                                labels: [map, mao, uti],
-                                datasets: [
-                                    {
-                                        label: 'Dataset 1',
-                                        data: totales,
-                                        backgroundColor: ['#BB2100', '#EB8934', '#37EB34']
-                                    }
-                                ]
-                            },
-                            options: {
-                                responsive: true,
-                                plugins: {
-                                    legend: {
-                                        position: 'bottom',
-                                    },
-                                    title: {
-                                        display: true,
-                                        text: 'Rendimiento'
-                                    }
-                                }
-                            },
-                        })
-                       
+                        
                     },
                     error: function (error) { 
                         console.log(error)
                     }
+                    
                 }
             )
 
             //RED #BB2100, ORANGE #EB8934, YELLOW #EBE534, GREEN #37EB34, BLUE #3437EB
-  
+         
         
 
             

@@ -16,6 +16,9 @@ using System.ComponentModel;
 using System.Globalization;
 using static SkiaSharp.HarfBuzz.SKShaper;
 using DocumentFormat.OpenXml.Wordprocessing;
+using System;
+using System.Xml;
+using System.Xml.Serialization;
 
 namespace SAGM.Controllers
 {
@@ -464,7 +467,7 @@ namespace SAGM.Controllers
         // GET: Archives
         public async Task<IActionResult> Index()
         {
-            return View(await _context.Archives.Where(a => a.Entity == "InvoicesTralix" || a.Entity == "ExchangeRate").OrderByDescending(a => a.UploadDate).ToListAsync());
+            return View(await _context.Archives.Where(a => a.Entity == "InvoicesTralix" || a.Entity == "ExchangeRate" || a.Entity == "Invoice").OrderByDescending(a => a.UploadDate).ToListAsync());
         }
 
         // GET: Archives/Details/5
@@ -669,6 +672,207 @@ namespace SAGM.Controllers
             TempData["ArchiveDeleteResult"] = "true";
             TempData["ArchiveDeleteMessage"] = "El archivo fué eliminado";
             return RedirectToAction(action, controller, new {id= returnentityId });
+        }
+
+
+        //Este proceso es exclusivo para Finanzas y sirve para leer un excel y poder subir su info a la BD
+        public IActionResult UploadOwnInvoices(string entity = "SimaqInvoice", int entityid = 0)
+        {
+            AddArchiveViewModel model = new AddArchiveViewModel();
+            model.Entity = entity;
+            model.EntityId = entityid;
+         
+            return View(model);
+        }
+
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]///Este proceso es usado para almacenar archivos y dejarlo guardado ya que casi no se utilizará la funcion eliminar
+        //
+        public async Task<IActionResult> UploadOwnInvoices(List<IFormFile> ArchiveFileList)
+        {
+            //El siguiente proceso se ejecuta seguen el siguiente orden:
+
+            string yearmonth_ini = "";///Este sera la fecha inicial mínima para eliminar los registros de InvoicesCompacted
+            string yearmonth_fin = "";///Este sera la fecha final máxima para eliminar los registros de InvoicesCompacted
+
+            Guid archiveguid = Guid.Empty;
+
+            foreach (var file in ArchiveFileList)
+            {
+                //Cargamos el archivo al blob
+                //leemos el archivo desde el blob y lo dejamos en memoria
+
+                archiveguid = await _blobHelper.UploadBlobAsync(file, "xmlowninvoices");
+
+
+                string connectionstring = _configuration["Blob:ConnectionString"];
+                BlobClient blobClient = new BlobClient(connectionstring, "xmlowninvoices", archiveguid.ToString());
+
+                Archive archive = new Archive();
+                archive.ArchiveGuid = archiveguid;
+                archive.Entity = "Invoice";
+                archive.EntityId = 1;
+                archive.UploadDate = DateTime.Now;
+                archive.ArchiveName = file.FileName;
+                _context.Add(archive);
+                await _context.SaveChangesAsync();
+
+                using (var stream = new MemoryStream()) {
+                    var contentType = (blobClient.GetProperties()).Value.ContentType;
+                    blobClient.DownloadTo(stream);
+                    stream.Position = 0;///esta linea es la que nos ayuda a empezar a leer el lector "reader"
+                    ///Vamos a revisar si el header de la factura ya esta cargada
+                    ///Si lo esta, tenemos que eliminar el header para volver a subirlo
+                    ///Si no esta solo creamos el header y luego subimos las partidas
+                    ///Hay que obtener el rango de fechas a eliminar de la tabla InvoicesCompacted y lo tomaremos de la año y mes de la factura mas nueva y mas vieja en el listado de archivos(facturas) que estamos subiendo
+                    ///Por ultimo actualizamos el concentrado de facturas pero este proceso lo vamos a hacer al final del foreach de los archivos subidos
+                    ///
+                    XmlTextReader reader = new XmlTextReader(stream);
+                    XmlSerializer serializer = new XmlSerializer(typeof(Comprobante));
+                    Comprobante factura = (Comprobante)serializer.Deserialize(reader);
+                    string uuid = factura.Complemento.Any[0].Attributes[2].Value;
+
+                    Invoice facturaexistente = await _context.Invoices.FirstOrDefaultAsync(i => i.UUID == uuid);
+                    if (facturaexistente != null)
+                    {
+                        if (facturaexistente.UUID == uuid)
+                        {
+                            _context.Invoices.Remove(facturaexistente);
+                            await _context.SaveChangesAsync();
+
+                            List<InvoiceDetail> lstDetails = _context.InvoiceDetails.Where(d => d.UUID == uuid).ToList();   
+                            foreach (InvoiceDetail detail in lstDetails)
+                            {
+                                _context.InvoiceDetails.Remove(detail);
+                                await _context.SaveChangesAsync();
+                            }
+
+                        };
+                    }
+
+                    //validamos si realmente es una factura con el tipo de comprobante = I
+
+                    if (factura.TipoDeComprobante.ToString() == "I") {
+
+                        Invoice NuevaFactura = new Invoice();
+
+
+                        NuevaFactura.Serie = factura.Serie;
+                        NuevaFactura.Folio = Convert.ToInt32(factura.Folio);
+                        NuevaFactura.UUID = uuid;
+                        NuevaFactura.EmisionDate = factura.Fecha;
+                        NuevaFactura.EmisorTaxId = factura.Emisor.Rfc;
+                        NuevaFactura.EmisorName = factura.Emisor.Nombre;
+                        NuevaFactura.ReceptorTaxId = factura.Receptor.Rfc;
+                        NuevaFactura.Subtotal = factura.SubTotal;
+                        NuevaFactura.TrasladedTax = factura.Impuestos.TotalImpuestosTrasladados;
+                        NuevaFactura.Total = factura.Total;
+                        NuevaFactura.Currency = factura.Moneda.ToString();
+                        NuevaFactura.ReceptorName = factura.Receptor.Nombre;
+                        NuevaFactura.TaxStatus = "VIGENTE";  //Lo estamos suponiendo porque no viene en el XML
+                        NuevaFactura.PayStatus = "NO PAGADO"; //Lo estamos suponiendo porque no viene en el XML
+                        NuevaFactura.RecipeType = "Factura"; //Lo estamos suponiendo porque no viene en el XML
+                        NuevaFactura.CfdiType = factura.TipoDeComprobante.ToString();
+                        NuevaFactura.PayDate = null;
+                        NuevaFactura.payComment = null;
+                        NuevaFactura.payMethod = factura.MetodoPago.ToString();
+                        NuevaFactura.LoadedDate = DateTime.Now;
+                        NuevaFactura.LoadType = "XML";
+
+
+
+                        string yearmonth = "";
+                        string mes = "00";
+                        string anio = "";
+
+                        anio = factura.Fecha.Year.ToString();
+                        mes += factura.Fecha.Month.ToString();
+                        mes = mes.Substring(mes.Length - 2, 2);
+
+                        yearmonth = $"{anio}-{mes}";
+
+
+                        //Aqui obtenemos el año y mes maximos y minimos
+                        if (yearmonth_ini == "")
+                        {
+                            yearmonth_ini = yearmonth;
+                        }
+                        else {
+                            if (Convert.ToInt32(yearmonth) < Convert.ToInt32(yearmonth_ini) )
+                            {
+                                yearmonth_ini = yearmonth;
+                            } 
+                        }
+
+                        if (yearmonth_fin == "")
+                        {
+                            yearmonth_fin = yearmonth;
+                        }
+                        else {
+                            if (Convert.ToInt32(yearmonth) > Convert.ToInt32(yearmonth_fin))
+                            {
+                                yearmonth_fin = yearmonth;
+                            }
+                        }
+
+
+                        _context.Add(NuevaFactura);
+                        await _context.SaveChangesAsync();
+
+
+
+
+                        foreach (ComprobanteConcepto partida in factura.Conceptos)
+                        {
+                            InvoiceDetail detail = new InvoiceDetail();
+                            detail.InvoiceId = NuevaFactura.InvoiceId;
+                            detail.UUID = uuid;
+                            detail.Cantidad = partida.Cantidad;
+                            detail.PU = partida.ValorUnitario;
+                            detail.Importe = partida.Importe;
+                            detail.Description = partida.Descripcion;
+                            detail.UM = partida.Unidad;
+                            detail.Folio = NuevaFactura.Folio;
+                            _context.Add(detail);
+                            await _context.SaveChangesAsync();
+
+                        }
+
+                    }
+
+                    
+                  
+                }
+
+
+                //Con yearmonth_ini diferente de "" quiere decir que si entro a guardar una factura nueva y hay que recalcular InvoicedCompacted
+                //dentro de las fechas ini y fin
+
+
+                if (yearmonth_ini != "") {
+
+                    var result = await _context.Database.ExecuteSqlRawAsync("DELETE FROM InvoicesCompacted WHERE CONVERT(nvarchar,Year([Date])) +'-' + RIGHT('0' + CONVERT(nvarchar,Month([Date])),2) >= '" + yearmonth_ini + "' AND CONVERT(nvarchar,Year([Date])) +'-' + RIGHT('0' + CONVERT(nvarchar,Month([Date])),2) <= '" + yearmonth_fin + "')");
+                    result = await _context.SaveChangesAsync();
+
+                    string command = "INSERT INTO InvoicesCompacted (Day,Month,Year,Subtotal,Total,[RFC Receptor],[Date])\r\n\t\tSELECT DAY(I.[Fecha de Emisión]) AS Dia,\r\n\t\t\t   MONTH(I.[Fecha de Emisión]) AS Mes,\r\n\t\t\t   YEAR(I.[Fecha de Emisión]) AS Año,\r\n\t\tSUM(CASE I.Moneda\r\n\t\t\tWHEN 'USD' THEN Subtotal*E.Exchangerate\r\n\t\t\tELSE Subtotal\r\n\t\tEND) AS Subtotal,\r\n\t\tSUM(CASE I.Moneda\r\n\t\t\tWHEN 'USD' THEN Total*E.Exchangerate\r\n\t\t\tELSE Total\r\n\t\tEND) As Total,\r\n\t\t[RFC Receptor], \r\n\t\t I.[Fecha de Emisión]\r\n\t\t FROM Invoices I\r\n\t\tLEFT JOIN ExchangeRates E ON (CONVERT(date,I.[Fecha de Emisión]) = E.[Date]  CONVERT(nvarchar,Year([Date])) +'-' + RIGHT('0' + CONVERT(nvarchar,Month([Date])),2) >= '" + yearmonth_ini + "' AND CONVERT(nvarchar,Year([Date])) +'-' + RIGHT('0' + CONVERT(nvarchar,Month([Date])),2) <= '" + yearmonth_fin + "'))\r\n\t\t\tWHERE [Tipo de Comprobante] = 'FACTURA'\r\n\t\tAND [Estado Fiscal] IN ('ACTIVO','VIGENTE','VIGENTE:NO CANCELABLE', 'VIGENTE:SIN ACEPTACIÓN', 'VIGENTE:CON ACEPTACIÓN')\r\n\t\tGroup By  [RFC Receptor],I.[Fecha de Emisión]\r\n";
+                    result = await _context.Database.ExecuteSqlRawAsync(command);
+                    result = await _context.SaveChangesAsync();
+
+                    return RedirectToAction("Index", "Archives");
+
+                }
+            }
+
+         
+
+           
+
+
+
+
+
+            return View();
         }
 
         private bool ArchiveExists(int id)

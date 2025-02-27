@@ -1,6 +1,7 @@
 ﻿using DocumentFormat.OpenXml.Drawing.Charts;
 using DocumentFormat.OpenXml.Spreadsheet;
 using Microsoft.EntityFrameworkCore;
+using QRCoder;
 using QuestPDF.Fluent;
 using QuestPDF.Helpers;
 using QuestPDF.Infrastructure;
@@ -46,6 +47,11 @@ namespace SAGM.Helpers
                 .Include(q => q.QuoteDetails).ThenInclude(qd => qd.Unit)
                 .Include(q => q.QuoteDetails).ThenInclude(qd => qd.Material)
                 .FirstOrDefaultAsync(q => q.QuoteId == QuoteId);
+
+            string QrUri;
+            byte[] qrCodeImage;
+            QrUri = $"https://sagm.azurewebsites.net/Quotes/Details/{quote.QuoteId.ToString()}";
+            qrCodeImage = QRCodeImage(QrUri);
 
 
             User seller = await _userHelper.GetUserAsync(quote.Seller);
@@ -202,7 +208,8 @@ namespace SAGM.Helpers
                     {
                         var rutaimagen = $"{path}{"simaq_footer.png"}";
                         byte[] imageData = System.IO.File.ReadAllBytes(rutaimagen);
-                        row.ConstantItem(140).Height(65).AlignBottom().Text(txt =>
+                        row.ConstantItem(65).Height(65).AlignBottom().Image(qrCodeImage).FitWidth().FitHeight();
+                        row.ConstantItem(100).Height(65).AlignCenter().AlignBottom().Text(txt =>
                         {
                             txt.Span("Pagina ").FontSize(10);
                             txt.CurrentPageNumber().FontSize(10);
@@ -211,6 +218,8 @@ namespace SAGM.Helpers
                         });
                         row.RelativeItem().Height(65);
                         row.ConstantItem(120).Height(65).AlignBottom().Image(imageData);
+
+
                     });
 
                 });
@@ -456,6 +465,8 @@ namespace SAGM.Helpers
         public async Task<byte[]> GenerateOrderReportPDFAsync(int OrderId)
         {
             {
+              
+
                 nfi.CurrencyDecimalDigits = 2;
                 //nfi.CurrencyDecimalSeparator = ",";
                 nfi.NumberDecimalDigits = 2;
@@ -468,6 +479,28 @@ namespace SAGM.Helpers
                     .Include(o => o.OrderDetails).ThenInclude(od => od.Unit)
                     .Include(o => o.OrderDetails).ThenInclude(od => od.Material)
                     .FirstOrDefaultAsync(o => o.OrderId == OrderId);
+
+
+                //-----------------------------------------------------
+
+
+                string QrUri;
+                byte[] qrCodeImage;
+                QrUri = $"https://sagm.azurewebsites.net/Orders/Details/{order.OrderId.ToString()}";
+                qrCodeImage = QRCodeImage(QrUri);
+                //using (QRCodeGenerator qrGenerator = new QRCodeGenerator())
+                //using (QRCodeData qrCodeData = qrGenerator.CreateQrCode, QRCodeGenerator.ECCLevel.Q))
+                //using (PngByteQRCode qrCode = new PngByteQRCode(qrCodeData))
+                //{
+                    
+                //    qrCodeImage = qrCode.GetGraphic(10);
+
+                //   // QrUri = string.Format("data:image/png;base64,{0}", Convert.ToBase64String(qrCodeImage));
+                //}
+               
+
+
+                //-----------------------------------------------------
 
 
 
@@ -498,6 +531,7 @@ namespace SAGM.Helpers
                         page.Header().ShowOnce().Column(col =>
                         {
                             col.Item().Row(row => row.RelativeItem().Height(68).Image(imageData));
+                            //col.Item().Row(row => row.RelativeItem().Height(40).Image(qrCodeImage).FitWidth().FitHeight());
                             col.Item().Background("FFBB11").Row(row => row.RelativeItem().Height(20).AlignRight().PaddingRight(5).Text(order.OrderName).FontColor("#626567").Bold());
                             col.Item().Border(1).BorderColor(Colors.BlueGrey.Lighten5).Table(table =>
                             {
@@ -611,7 +645,8 @@ namespace SAGM.Helpers
                         {
                             var rutaimagen = $"{path}{"simaq_footer.png"}";
                             byte[] imageData = System.IO.File.ReadAllBytes(rutaimagen);
-                            row.ConstantItem(140).Height(65).AlignBottom().Text(txt =>
+                            row.ConstantItem(65).Height(65).AlignBottom().Image(qrCodeImage).FitWidth().FitHeight();
+                            row.ConstantItem(100).Height(65).AlignCenter().AlignBottom().Text(txt =>
                             {
                                 txt.Span("Pagina ").FontSize(10);
                                 txt.CurrentPageNumber().FontSize(10);
@@ -1038,5 +1073,23 @@ namespace SAGM.Helpers
 
             throw new NotImplementedException();
         }
+
+        private byte[] QRCodeImage(string url)
+        {
+            string QrUri;
+            byte[] qrCodeImage;
+            using (QRCodeGenerator qrGenerator = new QRCodeGenerator())
+            using (QRCodeData qrCodeData = qrGenerator.CreateQrCode(url, QRCodeGenerator.ECCLevel.Q))
+            using (PngByteQRCode qrCode = new PngByteQRCode(qrCodeData))
+            {
+
+                qrCodeImage = qrCode.GetGraphic(10);
+
+                // QrUri = string.Format("data:image/png;base64,{0}", Convert.ToBase64String(qrCodeImage));
+            }
+
+            return qrCodeImage;
+        }
+
     }
 }

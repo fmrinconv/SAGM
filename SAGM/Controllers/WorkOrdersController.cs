@@ -23,6 +23,7 @@ using System.Diagnostics;
 using Process = SAGM.Data.Entities.Process;
 using DocumentFormat.OpenXml.ExtendedProperties;
 using Microsoft.AspNetCore.Authorization;
+using DocumentFormat.OpenXml.Spreadsheet;
 
 
 namespace SAGM.Controllers
@@ -122,6 +123,7 @@ namespace SAGM.Controllers
                  .Include(w => w.WorkOrderStatus)
                  .Include(w => w.Currency)
                  .Include(w => w.CreatedBy)
+                 .Include(w => w.Orders)
                  .OrderByDescending(w => w.WorkOrderId)
                  .ToListAsync();
 
@@ -198,6 +200,7 @@ namespace SAGM.Controllers
                     PromiseDate = w.PromiseDate,
                     ArchivesNumber = archivesnumber,
                     ArchivesChain = archiveschain,
+                    OrdersNumber = w.OrdersNumber
 
                 };
 
@@ -510,6 +513,82 @@ namespace SAGM.Controllers
             forecastModel.MaterialCost = materialcost;
 
             return Json(forecastModel);
+        }
+
+        [HttpGet]
+        public async Task<JsonResult> GetForecast2(int workorderid) {
+
+            WorkOrder workorder = await _context.WorkOrders
+              .Include(wo => wo.WorkOrderDetails).ThenInclude(wo => wo.WorkOrderDetailProcess)
+              .Include(w => w.Currency)
+              .Include(w => w.Orders).ThenInclude(w => w.OrderDetails)
+              .Include(w => w.Orders).ThenInclude(w => w.Currency)
+              .FirstOrDefaultAsync(wo => wo.WorkOrderId == workorderid);
+
+            decimal total = 0;
+            decimal processcost = 0;
+            decimal materialcost = 0;
+
+            foreach (WorkOrderDetail wod in workorder.WorkOrderDetails)
+            {
+                //Obtenemos el total de la OT
+                total += (wod.Quantity * wod.Price);
+                //Por cada Detalle de OT obtenemos el costo de cada proceso y lo multiplicamos con la cantidad especificada en el detalle
+                foreach (WorkOrderDetailProcess wodp in wod.WorkOrderDetailProcess)
+                {
+                    processcost += wod.Quantity * wodp.Quantity * wodp.Cost;//se va a sustituir por wodp.cost 
+
+                }
+            }
+            foreach (Order wod in workorder.Orders)
+            {
+                foreach (OrderDetail od in wod.OrderDetails)
+                {
+
+                    if (wod.Currency != workorder.Currency)
+                    {
+                        if (wod.Currency.CurrencyId == 1)//si esta lo OC hacia el proveedor en Pesos y la OT esta en Dólares
+                        {
+                            materialcost += od.Quantity * od.Price / workorder.ExchangeRate; //tomamos el tipo de cambio de la OT
+                        }
+                        else
+                        {
+                            materialcost += od.Quantity * od.Price * wod.ExchangeRate;  //tomamos en cuenta el Tipo de cambio de la OC   ya que la que viene en dolares es la Compra hacia proveedor
+                        }
+                    }
+                    else
+                    {
+                        materialcost += od.Quantity * od.Price;
+                    }
+                }
+            }
+            WorkOrderForecastModel forecastModel = new WorkOrderForecastModel();
+            forecastModel.Total = total;
+            forecastModel.ProcessCost = processcost;
+            forecastModel.MaterialCost = materialcost;
+
+            List<GraphicPay> serie = new List<GraphicPay>();
+            GraphicPay paydata = new GraphicPay();
+
+            paydata.x = "MP " + Math.Round(materialcost*100/total).ToString() + '%';
+            paydata.value = materialcost;
+            paydata.fill = "#BB2100";
+            serie.Add(paydata);
+
+
+            paydata = new GraphicPay();
+            paydata.x = "MO " + Math.Round(processcost*100/total).ToString() + '%';
+            paydata.value = processcost;
+            paydata.fill = "#EB8934";
+            serie.Add(paydata);
+
+            paydata = new GraphicPay();
+            paydata.x = "UT " + Math.Round((total - processcost - materialcost)*100/total).ToString() + '%';
+            paydata.value = total - materialcost - processcost;
+            paydata.fill = "#37EB34";
+            serie.Add(paydata);
+
+            return Json(new { serie = serie.OrderByDescending(x => x.value), total = total });
         }
 
         public IActionResult WorkLoad()
@@ -2441,6 +2520,57 @@ namespace SAGM.Controllers
             Stream stream = new MemoryStream(await _reportHelper.GenerateRemisionReportPDFAsync(remision.WorkOrderDeliveryId));
 
             return File(stream, "application/pdf", $"{remision.WorkOrderDeliveryName}{".pdf"}");
+        }
+
+        public async Task<IActionResult> Orders(int Id)
+        {
+            List<Order> listorders = await _context.Orders
+                                .Where(o => o.WorkOrder.WorkOrderId == Id)
+                                .Include(o => o.OrderDetails)
+                                .Include(o =>o.Supplier)
+                                .Include(o => o.Currency)
+                                .Include(o => o.OrderDetails).ThenInclude(d => d.Material)
+                                .Include(o => o.OrderStatus)
+                                .ToListAsync(); 
+
+            List<OrdersFromOT> listordersFromOT = new List<OrdersFromOT>();
+            foreach (Order o in listorders)
+            {
+                
+                User Buyer = await _userHelper.GetUserAsync(o.Buyer);
+                String CreatedBy = "";
+
+                if(o.CreatedBy != null) {
+                    CreatedBy = $"{o.CreatedBy.FirstName} {o.CreatedBy.LastName}";
+                }
+
+                Contact supcontact = await _context.Contacts.FirstOrDefaultAsync(c => c.ContactId == o.SupplierContactId);
+
+                OrdersFromOT orderFromOT = new OrdersFromOT() {
+                    Active = o.Active,
+                    Buyer = $"{Buyer.FirstName} {Buyer.LastName}",
+                    Comments = o.Comments,
+                    CreatedBy = CreatedBy,
+                    Currency = o.Currency.Curr,
+                    DeliveryDate = o.DeliveryDate,
+                    EstimatedDeliveryDate = o.EstimatedDeliveryDate,
+                    ExchangeRate = o.ExchangeRate,
+                    OrderComments = o.OrderComments,
+                    OrderDate = o.OrderDate,
+                    OrderDetails = o.OrderDetails,
+                    OrderId = o.OrderId,
+                    OrderName = o.OrderName,
+                    OrderStatus = o.OrderStatus.OrderStatusName,
+                    Subtotal = o.SubTotal,
+                    Supplier = o.Supplier.SupplierNickName,
+                    SupplierContact = $"{supcontact.Name} {supcontact.LastName}"
+                };
+
+                listordersFromOT.Add(orderFromOT);
+
+            }
+
+            return View(listordersFromOT);
         }
     }
 }

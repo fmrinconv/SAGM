@@ -116,7 +116,9 @@ namespace SAGM.Helpers
 
         public async Task<SignInResult> LoginAsync(LoginViewModel model)
         {
+           
             return await _signInManager.PasswordSignInAsync(model.Username, model.Password, model.RememberMe, true);
+            
         }
 
         public async Task LogoutAsync()
@@ -263,6 +265,11 @@ namespace SAGM.Helpers
                 }
             }
             return listReceptors;
+        }
+
+        public Task<SignInResult> TwoFactorAuthenticatorSignInAsync(string code, bool x, bool y)
+        {
+            throw new NotImplementedException();
         }
     }
 }

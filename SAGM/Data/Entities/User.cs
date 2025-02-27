@@ -24,7 +24,6 @@ namespace SAGM.Data.Entities
         public string LastName { get; set; }
 
 
-
         [Display(Name = "Ciudad")]
         public City City { get; set; }
 
@@ -51,6 +50,10 @@ namespace SAGM.Data.Entities
 
         [Display(Name = "Usuario")]
         public string FullNameWithDocument => $"{FirstName} {LastName} - {Document}";
+
+        public bool TwoFactorEnabled { get; set; }
+
+        public string SecurityStamp { get; set; }
 
         public virtual ICollection<Quote> Quotes { get; set; }
 

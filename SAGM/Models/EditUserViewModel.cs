@@ -78,5 +78,8 @@ namespace SAGM.Models
 
         [Display(Name = "Usuario")]
         public string FullNameWithDocument => $"{FirstName} {LastName} - {Document}";
+
+        [Display(Name = "Doble factor de autenticacion")]
+        public bool TwoFactorEnabled { get; set; }
     }
 }

@@ -160,7 +160,9 @@
                         var paginator = chart.legend().paginator();
                         chart.title("Facturación de " + $("#DateIni").val() + " a " + $("#DateFin").val());
                         var title = chart.title();
-                        title.fontSize(11);
+                        title.fontSize(8);
+                        //title.listen("click", function () { alert("hola") });
+                       
                         paginator.layout("vertical");
                         paginator.orientation("right"); 
                         paginator.padding(10);
@@ -174,9 +176,10 @@
                         chart.legend().itemsFormat("<span'>{%x}: ${%value}{groupsSeparator:\\,}</span>")
                         chart.animation(true);
                         chart.sort("desc");
+                        chart.listen("pointClick", function (e) { var x = e.point.get('value'); alert(x); });
                         chart.draw();
 
-                        setTimeout(Graphic3d, 1700);
+                        //setTimeout(Graphic3d, 1700);
                                             }
                    
                     
@@ -195,6 +198,7 @@
             var title = chart.title();
             var paginator = chart.legend().paginator();
             title.fontSize(11);
+            title.ad
 
             paginator.layout("vertical");
             paginator.orientation("right");

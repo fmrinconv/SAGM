@@ -487,6 +487,7 @@ namespace SAGM.Controllers
             MaterialType materialtype = await _context.MaterialTypes.FindAsync(id);
             Material material = new()
             {
+                MaterialId = model.MaterialId,
                 MaterialType = materialtype,
                 MaterialName = model.MaterialName,
                 Active = model.Active

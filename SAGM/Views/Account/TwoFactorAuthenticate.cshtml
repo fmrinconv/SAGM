@@ -1,0 +1,51 @@
+﻿@model SAGM.Models.LoginViewModel
+
+@{
+    ViewData["Title"] = "SAGM doble factor autenticación";
+
+}
+
+<style>
+    .g1 {
+        background-color: #F9F9F9;
+        margin: 15px 15px 15px 15px;
+        border: 1px solid silver;
+        border-radius: 12px;
+        box-shadow: 5px 5px 5px #555;
+        background-color: orange;
+    }
+</style>
+<flash dismissable="true" />
+
+<div class="row">
+    <div class="col-md-4"></div>
+    <div class="col-md-4">
+        <div class="card bg-secondary mb-3 g1" style="width: 380px; height: 230px">
+            <h5 class="card-header text-center text-white"><i class="fa-solid fa-envelope text-navy text-white"></i> Google Authenticator</h5>
+            <div class="card-body bg-warning">
+                <form asp-action="Login">
+                    <input asp-for="TwoFactorEnabled" type="hidden" class="form-control" />
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+                    <div class="form-group">
+                        <label class="control-label">Código</label>
+                        <input asp-for="mfaCode" class="form-control" />
+                        <span asp-validation-for="mfaCode" class="text-danger"></span>
+                    </div>
+                 
+                    <div class="form-group mt-2 text-center">
+                        <button input type="submit" value="Login" class="btn btn-primary btn-block"> Validar</button>
+                       
+                    </div>
+                </form>
+            </div>
+         
+        </div>
+    </div>
+    <div class="col-md-4"></div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

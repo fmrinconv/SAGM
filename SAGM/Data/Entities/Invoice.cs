@@ -104,7 +104,15 @@ namespace SAGM.Data.Entities
         [Column("Metodo de pago")]
         public string? payMethod { get; set; } = null;
 
+        [Display(Name = "Fecha de carga")]
+        [DisplayFormat(DataFormatString = "{0:yyyy-MM-ddTHH:mm:ss}", ApplyFormatInEditMode = true)]
+        [Column("Fecha de carga")]
+        public DateTime? LoadedDate { get; set; } = DateTime.Now;
 
+        [Display(Name = "Tipo de carga")]
+        [Column("Tipo de carga")]
+        [MaxLength(16, ErrorMessage = "El campo {0} debe tener máximo {1} caractéres.")]
+        public string? LoadType { get; set; } = "InvoicesTralix";  ///XMLInvoice es el otro tipo de carga
 
 
     }

@@ -13,6 +13,7 @@ using SAGM.Common;
 using NuGet.Packaging.Signing;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using System.Globalization;
+using Google.Authenticator;
 
 namespace SAGM.Controllers
 {
@@ -123,7 +124,8 @@ namespace SAGM.Controllers
                     CountryId = user.City.State.Country.CountryId,
                     Cities = await _comboHelper.GetComboCitiesAsync(user.City.State.StateId),
                     States = await _comboHelper.GetComboStatesAsync(user.City.State.Country.CountryId),
-                    Countries = await _comboHelper.GetComboCountriesAsync()
+                    Countries = await _comboHelper.GetComboCountriesAsync(),
+                    TwoFactorEnabled = user.TwoFactorEnabled
                 };
                 return View(model);
             }
@@ -154,6 +156,7 @@ namespace SAGM.Controllers
                 user.PhoneNumber = model.PhoneNumber;
                 user.ImageId = model.ImageId;
                 user.City = await _context.Cities.FindAsync(model.CityId);
+                user.TwoFactorEnabled = model.TwoFactorEnabled;
                 await _userHelper.UpdateUserAsync(user);
                 ViewBag.Result = "true";
                 ViewBag.Message = "El cambio de datos ha sido exitoso";
@@ -190,11 +193,25 @@ namespace SAGM.Controllers
         {
             if (ModelState.IsValid)
             {
+          
                 SignInResult result = await _userHelper.LoginAsync(model);
                 if (result.Succeeded)
                 {
                     
-                    return RedirectToAction("Index", "Home");
+                    Data.Entities.User userlocal = _context.Users.Where(u => u.UserName == User.Identity.Name).FirstOrDefault();
+
+
+                    if (userlocal.TwoFactorEnabled != true)
+                    {
+                        return RedirectToAction("Index", "Home");
+                    }
+                    else
+                    {
+                           
+                        return RedirectToAction("TwoFactorAuthenticate", "Account");
+                    }
+
+                    
                 }
                 if (result.IsLockedOut)
                 {
@@ -211,6 +228,34 @@ namespace SAGM.Controllers
                 }
             }
             return View(model);
+        }
+
+        public  IActionResult TwoFactorAuthenticate()
+        {
+            Data.Entities.User userlocal = _context.Users.Where(u => u.UserName == User.Identity.Name).FirstOrDefault();
+            TwoFactorAuthenticator authenticator = new TwoFactorAuthenticator();
+            var setupInfo = authenticator.GenerateSetupCode("SimaqSagm", userlocal.UserName, userlocal.SecurityStamp, true, 3);
+            return View();
+        }
+
+        public IActionResult GoogleAutReg()
+        {
+            Data.Entities.User userlocal = _context.Users.Where(u => u.UserName == User.Identity.Name).FirstOrDefault();
+            TwoFactorAuthenticator authenticator = new TwoFactorAuthenticator();
+            var setupInfo = authenticator.GenerateSetupCode("SimaqSagm", userlocal.UserName, userlocal.SecurityStamp, true,3);
+            ViewBag.qrCodeImageUrl = setupInfo.QrCodeSetupImageUrl;
+            return View();
+        }
+
+        [HttpPost]
+        public IActionResult GoogleAutReg(TwoFactorAuthenticate model)
+        {
+            Data.Entities.User userlocal = _context.Users.Where(u => u.UserName == User.Identity.Name).FirstOrDefault();
+            TwoFactorAuthenticator authenticator = new TwoFactorAuthenticator();
+            bool result = authenticator.ValidateTwoFactorPIN(userlocal.SecurityStamp, model.mfaCode.ToString(),true);
+
+            return View(model);
+
         }
         public async Task<IActionResult> Logout()
         {

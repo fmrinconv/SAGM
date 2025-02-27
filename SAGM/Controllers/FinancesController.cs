@@ -83,11 +83,14 @@ namespace SAGM.Controllers
                 paydata.x = Customer;
                paydata.value = invoice.Subtotal;
                serie.Add(paydata);
+
+                var random = new Random();
+                var color = String.Format("#{0:X6}", random.Next(0x1000000)); // = 
+
+                paydata.fill = color;
                 sumtotal += decimal.Parse(paydata.value.ToString()); 
             }
-
-
-        
+       
 
             return Json(new { serie = serie.OrderByDescending(x => x.value), total = sumtotal });
         }

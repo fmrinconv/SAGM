@@ -37,6 +37,10 @@ internal class Program
         })
             .AddDefaultTokenProviders()
             .AddEntityFrameworkStores<SAGMContext>();
+        builder.Services.AddAuthorization(options => options.AddPolicy("TwoFactorEnabled", x => x.RequireClaim("amr", "mfa")));
+
+
+
 
         builder.Services.ConfigureApplicationCookie(options =>
         {

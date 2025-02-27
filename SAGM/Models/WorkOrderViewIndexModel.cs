@@ -87,5 +87,7 @@ namespace SAGM.Models
 
         public decimal total => WorkOrderDetails.Count == 0 ? 0 : WorkOrderDetails.Sum(q => q.Price * q.Quantity);
 
+        public int? OrdersNumber { get; set; } = 0;
+
     }
 }

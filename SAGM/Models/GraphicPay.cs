@@ -10,5 +10,9 @@ namespace SAGM.Models
 
         [Column(TypeName = "decimal(18,2)")]
         public decimal? value { get; set; } =null;
+
+
+   
+        public string? fill { get; set; } = null;
     }
 }

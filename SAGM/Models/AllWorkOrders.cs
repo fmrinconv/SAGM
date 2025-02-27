@@ -9,5 +9,6 @@ namespace SAGM.Models
         public string  BuyerContact { get; set; }
         public string  FinalUser { get; set; }
 
+
     }
 }

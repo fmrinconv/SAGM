@@ -1,4 +1,5 @@
-﻿using System.ComponentModel;
+﻿using SAGM.Migrations;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
@@ -74,7 +75,9 @@ namespace SAGM.Data.Entities
         public ICollection<OrderDetail> OrderDetails { get; set; }
         public ICollection<OrderComment> OrderComments { get; set; }
 
-        public WorkOrder WorkOrder { get; set; }    
+        public WorkOrder WorkOrder { get; set; }
+
+        public decimal SubTotal => OrderDetails == null ? 0 : OrderDetails.Sum(o => o.Quantity * o.Price);  //Nos ayuda a saber el total de la suma de las partidas
 
     }
 }

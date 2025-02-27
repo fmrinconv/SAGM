@@ -161,7 +161,7 @@
         <a onclick="showInPopup('@Url.Action("AddOrEditDetail", "Quotes", new { id = Model.QuoteId, detailid=0 }, Context.Request.Scheme)','Agregar partida','bg-success')" class="btn btn-sm btn-outline-success"><i class="fa-solid fa-plus-circle" title="Agregar partida"></i></a>
     </div>
     <div class="card-body">
-        <div id="view-all" >
+        <div id="view-all" style="width:100%;">
             <input type="hidden" id="Result" name="Result" value="@ViewBag.Result" />
                 @await Html.PartialAsync("_ViewAllQuoteDetails.cshtml", Model)
         </div>
@@ -542,7 +542,7 @@
             var id = $("#QuoteId").val();
             $.ajax({
                 type: "POST",
-                url: "/Quotes/ChangeComments?id=" + id + "&comments=" + comments,
+                url: "/Quotes/ChangeComments?id=" + id + "&comments=" + encodeURIComponent(comments) ,
                 data: null,
                 async: true,
                 contentType: false,

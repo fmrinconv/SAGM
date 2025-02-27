@@ -15,6 +15,9 @@
             <a onclick="showInPopup('@Url.Action("UploadExchangeRateFile", "Archives", new { id = 0 }, Context.Request.Scheme)' , 'Subir archivo de tipos de cambio','bg-primary')" class="btn btn-sm btn-outline-primary" title="Procesar archivo de tipos de cambio">
                 Tipo de cambio <i class="fa fa-plus"></i>
             </a>
+            <a onclick="showInPopup('@Url.Action("UploadOwnInvoices", "Archives", new { id = 0 }, Context.Request.Scheme)' , 'Subir archivos XML de facturas','bg-primary')" class="btn btn-sm btn-outline-primary" title="Procesar archivos XML de facturas">
+                XML Facturas <i class="fa fa-plus"></i>
+            </a>
         </div>
         <div class="card-body">
             <div id="view-all">

@@ -22,6 +22,7 @@ using DocumentFormat.OpenXml.Wordprocessing;
 using DocumentFormat.OpenXml.Office2010.Excel;
 using Microsoft.AspNetCore.Authorization;
 using System.Globalization;
+using DocumentFormat.OpenXml.Spreadsheet;
 
 
 namespace SAGM.Controllers
@@ -80,8 +81,6 @@ namespace SAGM.Controllers
             
             ViewBag.DateIni = DateOnly.FromDateTime(DateTime.Now).AddMonths(-1).ToString("yyyy-MM-dd");
             ViewBag.DateFin = DateOnly.FromDateTime(DateTime.Now).ToString("yyyy-MM-dd");
-
-
 
 
             if (TempData["AddQuoteResult"] != null)
@@ -251,7 +250,7 @@ namespace SAGM.Controllers
         {
 
             DataTable dt = new DataTable("QuoteResult");
-            dt.Columns.AddRange(new DataColumn[14] { 
+            dt.Columns.AddRange(new DataColumn[15] { 
                                             new DataColumn("Cotización",Type.GetType("System.String")),
                                             new DataColumn("Cliente",Type.GetType("System.String")),
                                             new DataColumn("Usuario",Type.GetType("System.String")),
@@ -265,7 +264,8 @@ namespace SAGM.Controllers
                                             new DataColumn("Descripción"),
                                             new DataColumn("Cantidad",Type.GetType("System.Decimal")),
                                             new DataColumn("Unidad"),
-                                            new DataColumn("Precio",Type.GetType("System.Decimal"))
+                                            new DataColumn("Precio",Type.GetType("System.Decimal")),
+                                            new DataColumn("Estatus")
                                             });
 
             List<Quote> quotes = await _context.Quotes
@@ -297,7 +297,8 @@ namespace SAGM.Controllers
                                 qd.Description,
                                 qd.Quantity,
                                 qd.Unit.UnitName,
-                                qd.Price
+                                qd.Price,
+                                quote.QuoteStatus.QuoteStatusName
                                 ); ;
                 }
             }
@@ -307,6 +308,14 @@ namespace SAGM.Controllers
                 using (XLWorkbook wb = new XLWorkbook())
                 {
                     wb.Worksheets.Add(dt,"Cotizaciones");
+
+                    foreach (IXLWorksheet worksheet in wb.Worksheets)
+                    {
+                        worksheet.Style.Alignment.WrapText = false;  
+                        Console.WriteLine(worksheet.Name); // outputs the current worksheet name.
+                                                           // do the thing you want to do on each individual worksheet.
+                    }
+
                     using (MemoryStream stream = new MemoryStream())
                     {
                         string exportfilename = $"Quote{DateTime.Now.ToString("yyyyMMddHHmmss")}.xlsx";

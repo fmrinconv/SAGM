@@ -90,5 +90,7 @@ namespace SAGM.Data.Entities
         public ICollection<WorkOrderComment> WorkOrderComments { get; set; }
         public ICollection<Order> Orders { get; set; }
         public ICollection<WorkOrderDelivery> WorkOrderDeliveries { get; set; }
+
+        public int OrdersNumber => Orders == null ? 0 : Orders.Count;  //Nos ayuda a saber cuantas Ordenes de compra estan ligadas a la OT
     }
 }

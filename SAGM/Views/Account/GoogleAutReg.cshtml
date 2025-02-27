@@ -1,0 +1,29 @@
+﻿@model SAGM.Models.TwoFactorAuthenticate
+@{
+    ViewData["Title"] = "Registro de Google authenticator";
+}
+
+<div>
+    <form asp-action="GoogleAutReg" enctype="multipart/form-data" method="post">
+        <input type="hidden" id="Result" name="Result" value="@ViewBag.Result" />
+        <input type="hidden" asp-for="Username" />
+
+        <div class="form-group">
+            <img src="@ViewBag.qrCodeImageUrl" class="img-thumbnail" />
+        </div>
+        <div class="row">
+            <div class="col-md-6">
+                <label asp-for="mfaCode" class="control-label"></label>
+                <input asp-for="mfaCode" class="form-control" />
+                <span asp-validation-for="mfaCode" class="text-danger"></span>
+            </div>
+        </div>
+
+
+
+        <div class="form-group mt-2">
+            <input type="submit" value="Guardar" class="btn btn-outline-primary" />
+        </div>
+    </form>
+</div>
+
