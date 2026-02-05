@@ -116,10 +116,24 @@ namespace SAGM.Helpers
 
         public async Task<SignInResult> LoginAsync(LoginViewModel model)
         {
-           
-            return await _signInManager.PasswordSignInAsync(model.Username, model.Password, model.RememberMe, true);
+
+         
+            User user = await _context.Users.FirstOrDefaultAsync(u => u.UserName == model.Username);
+            if (user.TwoFactorEnabled == true) //Forzamos a leer la propiedad de la BD con el campo TwoFactorEnabled
+            {
+                await _userManager.SetTwoFactorEnabledAsync(user, true);
+            }
+            var twofactorenabled = await _userManager.GetTwoFactorEnabledAsync(user);
+            
+            
+           var result = await _signInManager.PasswordSignInAsync(model.Username, model.Password, true, false);
+
+
+
+            return result;
             
         }
+
 
         public async Task LogoutAsync()
         {
@@ -267,9 +281,13 @@ namespace SAGM.Helpers
             return listReceptors;
         }
 
-        public Task<SignInResult> TwoFactorAuthenticatorSignInAsync(string code, bool x, bool y)
+        public async Task<SignInResult> TwoFactorAuthenticatorSignInAsync(LoginViewModel model)
         {
-            throw new NotImplementedException();
+
+            var result = await _signInManager.PasswordSignInAsync(model.Username, model.Password, true, false);
+
+
+            return result;
         }
     }
 }

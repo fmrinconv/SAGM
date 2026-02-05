@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using SAGM.Data;
 using SAGM.Data.Entities;
 using SAGM.Helpers;
@@ -11,6 +12,14 @@ internal class Program
     private static void Main(string[] args)
     {
         var builder = WebApplication.CreateBuilder(args);
+
+        //Agregamos estas opciones a la Session para extenderla del default que es 20 minuts a 90 minutos
+        builder.Services.AddSession(options =>
+        {
+            options.IdleTimeout = TimeSpan.FromMinutes(90);
+            options.Cookie.HttpOnly = true;
+            options.Cookie.IsEssential = true;
+        });
 
         builder.Services.AddControllersWithViews();
         builder.Services.AddDbContext<SAGMContext>(o =>
@@ -77,7 +86,7 @@ internal class Program
 
         if (!app.Environment.IsDevelopment())
         {
-            app.UseExceptionHandler("/Home/Error");
+            app.UseExceptionHandler("/Home/Index");
             app.UseHsts();
         }
         app.UseStatusCodePagesWithReExecute("/error/{0}");

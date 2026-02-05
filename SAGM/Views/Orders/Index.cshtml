@@ -21,18 +21,32 @@
 <div class="container-fluid">
     <div class="card mt-2">
         <div class="card-header text-danger bg-secondary bg-opacity-25">
-            <table>
-                <tr>
-                    <td>
+
+            <div class=" container-fluid">
+                <div class="row">
+                    <div class="col-sm-3">
                         <i class="fa fa-money-check-dollar"></i><strong> Ordenes de compra</strong>
                         <a onclick="showInPopup('@Url.Action("AddOrder", "Orders", new { id = "" }, Context.Request.Scheme)' , 'Crear OC @DateTime.Now.ToString(" yyyyMMdd")-XXX','bg-danger')" class="btn btn-sm btn-outline-success" title="Crear OC"><i class="fa fa-plus-circle"></i></a>
-                    </td>
-                    <td>
-                        <a onclick="Export()" class="btn btn-sm btn-outline-primary"><i class="fa-solid fa-file-arrow-down"></i></a>
-                        
-                    </td>
-                </tr>
-            </table>           
+                    </div>
+                    <div class="col-sm-1"></div>
+                    <div class="col-sm-2" style="text-align:right; vertical-align:middle; padding-top:5px;">
+                        <strong> Filtrar x fechas</strong>
+                    </div>
+                    <div class="col-sm-2 align-content-end">
+                        <input id="Dateini" name="Dateini" value="@ViewBag.DateIni" class="form-control datepicker" type="date" />
+                    </div>
+                    <div class="col-sm-2 align-content-end">
+                        <input id="Datefin" name="Datefin" value="@ViewBag.DateFin" class="form-control datepicker" type="date" />
+                    </div>
+                    <div class="col-sm-1" style="text-align:left; vertical-align:bottom;">
+                        <a onclick="Filter()" class="btn btn-med btn-outline-success"><i class="fa-solid fa-filter" title="Filtrar"></i></a>
+                    </div>
+                    <div class="col-sm-1">
+                        <label style="color:black;">Solo activas</label> <input type="checkbox" checked="@ViewBag.activeflag" name="activeflag" id="activeflag" onchange="getOrders();" />
+                    </div>
+                </div>
+            </div>
+         
         </div>  
         <div class="card-body">
             <div id="view-all">
@@ -105,18 +119,27 @@
         function parseJsonDate(jsonDateString) {
             return new Date(parseInt(jsonDateString.replace('/Date(', '')));
         }
-        $(document).ready(function () {
-            if ($("#Result").val() == "true") {
+        //Como hay un checkbox de activeflag que pide traer las ordenes solo activas o todas es necesario recargar la tabla de Orders
+        //funcion GetOrders del controller, nos vimos forzados a meterla dentro de una función para poder llamarlo en el .ready y tambien cuando cambie el checkbox de "Solo Activas"
+        function getOrders()
+        {
+                      if ($("#Result").val() == "true") {
                 $.notify('@Html.Raw(ViewBag.Message)', "success", { globalPosition: "top left" });
             }
             else {
                 $.notify('@Html.Raw(ViewBag.Message)', "error", { globalPosition: "top left" });
             }
+
             count = 0;
+             if (dataTable != null) {
+                dataTable.destroy();
+            };
+
+
             dataTable = $('#TableOrders').DataTable(
                 {
                     "ajax": {
-                        "url": '/Orders/GetOrders' ,
+                            "url": '/Orders/GetOrders?activeflag=' +  $('#activeflag').is(":checked") + '&fini=' + $("#Dateini").val() + '&ffin=' + $("#Datefin").val(), 
                         "type": "GET",
                         "datatype": "json"
                     },
@@ -173,26 +196,26 @@
                             "targets": 12,
                             className: 'dt-body-center dt-body-nowrap',
                             responsivePriority: 4
-                        }, 
+                        },
                         {
                             "targets": [13,14,15],
                             className: 'dt-body-left dt-body-nowrap',
-                            responsivePriority: 1 
+                            responsivePriority: 1
                         }],
                     "columns": [
                         {
-                            "data": "orderId", 
-                            "render": 
-                                function (data) { 
-                                    orderid = data; 
-                                    count = count + 1; 
+                            "data": "orderId",
+                            "render":
+                                function (data) {
+                                    orderid = data;
+                                    count = count + 1;
                                     return count.toString(); }
                         },
-                        { "data": "orderName", "render": 
+                        { "data": "orderName", "render":
                                 function (data) {
                                     var result = '<a href=/Orders/Details/' + orderid + "> " + data + "</a>";
                                     return result;
-                                                } 
+                                                }
                         },
                         {
                             "data": "workOrderid",
@@ -245,10 +268,10 @@
                                         var year = date.getFullYear();
                                         return year + "-" + (month.toString().length > 1 ? month : "0" + month) + "-" + (day.toString().length > 1 ? day : "0" + day);
                                     }
-                                    else { 
+                                    else {
                                         return "";
                                     }
-                                   
+
                                 }
                         },
                         { "data": "currency" },
@@ -260,7 +283,7 @@
                             "render":
                                 function (data) {
                                     var result = "";
-                                  
+
                                     if (data == true) {
                                         result += "<input type='checkbox' checked onclick='return false;' />";
                                     }
@@ -270,7 +293,7 @@
                                     return result;
                                 }
                         },
-                        
+
                         {
                             "data": "orderStatusName",
                             "render":
@@ -279,26 +302,26 @@
                                     return data;
                                 }
                         },
-                        { "data": "orderId", 
-                          "render": 
+                        { "data": "orderId",
+                          "render":
                           function (data) {
                             var result = "";
 
                                 result += "<a title='Editar OC' onclick=\"showInPopup('/Orders/EditOrder?id=" + data + "','Editar\ OC','bg-danger')\" ";
                                 result += "class='btn btn-sm btn-outline-warning'><i title='Editar OC' class='fa-solid fa-pencil-alt' style='width:17px;'></i></a>";
 
-                              if (workorderid == 0) 
+                              if (workorderid == 0)
                               {
                                   result += "<a title='Enlazr OC' data-bs-toggle='modal' data-bs-target='#WorkOrdersModal' onclick='GetWorkOrders(" + data + ")' ";
                                   result += "class='btn btn-sm btn-outline-primary'><i title='Enlazar OC' class='fa fa-link'></i></a>";
                               }
-                              else 
+                              else
                               {
                                         result += "<a title='Desenlazar' onclick=\"showInPopup('/Orders/UnlinkOT?id=" + data + "','Desenlazar\ OC','bg-danger')\" ";
                                         result += "class='btn btn-sm btn-outline-danger'><i title='Desenlazar OC' class='fa fa-link-slash' style='width:17px;'></i></a>";
                               }
-                                
-                                    
+
+
                                 result += "<a title='Copiar OC' onclick=\"showInPopup('/Orders/CopyOrder?id=" + data + "','Copiar\ OC','bg-danger')\" ";
                                 result += "class='btn btn-sm btn-outline-success'><i title='Copiar OC' class='fa fa-copy' style='width:17px;'></i></a>";
 
@@ -312,16 +335,16 @@
                                         result += "<a title='Recibir pedido' href='/Orders/Receive?id=" + orderid + "' ";
                                         result += "class='btn btn-sm btn-outline-success'><i title='Recibir pedido' class='fa fa-check' style='width:17px;'></i></a>";
                               }
-                            
+
                                 return result;
 
                         } },
-                        { "data": "tax", 
-                        "render": 
-                            function (data) { 
+                        { "data": "tax",
+                        "render":
+                            function (data) {
                                 var result = "";
                                 result += data.toString() + "%";
-                                return result; } 
+                                return result; }
                         },
                         { "data": "comments" },
                         { "data": "archivesNumber" },
@@ -370,7 +393,7 @@
                             "render":
                                 function (data) {
                                     var result = "";
-                                    
+
                                     if (data.length !=0) {
                                         result = "<div><table style='border: 1px solid;'><tr class='bg-secondary bg-opacity-25'>"
                                         result += "<th>Cantidad</th>";
@@ -385,16 +408,19 @@
                                         };
                                         result += "</table></div>";
                                     }
-                                    else { 
+                                    else {
                                         result ='No hay partidas'
                                     }
                                     return result;
                                 }
-                        }             
+                        }
                     ]
                 });
-     
-  
+
+        };
+        $(document).ready(function () {
+
+            getOrders();
         });
 
         function downloadFile(guid, filename) {

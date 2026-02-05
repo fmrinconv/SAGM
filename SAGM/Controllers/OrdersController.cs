@@ -43,6 +43,11 @@ namespace SAGM.Controllers
 
             ViewBag.Result = "";
             ViewBag.Message = "";
+            ViewBag.activeflag = true;
+
+            ViewBag.DateIni = DateOnly.FromDateTime(DateTime.Now).AddMonths(-3).ToString("yyyy-MM-dd");
+            ViewBag.DateFin = DateOnly.FromDateTime(DateTime.Now).ToString("yyyy-MM-dd");
+
 
 
             if (TempData["AddOrderResult"] != null)
@@ -108,23 +113,44 @@ namespace SAGM.Controllers
         }
 
         [HttpGet]
-        public async Task<JsonResult> GetOrders()
+        public async Task<JsonResult> GetOrders(Boolean activeflag, DateTime fini, DateTime ffin)
         {
             ViewBag.Result = "";
             ViewBag.Message = "";
+            ViewBag.activeflag = activeflag;
+            List<Order> orders;
 
-            List<Order> orders = await _context.Orders
-                 .Include(o => o.OrderDetails)
-                 .ThenInclude(o => o.Material)
-                 .Include(o => o.Supplier)
-                 .Include(o => o.OrderStatus)
-                 .Include(o => o.Currency)
-                 .Include(o => o.WorkOrder)
-                 .Include(o => o.CreatedBy)
-                 .OrderByDescending(o => o.OrderId)
-                 .ToListAsync();
+            if (activeflag == true)
+            {
+                orders = await _context.Orders
+                .Include(o => o.OrderDetails)
+                .ThenInclude(o => o.Material)
+                .Include(o => o.Supplier)
+                .Include(o => o.OrderStatus)
+                .Include(o => o.Currency)
+                .Include(o => o.WorkOrder)
+                .Include(o => o.CreatedBy)
+                .OrderByDescending(o => o.OrderId)
+                .Where(o => o.Active == activeflag && o.OrderDate >= fini && o.OrderDate <= ffin.AddHours(23).AddMinutes(59).AddSeconds(59))
+                .ToListAsync();
+            }
+            else {
+                orders = await _context.Orders
+                    .Include(o => o.OrderDetails)
+                    .ThenInclude(o => o.Material)
+                    .Include(o => o.Supplier)
+                    .Include(o => o.OrderStatus)
+                    .Include(o => o.Currency)
+                    .Include(o => o.WorkOrder)
+                    .Include(o => o.CreatedBy)
+                    .Where(o => o.OrderDate >= fini && o.OrderDate <= ffin.AddHours(23).AddMinutes(59).AddSeconds(59))
+                    .OrderByDescending(o => o.OrderId)
+                    .ToListAsync();
+            }
 
-            List<OrderViewIndexModel> lorders = new List<OrderViewIndexModel>();
+
+
+                List<OrderViewIndexModel> lorders = new List<OrderViewIndexModel>();
 
             foreach (Order o in orders)
             {
@@ -333,6 +359,7 @@ namespace SAGM.Controllers
                             OrderName = ordername,
                             Buyer = model.BuyerId,
                             Tax = model.Tax,
+                            ExchangeRate = model.ExchangeRate,
                             EstimatedDeliveryDate = model.EstimatedDeliveryDate,
                             DeliveryDate = model.DeliveryDate,
                             OrderStatus = orderstatus,

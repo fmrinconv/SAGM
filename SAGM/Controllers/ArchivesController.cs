@@ -1,24 +1,23 @@
 ﻿using Azure.Storage.Blobs;
+using ClosedXML.Excel;
+using DocumentFormat.OpenXml.Drawing.Diagrams;
 using DocumentFormat.OpenXml.Office2010.Excel;
+using DocumentFormat.OpenXml.Wordprocessing;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.EntityFrameworkCore;
 using SAGM.Data;
 using SAGM.Data.Entities;
 using SAGM.Helpers;
 using SAGM.Models;
-using System.IO;
-using ClosedXML.Excel;
-
-using static SAGM.Helpers.ModalHelper;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System;
 using System.ComponentModel;
 using System.Globalization;
-using static SkiaSharp.HarfBuzz.SKShaper;
-using DocumentFormat.OpenXml.Wordprocessing;
-using System;
+using System.IO;
 using System.Xml;
 using System.Xml.Serialization;
+using static SAGM.Helpers.ModalHelper;
 
 namespace SAGM.Controllers
 {
@@ -31,15 +30,17 @@ namespace SAGM.Controllers
         private readonly IUserHelper _userHelper;
         private readonly IComboHelper _comboHelper;
         private readonly IConfiguration _configuration;
+        private readonly IReportHelper _reportHelper;
 
 
-        public ArchivesController(SAGMContext context, IBlobHelper blobHelper, IUserHelper userHelper, IComboHelper comboHelper, IConfiguration configuration)
+        public ArchivesController(SAGMContext context, IBlobHelper blobHelper, IUserHelper userHelper, IComboHelper comboHelper, IConfiguration configuration, IReportHelper reportHelper)
         {
             _context = context;
             _blobHelper = blobHelper;
             _userHelper = userHelper;
             _comboHelper = comboHelper;
             _configuration = configuration;
+            _reportHelper = reportHelper;
         }
 
 
@@ -433,6 +434,273 @@ namespace SAGM.Controllers
             return View(archive);
         }
 
+        [HttpGet]
+        [Authorize(Roles = "Administrador,Vendedor")]
+        public IActionResult AddArchiveToWorkOrder(int entityid=0  , string Entity = "")
+        {
+            AddArchiveToWorkOrderViewModel model = new AddArchiveToWorkOrderViewModel();
+            model.Entity = Entity;
+            model.EntityId = entityid;
+            return View(model);
+        }
+
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]///Este proceso es usado para almacenar archivos y dejarlo guardado ya que casi no se utilizará la funcion eliminar
+        //
+        public async Task<IActionResult> AddArchiveToWorkOrder(AddArchiveToWorkOrderViewModel model)
+        {
+            Guid archiveguid = Guid.Empty;
+
+            if (model.ArchiveFile != null)
+            {
+                archiveguid = await _blobHelper.UploadBlobAsync(model.ArchiveFile, "archives");
+            }
+
+            model.ArchiveGuid = archiveguid;
+
+            Archive archive = new Archive();
+            archive.ArchiveGuid = archiveguid;
+            archive.Entity = model.Entity;
+            archive.EntityId = model.EntityId;
+            archive.ArchiveName = model.ArchiveFile.FileName;
+            archive.UploadDate = DateTime.Now;
+            _context.Add(archive);
+            await _context.SaveChangesAsync();
+
+            if (model.isPurchaseOrder == true) {
+                WorkOrder WO = await _context.WorkOrders.FindAsync(archive.EntityId);
+                WO.CustomerPO = model.CustomerPO;
+                await _context.SaveChangesAsync();
+            }
+
+                switch (archive.Entity)
+            {
+
+                case "WorkOrder":
+                    TempData["AddArchiveResult"] = "true";
+                    TempData["AddArchiveMessage"] = "La carga de archivos se ha completado con éxito";
+                    WorkOrder w = await _context.WorkOrders
+                                        .FirstOrDefaultAsync(w => w.WorkOrderId == archive.EntityId);
+
+                    return RedirectToAction("Index", "WorkOrders", new { id = w.WorkOrderId });
+
+             
+                default:
+                    break;
+            }
+
+
+
+            return View(archive);
+        }
+
+        //[HttpPost]
+        //public async Task<IActionResult> AddArchiveToWorkOrder(AddArchiveToWorkOrderViewModel model)
+        //{
+        //    Guid archiveguid = Guid.Empty;
+
+        //    if (model.isPurchaseOrder == true)
+        //    {
+        //        if (model.CustomerPO == null)
+        //        {
+        //            List<WorkOrder> workorders = await _context.WorkOrders
+        //         .Include(w => w.WorkOrderDetails)
+        //         .ThenInclude(d => d.Material)
+        //         .Include(w => w.WorkOrderDetails)
+        //         .ThenInclude(d => d.Unit)
+        //         .Include(w => w.Customer)
+        //         .Include(w => w.WorkOrderStatus)
+        //         .Include(w => w.Currency)
+        //         .Include(w => w.CreatedBy)
+        //         .Include(w => w.Orders)
+        //         .OrderByDescending(w => w.WorkOrderId)
+        //         .ToListAsync();
+
+        //            List<WorkOrderViewIndexModel> lworkOrders = new List<WorkOrderViewIndexModel>();
+
+        //            foreach (WorkOrder w in workorders)
+        //            {
+        //                string seller = _userHelper.GetUserAsync(w.Seller).Result.FullName.ToString();
+        //                Contact buyercontact = await _context.Contacts.FindAsync(w.BuyerContactId);
+        //                Contact finaluser = await _context.Contacts.FindAsync(w.FinalUserId);
+        //                int archivesnumber = 0;
+        //                Quote quote = _context.Quotes.FirstOrDefault(q => q.QuoteId == w.QuoteId);
+
+
+
+        //                //Armamos la lista de detalles
+        //                List<WorkOrderDetailViewIndexModel> details = new List<WorkOrderDetailViewIndexModel>();
+        //                foreach (WorkOrderDetail wd in w.WorkOrderDetails)
+        //                {
+        //                    List<Archive> archives = _context.Archives.Where(a => a.Entity == "WorkOrderDetail" && a.EntityId == wd.WorkOrderDetailId).ToList();
+        //                    archivesnumber += archives.Count;
+        //                    WorkOrderDetailViewIndexModel wdvim = new WorkOrderDetailViewIndexModel()
+        //                    {
+        //                        Quantity = wd.Quantity,
+        //                        Material = _context.Materials.FindAsync(wd.Material.MaterialId).Result.MaterialName.ToString(),
+        //                        Description = wd.Description,
+        //                        Price = wd.Price,
+        //                        RawMaterial = wd.RawMaterial,
+        //                        Machined = wd.Machined,
+        //                        TT = wd.TT,
+        //                        Shipped = wd.Shipped,
+        //                        Invoiced = wd.Invoiced
+        //                    };
+        //                    details.Add(wdvim);
+
+        //                }
+
+        //                //
+
+        //                List<Archive> warchives = _context.Archives.Where(a => a.Entity == "WorkOrder" && a.EntityId == w.WorkOrderId).ToList();
+
+        //                string archiveschain = "";
+
+        //                foreach (var item in warchives)
+        //                {
+        //                    archiveschain += item.ArchiveGuid.ToString() + "," + item.ArchiveName + "," + item.ArchiveId + "|";
+        //                }
+        //                if (archiveschain != "")
+        //                {
+        //                    archiveschain = archiveschain.Substring(0, archiveschain.Length - 1);
+        //                }
+        //                ;
+
+
+        //                WorkOrderViewIndexModel aqs = new WorkOrderViewIndexModel()
+        //                {
+        //                    WorkOrderId = w.WorkOrderId,
+        //                    WorkOrderDate = w.WorkOrderDate,
+        //                    Active = w.Active,
+        //                    BuyerContact = $"{buyercontact.Name} {buyercontact.LastName}",
+        //                    Comments = w.Comments,
+        //                    CreatedBy = w.CreatedBy.FullName,
+        //                    Currency = w.Currency.Curr,
+        //                    ExchangeRate = w.ExchangeRate,
+        //                    CustomerNickName = w.Customer.CustomerNickName,
+        //                    CustomerPO = w.CustomerPO,
+        //                    CustomerRFQ = w.CustomerRFQ,
+        //                    FinalUser = $"{finaluser.Name} {finaluser.LastName}",
+        //                    ModifiedBy = w.ModifiedBy,
+        //                    ModifyDate = w.ModifyDate,
+        //                    WorkOrderDetails = details,
+        //                    WorkOrderName = w.WorkOrderName,
+        //                    Seller = seller,
+        //                    Tax = w.Tax,
+        //                    WorkOrderStatusName = w.WorkOrderStatus.WorkOrderStatusName,
+        //                    PromiseDate = w.PromiseDate,
+        //                    ArchivesNumber = archivesnumber,
+        //                    ArchivesChain = archiveschain,
+        //                    OrdersNumber = w.OrdersNumber
+
+        //                };
+
+        //                if (quote != null)
+        //                {
+        //                    aqs.QuoteId = quote.QuoteId;
+        //                    aqs.QuoteName = quote.QuoteName;
+        //                }
+        //                else
+        //                {
+        //                    aqs.QuoteId = 0;
+        //                    aqs.QuoteName = "";
+        //                }
+
+        //                lworkOrders.Add(aqs);
+        //            }
+
+        //            ModelState.AddModelError(string.Empty, "La orden compra no puede estar en blanco");
+        //            WorkOrdersController woc = new WorkOrdersController(_context,_userHelper,_comboHelper,_blobHelper, _configuration, _reportHelper);
+                    
+                    
+        //            return Json(new { isValid = false, html = ModalHelper.RenderRazorViewToString(woc, "AddArchiveToWorkOrder", model) });
+
+                  
+        //        }
+        //    }
+
+        //    if (model.ArchiveFile != null)
+        //    {
+        //        archiveguid = await _blobHelper.UploadBlobAsync(model.ArchiveFile, "archives");
+        //    }
+
+        //    model.ArchiveGuid = archiveguid;
+
+        //    Archive archive = new Archive();
+        //    archive.ArchiveGuid = archiveguid;
+        //    archive.Entity = model.Entity;
+        //    archive.EntityId = model.EntityId;
+        //    archive.ArchiveName = model.ArchiveFile.FileName;
+        //    archive.UploadDate = DateTime.Now;
+        //    _context.Add(archive);
+        //    await _context.SaveChangesAsync();
+
+
+
+        //    switch (archive.Entity)
+        //    {
+        //        case "QuoteDetail":
+        //            TempData["AddArchiveResult"] = "true";
+        //            TempData["AddArchiveMessage"] = "La carga de archivos se ha completado con éxito";
+        //            QuoteDetail qd = await _context.QuoteDetails
+        //                                .Include(qd => qd.Quote)
+        //                                .FirstOrDefaultAsync(qd => qd.QuoteDetailId == archive.EntityId);
+
+        //            return RedirectToAction("Details", "Quotes", new { id = qd.Quote.QuoteId, quoteDetilId = qd.QuoteDetailId });
+
+        //        case "Quote":
+        //            TempData["AddArchiveResult"] = "true";
+        //            TempData["AddArchiveMessage"] = "La carga de archivos se ha completado con éxito";
+        //            Quote q = await _context.Quotes
+        //                                .FirstOrDefaultAsync(q => q.QuoteId == archive.EntityId);
+
+        //            return RedirectToAction("Index", "Quotes", new { id = q.QuoteId });
+
+        //        case "WorkOrder":
+        //            TempData["AddArchiveResult"] = "true";
+        //            TempData["AddArchiveMessage"] = "La carga de archivos se ha completado con éxito";
+        //            WorkOrder w = await _context.WorkOrders
+        //                                .FirstOrDefaultAsync(w => w.WorkOrderId == archive.EntityId);
+
+        //            return RedirectToAction("Index", "WorkOrders", new { id = w.WorkOrderId });
+
+        //        case "WorkOrderDetail":
+        //            TempData["AddArchiveResult"] = "true";
+        //            TempData["AddArchiveMessage"] = "La carga de archivos se ha completado con éxito";
+        //            WorkOrderDetail wd = await _context.WorkOrderDetails
+        //                                .Include(wd => wd.WorkOrder)
+        //                                .FirstOrDefaultAsync(wd => wd.WorkOrderDetailId == archive.EntityId);
+
+        //            return RedirectToAction("Details", "WorkOrders", new { id = wd.WorkOrder.WorkOrderId, workOrderId = wd.WorkOrderDetailId });
+
+        //        case "Order":
+        //            TempData["AddArchiveResult"] = "true";
+        //            TempData["AddArchiveMessage"] = "La carga de archivos se ha completado con éxito";
+        //            Order o = await _context.Orders
+        //                                .FirstOrDefaultAsync(o => o.OrderId == archive.EntityId);
+
+        //            return RedirectToAction("Index", "Orders", new { id = o.OrderId });
+
+        //        case "OrderDetail":
+        //            TempData["AddArchiveResult"] = "true";
+        //            TempData["AddArchiveMessage"] = "La carga de archivos se ha completado con éxito";
+        //            OrderDetail od = await _context.OrderDetails
+        //                                .Include(od => od.Order)
+        //                                .FirstOrDefaultAsync(od => od.OrderDetailId == archive.EntityId);
+
+        //            return RedirectToAction("Details", "Orders", new { id = od.Order.OrderId, orderDetilId = od.OrderDetailId });
+
+        //        default:
+        //            break;
+        //    }
+
+
+
+        //    return View(archive);
+        //}
+
+
 
         [NoDirectAccess]
         [HttpPost]
@@ -799,7 +1067,7 @@ namespace SAGM.Controllers
                             yearmonth_ini = yearmonth;
                         }
                         else {
-                            if (Convert.ToInt32(yearmonth) < Convert.ToInt32(yearmonth_ini) )
+                            if (Convert.ToInt32(yearmonth.Replace("-", "")) < Convert.ToInt32(yearmonth_ini.Replace("-","") ))
                             {
                                 yearmonth_ini = yearmonth;
                             } 
@@ -810,7 +1078,7 @@ namespace SAGM.Controllers
                             yearmonth_fin = yearmonth;
                         }
                         else {
-                            if (Convert.ToInt32(yearmonth) > Convert.ToInt32(yearmonth_fin))
+                            if (Convert.ToInt32(yearmonth.Replace("-", "")  ) > Convert.ToInt32(yearmonth_fin.Replace("-","")))
                             {
                                 yearmonth_fin = yearmonth;
                             }
@@ -850,18 +1118,20 @@ namespace SAGM.Controllers
                 //dentro de las fechas ini y fin
 
 
-                if (yearmonth_ini != "") {
-
-                    var result = await _context.Database.ExecuteSqlRawAsync("DELETE FROM InvoicesCompacted WHERE CONVERT(nvarchar,Year([Date])) +'-' + RIGHT('0' + CONVERT(nvarchar,Month([Date])),2) >= '" + yearmonth_ini + "' AND CONVERT(nvarchar,Year([Date])) +'-' + RIGHT('0' + CONVERT(nvarchar,Month([Date])),2) <= '" + yearmonth_fin + "')");
-                    result = await _context.SaveChangesAsync();
-
-                    string command = "INSERT INTO InvoicesCompacted (Day,Month,Year,Subtotal,Total,[RFC Receptor],[Date])\r\n\t\tSELECT DAY(I.[Fecha de Emisión]) AS Dia,\r\n\t\t\t   MONTH(I.[Fecha de Emisión]) AS Mes,\r\n\t\t\t   YEAR(I.[Fecha de Emisión]) AS Año,\r\n\t\tSUM(CASE I.Moneda\r\n\t\t\tWHEN 'USD' THEN Subtotal*E.Exchangerate\r\n\t\t\tELSE Subtotal\r\n\t\tEND) AS Subtotal,\r\n\t\tSUM(CASE I.Moneda\r\n\t\t\tWHEN 'USD' THEN Total*E.Exchangerate\r\n\t\t\tELSE Total\r\n\t\tEND) As Total,\r\n\t\t[RFC Receptor], \r\n\t\t I.[Fecha de Emisión]\r\n\t\t FROM Invoices I\r\n\t\tLEFT JOIN ExchangeRates E ON (CONVERT(date,I.[Fecha de Emisión]) = E.[Date]  CONVERT(nvarchar,Year([Date])) +'-' + RIGHT('0' + CONVERT(nvarchar,Month([Date])),2) >= '" + yearmonth_ini + "' AND CONVERT(nvarchar,Year([Date])) +'-' + RIGHT('0' + CONVERT(nvarchar,Month([Date])),2) <= '" + yearmonth_fin + "'))\r\n\t\t\tWHERE [Tipo de Comprobante] = 'FACTURA'\r\n\t\tAND [Estado Fiscal] IN ('ACTIVO','VIGENTE','VIGENTE:NO CANCELABLE', 'VIGENTE:SIN ACEPTACIÓN', 'VIGENTE:CON ACEPTACIÓN')\r\n\t\tGroup By  [RFC Receptor],I.[Fecha de Emisión]\r\n";
-                    result = await _context.Database.ExecuteSqlRawAsync(command);
-                    result = await _context.SaveChangesAsync();
-
-                    return RedirectToAction("Index", "Archives");
+               
 
                 }
+            if (yearmonth_ini != "")
+            {
+
+                var result = await _context.Database.ExecuteSqlRawAsync("DELETE FROM InvoicesCompacted WHERE CONVERT(nvarchar,Year([Date])) +'-' + RIGHT('0' + CONVERT(nvarchar,Month([Date])),2) >= '" + yearmonth_ini + "' AND CONVERT(nvarchar,Year([Date])) +'-' + RIGHT('0' + CONVERT(nvarchar,Month([Date])),2) <= '" + yearmonth_fin + "'");
+                result = await _context.SaveChangesAsync();
+
+                string command = "INSERT INTO InvoicesCompacted (Day,Month,Year,Subtotal,Total,[RFC Receptor],[Date])\r\n\t\tSELECT DAY(I.[Fecha de Emisión]) AS Dia,\r\n\t\t\t   MONTH(I.[Fecha de Emisión]) AS Mes,\r\n\t\t\t   YEAR(I.[Fecha de Emisión]) AS Año,\r\n\t\tSUM(CASE I.Moneda\r\n\t\t\tWHEN 'USD' THEN Subtotal*E.Exchangerate\r\n\t\t\tELSE Subtotal\r\n\t\tEND) AS Subtotal,\r\n\t\tSUM(CASE I.Moneda\r\n\t\t\tWHEN 'USD' THEN Total*E.Exchangerate\r\n\t\t\tELSE Total\r\n\t\tEND) As Total,\r\n\t\t[RFC Receptor], \r\n\t\t I.[Fecha de Emisión]\r\n\t\t FROM Invoices I\r\n\t\tLEFT JOIN ExchangeRates E ON (CONVERT(nvarchar,CONVERT(date,I.[Fecha de Emisión])) =  CONVERT(nvarchar,Year([Date])) +'-' + RIGHT('0' + CONVERT(nvarchar,Month([Date])),2))\r\n\t\t\tWHERE [Tipo de Comprobante] = 'FACTURA'\r\n\t\tAND [Estado Fiscal] IN ('ACTIVO','VIGENTE','VIGENTE:NO CANCELABLE', 'VIGENTE:SIN ACEPTACIÓN', 'VIGENTE:CON ACEPTACIÓN')\r\n\t\tGroup By  [RFC Receptor],I.[Fecha de Emisión]\r\n";
+                result = await _context.Database.ExecuteSqlRawAsync(command);
+                result = await _context.SaveChangesAsync();
+
+                return RedirectToAction("Index", "Archives");
             }
 
          

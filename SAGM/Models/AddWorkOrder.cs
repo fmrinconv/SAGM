@@ -63,6 +63,10 @@ namespace SAGM.Models
         [Display(Name = "OC Cliente")]
         public string? CustomerPO { get; set; }
 
+        [StringLength(128)]
+        [Display(Name = "OC Cliente")]
+        public string? CustomerRFQ { get; set; }
+
         [Display(Name = "Estatus")]
         public IEnumerable<SelectListItem> WorkOrderStatus { get; set; }
 

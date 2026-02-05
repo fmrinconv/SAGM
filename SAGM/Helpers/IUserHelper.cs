@@ -28,8 +28,7 @@ namespace SAGM.Helpers
         Task<SignInResult> LoginAsync(LoginViewModel model);
 
 
-        
-        Task<SignInResult> TwoFactorAuthenticatorSignInAsync(string code, bool x, bool y);
+        Task<SignInResult> TwoFactorAuthenticatorSignInAsync(LoginViewModel model);
 
         Task LogoutAsync();
 

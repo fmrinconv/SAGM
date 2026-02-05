@@ -4,6 +4,7 @@ namespace SAGM.Data.Entities
 {
     public class Sat_TipoComprobante
     {
+
         [Key]
         public int TipoComprobanteId { get; set; }
 

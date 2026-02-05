@@ -138,6 +138,24 @@ namespace SAGM.Controllers
                 Quote quote = _context.Quotes.FirstOrDefault(q => q.QuoteId == w.QuoteId);
 
 
+                //Vamos a complementar lo datos de la OC del cliente en caso de que tenga
+                string OCcliente = null;
+                Guid? OCArchiveId = null;
+                string ArchiveName = null;
+                
+                int ArchiveId;
+
+                Archive ArchiveOC = await _context.Archive.FindAsync(w.OCArchiveId);
+
+                if (ArchiveOC != null)
+                {
+                    ArchiveId = ArchiveOC.ArchiveId;
+                    OCcliente = w.CustomerPO;
+                    OCArchiveId = ArchiveOC.ArchiveGuid;
+                    ArchiveName = ArchiveOC.ArchiveName;
+                }
+
+
 
                 //Armamos la lista de detalles
                 List<WorkOrderDetailViewIndexModel> details = new List<WorkOrderDetailViewIndexModel>();
@@ -177,7 +195,7 @@ namespace SAGM.Controllers
                 };
 
 
-                WorkOrderViewIndexModel aqs = new WorkOrderViewIndexModel()
+                WorkOrderViewIndexModel aws = new WorkOrderViewIndexModel()
                 {
                     WorkOrderId = w.WorkOrderId,
                     WorkOrderDate = w.WorkOrderDate,
@@ -189,6 +207,7 @@ namespace SAGM.Controllers
                     ExchangeRate = w.ExchangeRate,
                     CustomerNickName = w.Customer.CustomerNickName,
                     CustomerPO = w.CustomerPO,
+                    CustomerRFQ = w.CustomerRFQ,
                     FinalUser = $"{finaluser.Name} {finaluser.LastName}",
                     ModifiedBy = w.ModifiedBy,
                     ModifyDate = w.ModifyDate,
@@ -200,22 +219,24 @@ namespace SAGM.Controllers
                     PromiseDate = w.PromiseDate,
                     ArchivesNumber = archivesnumber,
                     ArchivesChain = archiveschain,
-                    OrdersNumber = w.OrdersNumber
+                    OrdersNumber = w.OrdersNumber,
+                    OCArchiveGuid = OCArchiveId,
+                    ArchiveName = ArchiveName
 
                 };
 
                 if (quote != null)
                 {
-                    aqs.QuoteId = quote.QuoteId;
-                    aqs.QuoteName = quote.QuoteName;
+                    aws.QuoteId = quote.QuoteId;
+                    aws.QuoteName = quote.QuoteName;
                 }
                 else
                 {
-                    aqs.QuoteId = 0;
-                    aqs.QuoteName = "";
+                    aws.QuoteId = 0;
+                    aws.QuoteName = "";
                 }
 
-                lworkOrders.Add(aqs);
+                lworkOrders.Add(aws);
             }
 
             return Json(new { data = lworkOrders.OrderByDescending(o => o.WorkOrderId) });
@@ -338,6 +359,7 @@ namespace SAGM.Controllers
             workorderv.ExchangeRate = workorder.ExchangeRate;
             workorderv.Customer = workorder.Customer;
             workorderv.CustomerPO = workorder.CustomerPO;
+            workorderv.CustomerRFQ = workorder.CustomerRFQ;
             workorderv.FinalUserId = workorder.FinalUserId;
             workorderv.FinalUserName = $"{finaluser.Name} {finaluser.LastName}";
             workorderv.ModifiedBy = workorder.ModifiedBy;
@@ -652,6 +674,7 @@ namespace SAGM.Controllers
                     workload.WorkOrderStatusName = wo.WorkOrderStatus.WorkOrderStatusName;
                     workload.CustomerNickName = wo.Customer.CustomerNickName;
                     workload.CustomerPO = wo.CustomerPO;
+                    workload.CustomerRFQ = wo.CustomerRFQ;
                     workload.FinalUser = $"{contact.Name} {contact.LastName}";
                     workload.Buyer = $"{buyer.Name} {buyer.LastName}";
                     workload.Seller = wo.Seller;
@@ -793,6 +816,7 @@ namespace SAGM.Controllers
                 CustomerFinalContacts = customerfinalcontacts,
                 FinalUserId = workorder.FinalUserId,
                 CustomerPO = workorder.CustomerPO,
+                CustomerRFQ = workorder.CustomerRFQ,
                 Sellers = sellers,
                 SellerId = workorder.Seller,
                 Tax = workorder.Tax,
@@ -859,6 +883,7 @@ namespace SAGM.Controllers
                     workorder.Comments = model.Comments;
                     workorder.Customer = customer;
                     workorder.CustomerPO = model.CustomerPO;
+                    workorder.CustomerRFQ = model.CustomerPO;
                     workorder.FinalUserId = model.FinalUserId;
                     workorder.ModifiedBy = User.Identity.Name;
                     workorder.ModifyDate = DateTime.Now;
@@ -903,6 +928,7 @@ namespace SAGM.Controllers
                 workorder.Comments = model.Comments;
                 workorder.Customer = customer;
                 workorder.CustomerPO = model.CustomerPO;
+                workorder.CustomerRFQ = model.CustomerRFQ;
                 workorder.FinalUserId = model.FinalUserId;
                 workorder.ModifiedBy = User.Identity.Name;
                 workorder.ModifyDate = DateTime.Now;
@@ -954,6 +980,7 @@ namespace SAGM.Controllers
                     Customers = customers,
                     CustomerId = model.CustomerId,
                     CustomerPO = model.CustomerPO,
+                    CustomerRFQ = model.CustomerRFQ,
                     CustomerBuyerContacts = customerbuyercontacts,
                     BuyerContactId = model.BuyerContactId,
                     CustomerFinalContacts = customerfinalcontacts,
@@ -993,6 +1020,7 @@ namespace SAGM.Controllers
                     workorder.Comments = model.Comments;
                     workorder.Customer = customer;
                     workorder.CustomerPO = model.CustomerPO;
+                    workorder.CustomerRFQ = model.CustomerRFQ;
                     workorder.FinalUserId = model.FinalUserId;
                     workorder.ModifiedBy = User.Identity.Name;
                     workorder.ModifyDate = DateTime.Now;
@@ -1071,6 +1099,7 @@ namespace SAGM.Controllers
                     Customers = customers,
                     CustomerId = model.CustomerId,
                     CustomerPO = workorder.CustomerPO,
+                    CustomerRFQ = workorder.CustomerRFQ,
                     CustomerBuyerContacts = customerbuyercontacts,
                     BuyerContactId = model.BuyerContactId,
                     CustomerFinalContacts = customerfinalcontacts,
@@ -1725,6 +1754,7 @@ namespace SAGM.Controllers
                     workload.WorkOrderStatusName = wo.WorkOrderStatus.WorkOrderStatusName;
                     workload.CustomerNickName = wo.Customer.CustomerNickName;
                     workload.CustomerPO = wo.CustomerPO;
+                    workload.CustomerRFQ = wo.CustomerRFQ;
                     workload.FinalUser = $"{contact.Name} {contact.LastName}";
                     workload.Buyer = $"{buyer.Name} {buyer.LastName}";
                     workload.Seller = wo.Seller;
@@ -2572,5 +2602,120 @@ namespace SAGM.Controllers
 
             return View(listordersFromOT);
         }
+
+
+
+        private  List<WorkOrderViewIndexModel> LworkOrderslistorders()
+        {
+            List<WorkOrder> workorders =  _context.WorkOrders
+                 .Include(w => w.WorkOrderDetails)
+                 .ThenInclude(d => d.Material)
+                 .Include(w => w.WorkOrderDetails)
+                 .ThenInclude(d => d.Unit)
+                 .Include(w => w.Customer)
+                 .Include(w => w.WorkOrderStatus)
+                 .Include(w => w.Currency)
+                 .Include(w => w.CreatedBy)
+                 .Include(w => w.Orders)
+                 .OrderByDescending(w => w.WorkOrderId)
+                 .ToList();
+
+            List<WorkOrderViewIndexModel> lworkOrders = new List<WorkOrderViewIndexModel>();
+
+            foreach (WorkOrder w in workorders)
+            {
+                string seller = _userHelper.GetUserAsync(w.Seller).Result.FullName.ToString();
+                Contact buyercontact = _context.Contacts.Find(w.BuyerContactId);
+                Contact finaluser =  _context.Contacts.Find(w.FinalUserId);
+                int archivesnumber = 0;
+                Quote quote = _context.Quotes.FirstOrDefault(q => q.QuoteId == w.QuoteId);
+
+
+
+                //Armamos la lista de detalles
+                List<WorkOrderDetailViewIndexModel> details = new List<WorkOrderDetailViewIndexModel>();
+                foreach (WorkOrderDetail wd in w.WorkOrderDetails)
+                {
+                    List<Archive> archives = _context.Archives.Where(a => a.Entity == "WorkOrderDetail" && a.EntityId == wd.WorkOrderDetailId).ToList();
+                    archivesnumber += archives.Count;
+                    WorkOrderDetailViewIndexModel wdvim = new WorkOrderDetailViewIndexModel()
+                    {
+                        Quantity = wd.Quantity,
+                        Material = _context.Materials.FindAsync(wd.Material.MaterialId).Result.MaterialName.ToString(),
+                        Description = wd.Description,
+                        Price = wd.Price,
+                        RawMaterial = wd.RawMaterial,
+                        Machined = wd.Machined,
+                        TT = wd.TT,
+                        Shipped = wd.Shipped,
+                        Invoiced = wd.Invoiced
+                    };
+                    details.Add(wdvim);
+
+                }
+
+                //
+
+                List<Archive> warchives = _context.Archives.Where(a => a.Entity == "WorkOrder" && a.EntityId == w.WorkOrderId).ToList();
+
+                string archiveschain = "";
+
+                foreach (var item in warchives)
+                {
+                    archiveschain += item.ArchiveGuid.ToString() + "," + item.ArchiveName + "," + item.ArchiveId + "|";
+                }
+                if (archiveschain != "")
+                {
+                    archiveschain = archiveschain.Substring(0, archiveschain.Length - 1);
+                }
+                ;
+
+
+                WorkOrderViewIndexModel aqs = new WorkOrderViewIndexModel()
+                {
+                    WorkOrderId = w.WorkOrderId,
+                    WorkOrderDate = w.WorkOrderDate,
+                    Active = w.Active,
+                    BuyerContact = $"{buyercontact.Name} {buyercontact.LastName}",
+                    Comments = w.Comments,
+                    CreatedBy = w.CreatedBy.FullName,
+                    Currency = w.Currency.Curr,
+                    ExchangeRate = w.ExchangeRate,
+                    CustomerNickName = w.Customer.CustomerNickName,
+                    CustomerPO = w.CustomerPO,
+                    CustomerRFQ = w.CustomerRFQ,
+                    FinalUser = $"{finaluser.Name} {finaluser.LastName}",
+                    ModifiedBy = w.ModifiedBy,
+                    ModifyDate = w.ModifyDate,
+                    WorkOrderDetails = details,
+                    WorkOrderName = w.WorkOrderName,
+                    Seller = seller,
+                    Tax = w.Tax,
+                    WorkOrderStatusName = w.WorkOrderStatus.WorkOrderStatusName,
+                    PromiseDate = w.PromiseDate,
+                    ArchivesNumber = archivesnumber,
+                    ArchivesChain = archiveschain,
+                    OrdersNumber = w.OrdersNumber
+
+                };
+
+                if (quote != null)
+                {
+                    aqs.QuoteId = quote.QuoteId;
+                    aqs.QuoteName = quote.QuoteName;
+                }
+                else
+                {
+                    aqs.QuoteId = 0;
+                    aqs.QuoteName = "";
+                }
+
+                lworkOrders.Add(aqs);
+            }
+            return (List<WorkOrderViewIndexModel>)lworkOrders.OrderByDescending(o => o.WorkOrderId);
+        }
+
+
+
     }
 }

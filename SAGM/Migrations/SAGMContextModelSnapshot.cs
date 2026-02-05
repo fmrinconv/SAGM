@@ -17,7 +17,7 @@ namespace SAGM.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "8.0.1")
+                .HasAnnotation("ProductVersion", "9.0.2")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -552,8 +552,8 @@ namespace SAGM.Migrations
 
                     b.Property<string>("UM")
                         .IsRequired()
-                        .HasMaxLength(16)
-                        .HasColumnType("nvarchar(16)");
+                        .HasMaxLength(32)
+                        .HasColumnType("nvarchar(32)");
 
                     b.Property<string>("UUID")
                         .IsRequired()
@@ -1110,8 +1110,7 @@ namespace SAGM.Migrations
                     b.Property<decimal>("Tax")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<DateTime?>("validUntilDate")
-                        .IsRequired()
+                    b.Property<DateTime>("validUntilDate")
                         .HasColumnType("datetime2");
 
                     b.HasKey("QuoteId");
@@ -1240,6 +1239,26 @@ namespace SAGM.Migrations
                     b.HasKey("QuoteStatusId");
 
                     b.ToTable("QuoteStatus");
+                });
+
+            modelBuilder.Entity("SAGM.Data.Entities.Sat_TipoComprobante", b =>
+                {
+                    b.Property<int>("TipoComprobanteId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("TipoComprobanteId"));
+
+                    b.Property<string>("TipoComprobante")
+                        .HasMaxLength(1)
+                        .HasColumnType("nvarchar(1)");
+
+                    b.Property<string>("TipoComprobanteDesc")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("TipoComprobanteId");
+
+                    b.ToTable("Sat_TipoComprobante");
                 });
 
             modelBuilder.Entity("SAGM.Data.Entities.State", b =>
@@ -1476,6 +1495,10 @@ namespace SAGM.Migrations
                         .HasMaxLength(128)
                         .HasColumnType("nvarchar(128)");
 
+                    b.Property<string>("CustomerRFQ")
+                        .HasMaxLength(128)
+                        .HasColumnType("nvarchar(128)");
+
                     b.Property<decimal>("ExchangeRate")
                         .HasColumnType("decimal(18,2)");
 
@@ -1488,6 +1511,9 @@ namespace SAGM.Migrations
 
                     b.Property<DateTime?>("ModifyDate")
                         .HasColumnType("datetime2");
+
+                    b.Property<int?>("OCArchiveId")
+                        .HasColumnType("int");
 
                     b.Property<DateTime?>("PromiseDate")
                         .HasColumnType("datetime2");
@@ -1878,7 +1904,7 @@ namespace SAGM.Migrations
                         .HasForeignKey("OrderStatusId");
 
                     b.HasOne("SAGM.Data.Entities.Supplier", "Supplier")
-                        .WithMany()
+                        .WithMany("Orders")
                         .HasForeignKey("SupplierId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -2325,6 +2351,8 @@ namespace SAGM.Migrations
             modelBuilder.Entity("SAGM.Data.Entities.Supplier", b =>
                 {
                     b.Navigation("Contacts");
+
+                    b.Navigation("Orders");
                 });
 
             modelBuilder.Entity("SAGM.Data.Entities.Unit", b =>

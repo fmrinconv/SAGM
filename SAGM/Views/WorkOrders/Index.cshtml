@@ -54,6 +54,8 @@
         var count = 0;
         var dataTable;
         var quoteid;
+        var poArchiveGuid="";
+        var woArchiveName="";
         function parseJsonDate(jsonDateString) {
             return new Date(parseInt(jsonDateString.replace('/Date(', '')));
         }
@@ -125,13 +127,19 @@
                         {
                             "targets": [12],
                             className: 'dt-body-right dt-body-nowrap',
-                            responsivePriority: 1
+                            responsivePriority: 1,
+                            visible: false
                         },
                         {
                             "targets": 13,
                             className: 'dt-body-center dt-body-nowrap',
                             responsivePriority: 4
-                        }, 
+                        },
+                          {
+                            "targets": 14,
+                            className: 'dt-body-center dt-body-nowrap',
+                            responsivePriority: 1
+                        },
                         {
                             "targets": 15,
                             className: 'dt-body-left dt-body-nowrap',
@@ -155,7 +163,7 @@
                         {
                             "targets": 24,
                             className: 'dt-body-center dt-body-nowrap',
-                            responsivePriority: 1
+                            responsivePriority: 4,
                         }],
                     "columns": [
                         {
@@ -222,7 +230,27 @@
                         { "data": "seller"},
                         { "data": "currency" },
                         { "data": "exchangeRate", "render": $.fn.dataTable.render.number(',', '.', 2) },
-                        { "data": "customerPO" },
+                        { "data": "ocArchiveGuid","render": function(data){poArchiveGuid = data; return poArchiveGuid}},
+                        { "data": "archiveName","render": function(data){woArchiveName = data; return woArchiveName}},
+                        { "data": "customerPO", "render": function(data){
+                                                                      var result="";
+                                                                      if (poArchiveGuid != "" && poArchiveGuid != null)
+                                                                      {
+                                                                         result  = "";
+                                                                         result += "<a title='Descargar' href='#' onclick=\"downloadFile('" + poArchiveGuid + "','" + woArchiveName
+                                                                         result += "')\">" + data + "</a>";
+                                                                      }
+                                                                      else if(data != null){
+                                                                          result = data;
+                                                                      }
+                                                                      else
+                                                                      {
+                                                                          result ="";
+                                                                      }
+                                                               
+                                                                      return result;
+                                                                  }
+                        },
                         { "data": "total", "render": $.fn.dataTable.render.number(',', '.', 2) },
                         {
                             "data": "active",
@@ -248,7 +276,7 @@
                                 result += "<a title='Editar Orden de trabajo' onclick=\"showInPopup('/WorkOrders/EditWorkOrder?id=" + data + "','Editar\ Orden de trabajo','bg-warning')\" ";
                                 result += "class='btn btn-sm btn-outline-warning'><i title='Editar Orden de trabajo' class='fa-solid fa-pencil-alt'></i></a>";
 
-                                result += "<a title='Subir archivo' onclick=\"showInPopup('/Archives/AddArchive?entityid=" + data + "&Entity=WorkOrder','Agregar\ archivos','bg-primary')\" ";
+                                result += "<a title='Subir archivo' onclick=\"showInPopup('/Archives/AddArchiveToWorkOrder?entityid=" + data + "&Entity=PurchaseOrder','Agregar\ archivos','bg-primary')\" ";
                                 result += "class='btn btn-sm btn-outline-primary'><i title='Subir archivo' class='fa-solid fa-file-circle-plus'></i></a>";
 
                                 result += "<a title='Comentarios' onclick=\"showInPopup('/WorkOrders/AddOrEditComment?id=" + data + "','Agregar\ comentario','bg-primary')\" ";

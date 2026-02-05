@@ -6,6 +6,7 @@ using System.Diagnostics;
 namespace SAGM.Controllers
 {
 
+    [Authorize(Roles = "Administrador,Vendedor")]
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
@@ -17,6 +18,16 @@ namespace SAGM.Controllers
 
         public IActionResult Index()
         {
+
+            if (TempData["TwoFactorEnabledResult"] != null)
+            {
+
+                ViewBag.Result = TempData["TwoFactorEnabledResult"].ToString();
+                ViewBag.Message = TempData["TwoFactorEnabledMessage"].ToString();
+                TempData.Remove("TwoFactorEnabledResult");
+                TempData.Remove("TwoFactorEnabledMessage");
+            }
+            ;
             return View();
         }
 

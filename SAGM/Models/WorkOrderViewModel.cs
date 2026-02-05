@@ -67,6 +67,10 @@ namespace SAGM.Models
         [Display(Name = "OC Cliente")]
         public string? CustomerPO { get; set; }
 
+        [StringLength(128)]
+        [Display(Name = "Requerimiento")]
+        public string? CustomerRFQ { get; set; }
+
         public int WorkOrderStatusId { get; set; }
 
         [Display(Name = "Estatus")]
@@ -94,6 +98,9 @@ namespace SAGM.Models
         [Display(Name = "IVA")]
         [Required(ErrorMessage = "El campo {0} es obligatorio.")]
         public decimal Tax { get; set; }
+
+         [Display(Name = "ArchivoOCCliente")]
+        public int? OCArchiveId { get; set; } 
 
    
 

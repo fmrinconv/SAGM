@@ -23,7 +23,7 @@ namespace SAGM.Data.Entities
 
         [Required]
         [Display(Name = "UM")]
-        [MaxLength(16, ErrorMessage = "El campo {0} debe tener máximo {1} caractéres.")]
+        [MaxLength(32, ErrorMessage = "El campo {0} debe tener máximo {1} caractéres.")]
         public string UM { get; set; }
 
         [Required]

@@ -51,13 +51,17 @@
         </div>
         <div class="form-group">
             <label asp-for="TwoFactorEnabled" class="control-label"></label>
-            @Html.EditorFor(model => model.TwoFactorEnabled)
+            <div style="display:none;">@Html.EditorFor(model => model.TwoFactorEnabled)</div>
             <span asp-validation-for="TwoFactorEnabled" class="text-danger"></span>
         </div>
         <div>
-            @if (@Model.TwoFactorEnabled == true)
+            @if (@Model.TwoFactorEnabled == false)
             {
-                <a asp-action="GoogleAutReg" class="btn btn-outline-secondary">Activar</a>
+                <a asp-action="GoogleAutReg" class="btn btn-outline-secondary" onclick="javascript: $('#TwoFactorEnabled').prop('checked', true); return true; ">Activar</a>
+            }
+            else
+            {
+                <input class="btn btn-outline-secondary" onclick="javascript: $('#TwoFactorEnabled').prop('checked', false); return false;" value="Desactivar">
             }
         </div>
     </div>

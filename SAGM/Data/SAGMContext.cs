@@ -103,5 +103,6 @@ namespace SAGM.Data
             modelBuilder.Entity<Machine>().HasIndex("MachineName", "ProcessId").IsUnique();
         }
         public DbSet<SAGM.Data.Entities.Archive> Archive { get; set; }
+        public DbSet<SAGM.Data.Entities.Sat_TipoComprobante> Sat_TipoComprobante { get; set; }
     }
 }

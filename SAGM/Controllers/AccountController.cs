@@ -14,6 +14,8 @@ using NuGet.Packaging.Signing;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using System.Globalization;
 using Google.Authenticator;
+using Microsoft.ReportingServices.ReportProcessing.ReportObjectModel;
+using User = SAGM.Data.Entities.User;
 
 namespace SAGM.Controllers
 {
@@ -88,6 +90,8 @@ namespace SAGM.Controllers
             return View(model);
         }
 
+
+        [Authorize(Roles = "Usuario")]
         public async Task<IActionResult> ChangeUser()
         {
 
@@ -195,9 +199,10 @@ namespace SAGM.Controllers
             {
           
                 SignInResult result = await _userHelper.LoginAsync(model);
+
                 if (result.Succeeded)
                 {
-                    
+
                     Data.Entities.User userlocal = _context.Users.Where(u => u.UserName == User.Identity.Name).FirstOrDefault();
 
 
@@ -205,13 +210,17 @@ namespace SAGM.Controllers
                     {
                         return RedirectToAction("Index", "Home");
                     }
-                    else
+
+
+                }
+                else
+                {
+                    if (result.RequiresTwoFactor)
                     {
-                           
+                        TempData["User"] = model.Username;
+                        TempData["Password"] = model.Password;
                         return RedirectToAction("TwoFactorAuthenticate", "Account");
                     }
-
-                    
                 }
                 if (result.IsLockedOut)
                 {
@@ -232,10 +241,46 @@ namespace SAGM.Controllers
 
         public  IActionResult TwoFactorAuthenticate()
         {
-            Data.Entities.User userlocal = _context.Users.Where(u => u.UserName == User.Identity.Name).FirstOrDefault();
+            String  user =  (string)TempData["User"];
+            String password = (string)TempData["Password"];
+
+            Data.Entities.User userlocal = _context.Users.Where(u => u.UserName == user).FirstOrDefault();
             TwoFactorAuthenticator authenticator = new TwoFactorAuthenticator();
             var setupInfo = authenticator.GenerateSetupCode("SimaqSagm", userlocal.UserName, userlocal.SecurityStamp, true, 3);
-            return View();
+            LoginViewModel usr = new LoginViewModel();
+            usr.Username = user;
+            usr.Password = password;
+            usr.EmailConfirmed = true;
+            TempData.Remove("User");
+            TempData.Remove("Password");
+            return View(usr);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> TwoFactorAuthenticate(LoginViewModel model)
+        {
+            Data.Entities.User userlocal = _context.Users.Where(u => u.UserName == model.Username).FirstOrDefault();
+            TwoFactorAuthenticator authenticator = new TwoFactorAuthenticator();
+            bool result = authenticator.ValidateTwoFactorPIN(userlocal.SecurityStamp, model.mfaCode.ToString(), true);
+            if (result == true)
+            {
+                SignInResult signresult = await _userHelper.TwoFactorAuthenticatorSignInAsync(model);
+
+                if (signresult.Succeeded)
+                {
+                    return RedirectToAction("Index", "Home");
+                }
+                else
+                {
+                    ModelState.AddModelError(string.Empty, "Error desconocido");
+                    return View(model);
+                }
+            }
+            else {
+                ModelState.AddModelError(string.Empty, "Código inválido");
+                return View(model);
+            }
+           
         }
 
         public IActionResult GoogleAutReg()
@@ -251,10 +296,29 @@ namespace SAGM.Controllers
         public IActionResult GoogleAutReg(TwoFactorAuthenticate model)
         {
             Data.Entities.User userlocal = _context.Users.Where(u => u.UserName == User.Identity.Name).FirstOrDefault();
-            TwoFactorAuthenticator authenticator = new TwoFactorAuthenticator();
-            bool result = authenticator.ValidateTwoFactorPIN(userlocal.SecurityStamp, model.mfaCode.ToString(),true);
+            userlocal.TwoFactorEnabled = true;
+            _context.SaveChanges();
 
-            return View(model);
+            TwoFactorAuthenticator authenticator = new TwoFactorAuthenticator();
+            bool result =  authenticator.ValidateTwoFactorPIN(userlocal.SecurityStamp, model.mfaCode.ToString(),true);
+
+            if (result == true)
+            {
+                TempData["TwoFactorEnabledResult"] = "true";
+                TempData["TwoFactorEnabledMessage"] = "Doble factor de autenticación ha sido activado";
+
+                return RedirectToAction("Index", "Home");
+
+            }
+            else {
+                userlocal.TwoFactorEnabled = false;
+                _context.SaveChanges();
+
+
+                ModelState.AddModelError("mfaCode", "Código inválido");
+                return View(model);
+            }
+
 
         }
         public async Task<IActionResult> Logout()
@@ -295,6 +359,8 @@ namespace SAGM.Controllers
                 model.ImageId = imageid;
 
                 User user = await _userHelper.AddUserAsync(model);
+                //y asignamos el rol de usuario
+                 await _userHelper.AddUserToRoleAsync(user, "Usuario");
 
                 if (user == null) {
                     ModelState.AddModelError(string.Empty, "Este correo ya esta siendo usado");

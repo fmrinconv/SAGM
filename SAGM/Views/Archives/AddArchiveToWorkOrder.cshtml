@@ -1,0 +1,109 @@
+﻿@model SAGM.Models.AddArchiveToWorkOrderViewModel
+@{
+    ViewData["Title"] = "Agregar archivo";
+    Layout = null;
+}
+
+
+
+<style>
+    .g2 {
+        background-color: #F9F9F9;
+        margin: 10px 10px 10px 10px;
+        border: 2px solid gray;
+        border-radius: 12px;
+        box-shadow: 5px 5px 5px #555;
+        background-color: whitesmoke;
+        padding: 2px 3px 1px 1px;
+    }
+
+    .header2 {
+        margin: 1px 1px 1px 1px;
+        border-top-left-radius: 12px;
+        border-top-right-radius: 12px;
+    }
+</style>
+<div class="container smfont">
+            <div class="modal-body modal-fullscreen-md-down">
+                <form asp-action="AddArchiveToWorkOrder" autocomplete="off" enctype="multipart/form-data">
+                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                    <input type="hidden" asp-for="Entity" />
+                    <input type="hidden" asp-for="EntityId" />
+                    <div class="form-group">
+                        <div class="row" style="height:50px;">
+                             <label asp-for="ArchiveFile" class="control-label"></label>
+                        </div>
+                        <div class="row" style="height:50px;">
+                            <input asp-for="ArchiveFile" class="form-control" style="width:300px;" type="file" />
+                        </div>
+                        <div class="row align-content-center" style="height:30px;">
+                                <span asp-validation-for="ArchiveFile" class="text-danger"></span>
+                        </div>
+                        <div class="form-group form-check">
+                            <label class="form-check-label">
+                                @Html.DisplayNameFor(model => model.isPurchaseOrder)
+                                 <input class="form-check-input" asp-for="isPurchaseOrder" onclick="showCPOgroup(this);" />
+                            </label>
+                        </div>
+                        <div id="CPOgroup" name="CPOgroup" class="row" style="display:none;">
+                            <table>
+                                <tbody>
+                                    <tr>
+                                        <td style="width:20%">
+                                            <label asp-for="CustomerPO" class="control-label"> </label>
+                                        </td>
+                                        <td style="text-align:left; width:20%;"><input asp-for="CustomerPO" class="form-control" /></td>
+                                        <td></td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            &nbsp;
+                                    <span asp-validation-for="CustomerPO" class="text-danger"></span>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                                    
+                                    
+                                    
+                        </div>
+                        <div class="row text-center">
+                            <div class="col-6 text-center">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" arial-label="cerrar"><i class="fa fa-ban"></i> Cancelar</button>
+                                 <input type="submit" value="Guardar" class="btn btn-primary" style="width:80px;" />
+                            </div>
+                        </div>
+                    </div>
+
+                </form>
+            </div>
+</div>
+<script>
+
+    function showCPOgroup(chk)
+    {
+        if(chk.checked == true)
+        {
+            window.document.getElementById('CPOgroup').style.display='block';
+        }
+        else
+        {
+              window.document.getElementById('CPOgroup').style.display='none';
+        }
+    }
+    function ispurchaseorder(){
+
+        if ($('#isPurchaseOrder').is(':checked')==true)
+        {
+            $('#isPurchaseOrder').prop('checked',false );
+            //alert("Checado");
+        }
+        else
+        {
+            $('#isPurchaseOrder').prop('checked', true);
+            //alert("No checado");
+        }
+    
+        
+    }
+</script>

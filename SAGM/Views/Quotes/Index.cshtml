@@ -21,7 +21,6 @@
         <div class="card-header text-success bg-secondary bg-opacity-25">
             <div class=" container-fluid">
                 <div class="row">
-
                         <div class="col-sm-4">
                             <i class="fa fa-file-invoice-dollar"></i><strong> Cotizaciones</strong>
                             <a onclick="showInPopup('@Url.Action("AddQuote", "Quotes", new { id = "" }, Context.Request.Scheme)' , 'Crear cotización @DateTime.Now.ToString(" yyyyMMdd")-XXX','bg-success')" class="btn btn-sm btn-outline-success" title="Crear cotización"><i class="fa fa-plus-circle"></i></a>
@@ -40,23 +39,17 @@
                         <div class="col-sm-1" style="text-align:left; vertical-align:bottom;">
                             <a onclick="Filter()" class="btn btn-med btn-outline-success"><i class="fa-solid fa-filter" title="Filtrar"></i></a>
                         </div>
-
-                    </div>
-        </div>
-
                 </div>
-
-
-            </div>
-             
-           
-        </div>  
-        <div class="card-body">
-            <div id="view-all">
-                <input type="hidden" id="Result" name="Result" value="@ViewBag.Result" />
-                @await Html.PartialAsync("_ViewAllQuotes", Model)
-            </div>
         </div>
+      </div>
+    </div>
+  </div>  
+  <div class="card-body">
+    <div id="view-all">
+        <input type="hidden" id="Result" name="Result" value="@ViewBag.Result" />
+        @await Html.PartialAsync("_ViewAllQuotes", Model)
+    </div>
+  </div>
     </div>
 </div>
 

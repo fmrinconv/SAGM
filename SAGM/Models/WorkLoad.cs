@@ -65,7 +65,9 @@ namespace SAGM.Models
         public string CustomerNickName { get; set; }
 
         [Display(Name = "OC")]
-        public string CustomerPO { get; set; }        
+        public string CustomerPO { get; set; }
+        [Display(Name = "Requerimiento")]
+        public string CustomerRFQ { get; set; }
 
         [Display(Name = "Usuario Final")]
         public string FinalUser { get; set; }

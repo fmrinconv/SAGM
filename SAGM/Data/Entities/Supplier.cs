@@ -60,7 +60,7 @@ namespace SAGM.Data.Entities
 
         public ICollection<Contact> Contacts { get; set; }
 
-        //public ICollection<Order> Orders { get; set; }
+        public ICollection<Order> Orders { get; set; }
 
     }
 }

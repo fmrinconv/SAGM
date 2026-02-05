@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SAGM.Data;
 using SAGM.Data.Entities;
@@ -8,6 +9,7 @@ using System.Globalization;
 
 namespace SAGM.Controllers
 {
+    [Authorize(Roles = "Administrador,Vendedor")]
     public class FinancesController : Controller
     {
         private readonly SAGMContext _context;

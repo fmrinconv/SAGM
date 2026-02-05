@@ -53,6 +53,10 @@ namespace SAGM.Models
         [Display(Name = "OC Cliente")]
         public string? CustomerPO { get; set; }
 
+        [StringLength(128)]
+        [Display(Name = "Requerimiento")]
+        public string? CustomerRFQ { get; set; }
+
         [Display(Name = "Estatus")]
 
         public string WorkOrderStatusName { get; set; }
@@ -88,6 +92,16 @@ namespace SAGM.Models
         public decimal total => WorkOrderDetails.Count == 0 ? 0 : WorkOrderDetails.Sum(q => q.Price * q.Quantity);
 
         public int? OrdersNumber { get; set; } = 0;
+
+
+        [Display(Name = "Nombre de Archivo")]
+        [Required(ErrorMessage = "El campo {0} es obligatorio.")]
+        [StringLength(200, MinimumLength = 6, ErrorMessage = "El campo {0} debe tener entre {2} y {1} caracteres")]
+        public string ArchiveName { get; set; }
+
+        [Display(Name = "OCArchiveGuid")]
+        public Guid? OCArchiveGuid { get; set; }
+
 
     }
 }
