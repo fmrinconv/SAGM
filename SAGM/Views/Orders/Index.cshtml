@@ -39,7 +39,7 @@
                         <input id="Datefin" name="Datefin" value="@ViewBag.DateFin" class="form-control datepicker" type="date" />
                     </div>
                     <div class="col-sm-1" style="text-align:left; vertical-align:bottom;">
-                        <a onclick="Filter()" class="btn btn-med btn-outline-success"><i class="fa-solid fa-filter" title="Filtrar"></i></a>
+                        <a onclick="getOrders()" class="btn btn-med btn-outline-success"><i class="fa-solid fa-filter" title="Filtrar"></i></a>
                     </div>
                     <div class="col-sm-1">
                         <label style="color:black;">Solo activas</label> <input type="checkbox" checked="@ViewBag.activeflag" name="activeflag" id="activeflag" onchange="getOrders();" />

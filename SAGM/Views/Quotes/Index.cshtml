@@ -15,6 +15,14 @@
         background-color: silver;
         color:black;
     }
+
+    .opheader2 {
+        font-weight: bold;
+    }
+
+   .opheader {
+        font-weight: bold;
+    }
 </style>
 <div class="container-fluid">
     <div class="card mt-2">
@@ -48,8 +56,6 @@
     <div id="view-all">
         <input type="hidden" id="Result" name="Result" value="@ViewBag.Result" />
         @await Html.PartialAsync("_ViewAllQuotes", Model)
-    </div>
-  </div>
     </div>
 </div>
 
@@ -95,6 +101,25 @@
             };
             dataTable = $('#TableQuotes').DataTable(
                 {
+                     initComplete: function () {
+                    this.api().columns(2).every(function () {
+                        var column = this;
+                        var select = $('<select style="font-weight: bold;"><option value="" class="form-control" selected style="font-weight:bold;">Clientes *</option></select>')
+                            .appendTo($(column.header()).empty())
+                            .on('change', function () {
+                                var val = $.fn.dataTable.util.escapeRegex(
+                                    $(this).val()
+                                );
+                                $(this).className = this.options[this.selectedIndex].className;
+                                column
+                                    .search(val ? '^' + val + '$' : '', true, false)
+                                    .draw();
+                            });
+
+                        column.data().unique().sort().each(function (d, j) {
+                            select.append('<option class="opheader2" value="' + d + '">' + d + '</option>')
+                        });
+                    });},
                     "ajax": {
                         "url": '/Quotes/GetQuotes?fini=' + $("#Dateini").val() + '&ffin=' + $("#Datefin").val(),
                         "type": "GET",
@@ -107,6 +132,7 @@
                         [25, 50, 100, 200, -1],
                         [25, 50, 100, 200, "Todos"]
                     ],
+                    
                     responsive: true,
                     "columnDefs": [
                         {
@@ -117,12 +143,14 @@
                         {
                             "targets": 1,
                             className: 'dt-body-left dt-body-nowrap',
-                            responsivePriority: 1
+                            responsivePriority: 1,
+                            "orderable":false
                         },
                         {
                             "targets": [2, 3],
                             className: 'dt-body-left dt-body-nowrap',
-                            responsivePriority: 1
+                            responsivePriority: 1,
+                            "orderable":false
                         },
                         {
                             "targets": 6,

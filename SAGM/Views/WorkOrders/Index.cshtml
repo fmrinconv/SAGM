@@ -21,18 +21,33 @@
 <div class="container-fluid">
     <div class="card mt-2">
         <div class="card-header text-warning bg-secondary bg-opacity-25">
-            <table>
-                <tr>
-                    <td>
-                        <i class="fa fa-wrench"></i><strong>&nbsp;Ordenes de trabajo</strong>
-                        <a onclick="showInPopup('@Url.Action("AddWorkOrder", "WorkOrders", new { id = "" }, Context.Request.Scheme)' , 'Crear Orden de trabajo @DateTime.Now.ToString(" yyyyMMdd")-XXX','bg-success')" class="btn btn-sm btn-outline-success" title="Crear Orden de trabajo"><i class="fa fa-plus-circle"></i></a>
-                    </td>
-                    <td>
-                        <a onclick="Export()" class="btn btn-sm btn-outline-primary"><i class="fa-solid fa-file-arrow-down"></i></a>
-                    </td>
-                </tr>
-            </table>           
-        </div>  
+        <div class=" container-fluid">
+            <div class="row">
+                <div class="col-sm-3">
+                    <i class="fa fa-wrench"></i><strong> Ordenes de trabajo</strong>
+                    <a onclick="showInPopup('@Url.Action("AddWorkOrder", "WorkOrders", new { id = "" }, Context.Request.Scheme)' , 'Crear Orden de trabajo @DateTime.Now.ToString(" yyyyMMdd")-XXX','bg-success')" class="btn btn-sm btn-outline-success" title="Crear Orden de trabajo"><i class="fa fa-plus-circle"></i></a>
+                </div>
+                <div class="col-sm-1"><a onclick="Export()" class="btn btn-sm btn-outline-primary"><i class="fa-solid fa-file-arrow-down"></i></a></div>
+                <div class="col-sm-2" style="text-align:right; vertical-align:middle; padding-top:5px;">
+                    <strong> Filtrar x fechas</strong>
+                </div>
+                <div class="col-sm-2 align-content-end">
+                    <input id="Dateini" name="Dateini" value="@ViewBag.DateIni" class="form-control datepicker" type="date" />
+                </div>
+                <div class="col-sm-2 align-content-end">
+                    <input id="Datefin" name="Datefin" value="@ViewBag.DateFin" class="form-control datepicker" type="date" />
+                </div>
+                <div class="col-sm-1" style="text-align:left; vertical-align:bottom;">
+                    <a onclick="Filter()" class="btn btn-med btn-outline-success"><i class="fa-solid fa-filter" title="Filtrar"></i></a>
+                </div>
+                <div class="col-sm-1">
+                    <label style="color:black;">Solo activas</label> <input type="checkbox" checked="@ViewBag.activeflag" name="activeflag" id="activeflag" onchange="Filter();" />
+                </div>
+            </div>
+        </div>
+
+       
+    </div>
         <div class="card-body">
             <div id="view-all">
                 <input type="hidden" id="Result" name="Result" value="@ViewBag.Result" />
@@ -66,10 +81,18 @@
             else {
                 $.notify('@Html.Raw(ViewBag.Message)', "error", { globalPosition: "top left" });
             }
+            Filter();
+
+        });
+        function Filter() {
+            if (dataTable != null) {
+                dataTable.destroy();
+                count = 0;
+            };
             dataTable = $('#TableWorkOrders').DataTable(
                 {
                     "ajax": {
-                        "url": '/WorkOrders/GetWorkOrders' ,
+                        "url": '/WorkOrders/GetWorkOrders?onlyactive=' + $('#activeflag').is(':checked') +'&fini=' + $("#Dateini").val() + '&ffin=' + $("#Datefin").val(),
                         "type": "GET",
                         "datatype": "json"
                     },
@@ -276,7 +299,7 @@
                                 result += "<a title='Editar Orden de trabajo' onclick=\"showInPopup('/WorkOrders/EditWorkOrder?id=" + data + "','Editar\ Orden de trabajo','bg-warning')\" ";
                                 result += "class='btn btn-sm btn-outline-warning'><i title='Editar Orden de trabajo' class='fa-solid fa-pencil-alt'></i></a>";
 
-                                result += "<a title='Subir archivo' onclick=\"showInPopup('/Archives/AddArchiveToWorkOrder?entityid=" + data + "&Entity=PurchaseOrder','Agregar\ archivos','bg-primary')\" ";
+                                result += "<a title='Subir archivo' onclick=\"showInPopup('/Archives/AddArchiveToWorkOrder?entityid=" + data + "&Entity=WorkOrder','Agregar\ archivos','bg-primary')\" ";
                                 result += "class='btn btn-sm btn-outline-primary'><i title='Subir archivo' class='fa-solid fa-file-circle-plus'></i></a>";
 
                                 result += "<a title='Comentarios' onclick=\"showInPopup('/WorkOrders/AddOrEditComment?id=" + data + "','Agregar\ comentario','bg-primary')\" ";
@@ -378,7 +401,7 @@
                 });
      
   
-        });
+        }
         function downloadFile(guid, filename) {
             var popout = window.open("/WorkOrders/DownloadFile/?id=" + guid + "&filename=" + filename, "_blank");
             return false;

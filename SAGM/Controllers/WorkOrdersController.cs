@@ -54,6 +54,9 @@ namespace SAGM.Controllers
             ViewBag.Result = "";
             ViewBag.Message = "";
 
+            ViewBag.DateIni = DateOnly.FromDateTime(DateTime.Now).AddMonths(-1).ToString("yyyy-MM-dd");
+            ViewBag.DateFin = DateOnly.FromDateTime(DateTime.Now).ToString("yyyy-MM-dd");
+
 
             if (TempData["AddWorkOrderResult"] != null)
             {
@@ -112,20 +115,44 @@ namespace SAGM.Controllers
 
         }
 
-        public async Task<JsonResult> GetWorkOrders()
+        public async Task<JsonResult> GetWorkOrders(DateTime fini, DateTime ffin, bool onlyactive)
         {
-            List<WorkOrder> workorders = await _context.WorkOrders
-                 .Include(w => w.WorkOrderDetails)
-                 .ThenInclude(d => d.Material)
-                 .Include(w => w.WorkOrderDetails)
-                 .ThenInclude(d => d.Unit)
-                 .Include(w => w.Customer)
-                 .Include(w => w.WorkOrderStatus)
-                 .Include(w => w.Currency)
-                 .Include(w => w.CreatedBy)
-                 .Include(w => w.Orders)
-                 .OrderByDescending(w => w.WorkOrderId)
-                 .ToListAsync();
+            List<WorkOrder> workorders = new List<WorkOrder>();
+            if (onlyactive == false)
+            {
+                workorders = await _context.WorkOrders
+                .Include(w => w.WorkOrderDetails)
+                .ThenInclude(d => d.Material)
+                .Include(w => w.WorkOrderDetails)
+                .ThenInclude(d => d.Unit)
+                .Include(w => w.Customer)
+                .Include(w => w.WorkOrderStatus)
+                .Include(w => w.Currency)
+                .Include(w => w.CreatedBy)
+                .Include(w => w.Orders)
+                .Where(w => w.WorkOrderDate >= fini && w.WorkOrderDate <= ffin.AddHours(23).AddMinutes(59).AddSeconds(59))
+                .OrderByDescending(w => w.WorkOrderId)
+                .ToListAsync();
+            }
+            else
+            {
+                
+                    workorders = await _context.WorkOrders
+                    .Include(w => w.WorkOrderDetails)
+                    .ThenInclude(d => d.Material)
+                    .Include(w => w.WorkOrderDetails)
+                    .ThenInclude(d => d.Unit)
+                    .Include(w => w.Customer)
+                    .Include(w => w.WorkOrderStatus)
+                    .Include(w => w.Currency)
+                    .Include(w => w.CreatedBy)
+                    .Include(w => w.Orders)
+                    .Where(w => w.Active == true && w.WorkOrderDate >= fini && w.WorkOrderDate <= ffin.AddHours(23).AddMinutes(59).AddSeconds(59))
+                    .OrderByDescending(w => w.WorkOrderId)
+                    .ToListAsync();
+                
+            }
+           
 
             List<WorkOrderViewIndexModel> lworkOrders = new List<WorkOrderViewIndexModel>();
 
