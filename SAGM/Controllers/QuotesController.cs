@@ -1780,24 +1780,26 @@ namespace SAGM.Controllers
             int Consec = 0;
 
 
+
+
             workordername = "OT-" + workordername;
 
             // -------------------------
 
-            WorkOrder LastWO = await _context.WorkOrders.Where(q => q.WorkOrderName.Substring(0, 1) == workordername).OrderBy(w => w.WorkOrderId).LastOrDefaultAsync();//Ultima cotizacion
+            WorkOrder LastWO = await _context.WorkOrders.Where(q => q.WorkOrderName.Substring(0, 1) == workordername).OrderBy(w => w.WorkOrderId).LastOrDefaultAsync();//Ultima OT
 
             if (LastWO != null)
             {
-                Lastnumber = LastWO.WorkOrderName.Substring(7, 3);
+                Lastnumber = LastWO.WorkOrderName.Substring(12, 3);
                 Consec = Int32.Parse(Lastnumber);
             }
             else
             {
-                Lastnumber = "000";
+                Lastnumber = "001";
                 Consec = Int32.Parse(Lastnumber);
             }
 
-            Lastnumber += 1;
+            Lastnumber += Consec.ToString();
 
             strnumber = $"000{Lastnumber}";
 
@@ -1805,6 +1807,10 @@ namespace SAGM.Controllers
 
 
             ///--------------------------
+            ///
+
+
+
 
             WorkOrder workOrder = new WorkOrder();
             workOrder.Active = true;
