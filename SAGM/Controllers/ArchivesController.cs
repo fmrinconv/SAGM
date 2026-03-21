@@ -471,6 +471,7 @@ namespace SAGM.Controllers
             if (model.isPurchaseOrder == true) {
                 WorkOrder WO = await _context.WorkOrders.FindAsync(archive.EntityId);
                 WO.CustomerPO = model.CustomerPO;
+                WO.OCArchiveId = archive.ArchiveId;
                 await _context.SaveChangesAsync();
             }
 
