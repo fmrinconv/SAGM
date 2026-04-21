@@ -203,6 +203,8 @@ namespace SAGM.Controllers
                 string command = "INSERT INTO InvoicesCompacted (Day,Month,Year,Subtotal,Total,[RFC Receptor],[Date])\r\n\t\tSELECT DAY(I.[Fecha de Emisión]) AS Dia,\r\n\t\t\t   MONTH(I.[Fecha de Emisión]) AS Mes,\r\n\t\t\t   YEAR(I.[Fecha de Emisión]) AS Año,\r\n\t\tSUM(CASE I.Moneda\r\n\t\t\tWHEN 'USD' THEN Subtotal*E.Exchangerate\r\n\t\t\tELSE Subtotal\r\n\t\tEND) AS Subtotal,\r\n\t\tSUM(CASE I.Moneda\r\n\t\t\tWHEN 'USD' THEN Total*E.Exchangerate\r\n\t\t\tELSE Total\r\n\t\tEND) As Total,\r\n\t\t[RFC Receptor], \r\n\t\t I.[Fecha de Emisión]\r\n\t\t FROM Invoices I\r\n\t\tLEFT JOIN ExchangeRates E ON (CONVERT(date,I.[Fecha de Emisión]) = E.[Date]  AND YEAR(E.[Date]) IN (" + act_year + "," + old_year + "))\r\n\t\t\tWHERE [Tipo de Comprobante] = 'FACTURA'\r\n\t\tAND [Estado Fiscal] IN ('ACTIVO','VIGENTE','VIGENTE:NO CANCELABLE', 'VIGENTE:SIN ACEPTACIÓN', 'VIGENTE:CON ACEPTACIÓN')\r\n\t\tGroup By  [RFC Receptor],I.[Fecha de Emisión]\r\n";
                 result = await _context.Database.ExecuteSqlRawAsync(command);
                 result = await _context.SaveChangesAsync();
+                TempData["AddArchiveResult"] = "true";
+                TempData["AddArchiveMessage"] = "La carga de archivo de facturación se ha completado con éxito";
 
                 return RedirectToAction("Index", "Archives");
             }
@@ -328,6 +330,8 @@ namespace SAGM.Controllers
                 var result = await _context.Database.ExecuteSqlRawAsync(Command);
                 result = await _context.SaveChangesAsync();
 
+                TempData["AddArchiveResult"] = "true";
+                TempData["AddArchiveMessage"] = "La carga de archivo de tipo de cambio se ha completado con éxito";
                 return RedirectToAction("Index", "Archives");
             }
 
@@ -736,7 +740,22 @@ namespace SAGM.Controllers
         // GET: Archives
         public async Task<IActionResult> Index()
         {
-            return View(await _context.Archives.Where(a => a.Entity == "InvoicesTralix" || a.Entity == "ExchangeRate" || a.Entity == "Invoice").OrderByDescending(a => a.UploadDate).ToListAsync());
+            ViewBag.Result = "";
+            ViewBag.Message = "";
+
+
+
+            if (TempData != null)
+            {
+                if (TempData["AddArchiveResult"] != null)
+                {
+                    ViewBag.Result = TempData["AddArchiveResult"].ToString();
+                    ViewBag.Message = TempData["AddArchiveMessage"].ToString();
+                    TempData.Remove("AddArchiveResult");
+                    TempData.Remove("AddArchiveMessage");
+                }
+            }
+                return View(await _context.Archives.Where(a => a.Entity == "InvoicesTralix" || a.Entity == "ExchangeRate" || a.Entity == "Invoice").OrderByDescending(a => a.UploadDate).ToListAsync());
         }
 
         // GET: Archives/Details/5
@@ -1131,6 +1150,8 @@ namespace SAGM.Controllers
                 string command = "INSERT INTO InvoicesCompacted (Day,Month,Year,Subtotal,Total,[RFC Receptor],[Date])\r\n\t\tSELECT DAY(I.[Fecha de Emisión]) AS Dia,\r\n\t\t\t   MONTH(I.[Fecha de Emisión]) AS Mes,\r\n\t\t\t   YEAR(I.[Fecha de Emisión]) AS Año,\r\n\t\tSUM(CASE I.Moneda\r\n\t\t\tWHEN 'USD' THEN Subtotal*E.Exchangerate\r\n\t\t\tELSE Subtotal\r\n\t\tEND) AS Subtotal,\r\n\t\tSUM(CASE I.Moneda\r\n\t\t\tWHEN 'USD' THEN Total*E.Exchangerate\r\n\t\t\tELSE Total\r\n\t\tEND) As Total,\r\n\t\t[RFC Receptor], \r\n\t\t I.[Fecha de Emisión]\r\n\t\t FROM Invoices I\r\n\t\tLEFT JOIN ExchangeRates E ON (CONVERT(nvarchar,CONVERT(date,I.[Fecha de Emisión])) =  CONVERT(nvarchar,Year([Date])) +'-' + RIGHT('0' + CONVERT(nvarchar,Month([Date])),2))\r\n\t\t\tWHERE [Tipo de Comprobante] = 'FACTURA'\r\n\t\tAND [Estado Fiscal] IN ('ACTIVO','VIGENTE','VIGENTE:NO CANCELABLE', 'VIGENTE:SIN ACEPTACIÓN', 'VIGENTE:CON ACEPTACIÓN')\r\n\t\tGroup By  [RFC Receptor],I.[Fecha de Emisión]\r\n";
                 result = await _context.Database.ExecuteSqlRawAsync(command);
                 result = await _context.SaveChangesAsync();
+                TempData["AddArchiveResult"] = "true";
+                TempData["AddArchiveMessage"] = "La carga de factura se ha completado con éxito";
 
                 return RedirectToAction("Index", "Archives");
             }

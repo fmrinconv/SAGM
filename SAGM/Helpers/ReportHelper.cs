@@ -605,6 +605,7 @@ namespace SAGM.Helpers
                                 table.Cell().Element(contenido).Padding(1).AlignRight().Text(qd.Quantity.ToString("N", nfi)).FontSize(9);
                                 table.Cell().Element(contenido).Padding(1).AlignRight().Text(qd.Price.ToString("N", nfi)).FontSize(9);
                                 table.Cell().Element(contenido).Padding(1).AlignRight().Text((qd.Price * qd.Quantity).ToString("N", nfi)).FontSize(9);
+                                counter += 1;
                             }
                             ivatotal += iva * subtotal;
                             total = subtotal + ivatotal;
