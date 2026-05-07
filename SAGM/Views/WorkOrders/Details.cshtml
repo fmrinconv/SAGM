@@ -498,24 +498,32 @@
                                     result += "<th>Maquina</th>";
                                     result += "<th>Unidad</th>";
                                     result += "<th>Cantidad</th>";
+                                    result += "<th>PU</th>";
+                                    result += "<th>Costo</th>";
                                     result += "<th>Acción</th>";
 
                                     var arrProcess = data.split("|");
                                     var sumquantity = 0;
+                                    var sumtotalxpza = 0;
                                     for (var i = 0; i < arrProcess.length; i++) {
                                         var process = arrProcess[i].split(",");
                                         var processname = process[0];
                                         var machine = process[1];
                                         var unit = process[2];
                                         var quantity = process[3];
-                                        var wodpid = process[4];
+                                        var pu = process[4];
+                                        var cost = parseFloat(process[5]);
+                                        var wodpid = process[6];
                                         sumquantity = sumquantity + parseFloat(quantity);
+                                        sumtotalxpza = sumtotalxpza + parseFloat(process[5]);
                             
 
                                         result += "<tr><td>" + processname + "</td>";
                                         result += "<td>" + machine + "</td>";
                                         result += "<td>" + unit + "</td>";
                                         result += "<td>" + quantity + "</td>";
+                                        result += "<td>" + pu + "</td>";
+                                        result += "<td>" + cost.toFixed(2).replace(/(\d)(?=(\d{3})+\.)/g, "$1,").toString() + "</td>";
                                         result += "<td><a title='Procesos' onclick=\"showInPopup('/WorkOrders/AddOrEditProcess?id=" + wodpid + "&workOrderDetailid=" + wodid + "','Procesos','bg-primary')\" ";
                                         result += "class='btn btn-sm btn-outline-warning'><i class='fa-solid fa-pencil' title='Procesos'></i></a>";
                                         result += "<a onclick=\"showInPopup('/WorkOrders/DeleteProcess?id=" + wodpid + "','Eliminar\ proceso','bg-secondary')\"";
@@ -524,7 +532,7 @@
                                         result += "</td></tr>";
 
                                     };
-                                    result += "<tr style='border-top:solid 1px silver;font-weight:bold;'><td></td><td></td><td>Total</td><td>" + sumquantity + "</td><td></td></tr>";
+                                                                    result += "<tr style='border-top:solid 1px silver;font-weight:bold;'><td></td><td></td><td>Total</td><td>" + sumquantity + "</td><td></td><td>" + sumtotalxpza.toFixed(2).replace(/(\d)(?=(\d{3})+\.)/g, "$1,").toString() + "</td></tr>";
                                     result += "</table></div>";
                                 }
 

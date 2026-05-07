@@ -493,7 +493,13 @@ namespace SAGM.Controllers
 
                     foreach (var item in wodp)
                     {
-                        processchain += item.Machine.Process.ProcessName + "," + item.Machine.MachineName + "," + item.Unit.UnitName + "," + item.Quantity + "," + item.WorkOrderDetailProcessId.ToString() + "|";
+                        var cost = item.Cost * item.Quantity;
+                        processchain += item.Machine.Process.ProcessName + "," + 
+                                        item.Machine.MachineName + "," + 
+                                        item.Unit.UnitName + "," + 
+                                        item.Quantity + "," + 
+                                        item.Cost +"," + 
+                                        cost + "," +  item.WorkOrderDetailProcessId.ToString() + "|";
                     }
                     if (processchain != "")
                     {
@@ -2041,6 +2047,7 @@ namespace SAGM.Controllers
                         wodp.Machine = await _context.Machines.FindAsync(model.MachineId);
                         wodp.Unit = await _context.Units.FindAsync(model.UnitId);
                         wodp.Quantity = model.Quantity;
+                        wodp.Cost = model.Cost; 
                         _context.Add(wodp);
                         await _context.SaveChangesAsync();
 
@@ -2067,6 +2074,7 @@ namespace SAGM.Controllers
                         wodp.Machine = await _context.Machines.FindAsync(model.MachineId);
                         wodp.Unit = await _context.Units.FindAsync(model.UnitId);
                         wodp.Quantity = model.Quantity;
+                        wodp.Cost = model.Cost;
                         _context.Update(wodp);
 
                         await _context.SaveChangesAsync();

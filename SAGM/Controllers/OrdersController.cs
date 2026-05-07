@@ -291,6 +291,7 @@ namespace SAGM.Controllers
                 Suppliers = await _comboHelper.GetComboSuppliersAsync(),
                 SupllierContacts = await _comboHelper.GetComboContactSuppliersAsync(0),
                 Buyers = buyers,
+                BuyerId = User.Identity.Name,
                 Tax = 16,
                 Active = true,
                 CurrencyId = 1,
