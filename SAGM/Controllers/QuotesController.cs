@@ -42,14 +42,14 @@ namespace SAGM.Controllers
             _context = context;
             _userHelper = userHelper;
             _comboHelper = comboHelper;
-            _blobHelper = blobHelper;   
+            _blobHelper = blobHelper;
             _configuration = configuration;
             _reportHelper = reportHelper;
         }
 
         // GET: Quotes
 
-   
+
         public FileResult DownloadFile(Guid id, string filename)
         {
 
@@ -68,17 +68,17 @@ namespace SAGM.Controllers
 
             }
 
-        
+
         }
 
 
-        public  IActionResult Index()
+        public IActionResult Index()
         {
 
             ViewBag.Result = "";
             ViewBag.Message = "";
 
-            
+
             ViewBag.DateIni = DateOnly.FromDateTime(DateTime.Now).AddMonths(-1).ToString("yyyy-MM-dd");
             ViewBag.DateFin = DateOnly.FromDateTime(DateTime.Now).ToString("yyyy-MM-dd");
 
@@ -90,7 +90,8 @@ namespace SAGM.Controllers
                 ViewBag.Message = TempData["AddQuoteMessage"].ToString();
                 TempData.Remove("AddQuoteResult");
                 TempData.Remove("AddQuoteMessage");
-            };
+            }
+            ;
 
             if (TempData["EditQuoteResult"] != null)
             {
@@ -99,7 +100,8 @@ namespace SAGM.Controllers
                 ViewBag.Message = TempData["EditQuoteMessage"].ToString();
                 TempData.Remove("EditQuoteResult");
                 TempData.Remove("EditQuoteMessage");
-            };
+            }
+            ;
 
             if (TempData["AddOrEditCommentResult"] != null)
             {
@@ -107,7 +109,8 @@ namespace SAGM.Controllers
                 ViewBag.Message = TempData["AddOrEditCommentMessage"].ToString();
                 TempData.Remove("AddOrEditCommentResult");
                 TempData.Remove("AddOrEditCommentMessage");
-            };
+            }
+            ;
 
             if (TempData["DeleteCommentResult"] != null)
             {
@@ -115,7 +118,8 @@ namespace SAGM.Controllers
                 ViewBag.Message = TempData["DeleteCommentMessage"].ToString();
                 TempData.Remove("DeleteCommentResult");
                 TempData.Remove("DeleteCommentMessage");
-            };
+            }
+            ;
             if (TempData["AddArchiveResult"] != null)
             {
 
@@ -142,7 +146,7 @@ namespace SAGM.Controllers
             }
 
             return View();
-              
+
         }
 
 
@@ -170,8 +174,8 @@ namespace SAGM.Controllers
                 int archivesnumber = 0;
 
 
-            //Armamos la lista de detalles
-               List<QuoteDetailViewIndexModel> details = new List<QuoteDetailViewIndexModel>();
+                //Armamos la lista de detalles
+                List<QuoteDetailViewIndexModel> details = new List<QuoteDetailViewIndexModel>();
                 foreach (QuoteDetail qd in q.QuoteDetails)
                 {
                     List<Archive> archives = _context.Archives.Where(a => a.Entity == "QuoteDetail" && a.EntityId == qd.QuoteDetailId).ToList();
@@ -183,7 +187,7 @@ namespace SAGM.Controllers
                         Description = qd.Description,
                         Price = qd.Price
                     };
-                    details.Add(qdvim); 
+                    details.Add(qdvim);
 
                 }
 
@@ -200,7 +204,8 @@ namespace SAGM.Controllers
                 if (archiveschain != "")
                 {
                     archiveschain = archiveschain.Substring(0, archiveschain.Length - 1);
-                };
+                }
+                ;
 
                 QuoteViewIndexModel aqs = new QuoteViewIndexModel()
                 {
@@ -229,14 +234,14 @@ namespace SAGM.Controllers
                 };
                 lquotes.Add(aqs);
             }
- 
-            return Json(new {data= lquotes});
+
+            return Json(new { data = lquotes });
         }
 
 
         public async Task<List<Quote>> GetDataQuotes()
         {
-            List<Quote> quotes =await _context.Quotes
+            List<Quote> quotes = await _context.Quotes
                 .Include(q => q.QuoteDetails)
                 .ThenInclude(d => d.Material)
                 .Include(q => q.Customer)
@@ -250,7 +255,7 @@ namespace SAGM.Controllers
         {
 
             DataTable dt = new DataTable("QuoteResult");
-            dt.Columns.AddRange(new DataColumn[15] { 
+            dt.Columns.AddRange(new DataColumn[15] {
                                             new DataColumn("Cotización",Type.GetType("System.String")),
                                             new DataColumn("Cliente",Type.GetType("System.String")),
                                             new DataColumn("Usuario",Type.GetType("System.String")),
@@ -280,7 +285,7 @@ namespace SAGM.Controllers
             foreach (Quote quote in quotes)
             {
                 string seller = _userHelper.GetUserAsync(quote.Seller).Result.FullName.ToString();
-                Contact buyercontact =  _context.Contacts.Find(quote.BuyerContactId);
+                Contact buyercontact = _context.Contacts.Find(quote.BuyerContactId);
                 Contact finaluser = _context.Contacts.Find(quote.FinalUserId);
                 foreach (QuoteDetail qd in quote.QuoteDetails)
                 {
@@ -307,11 +312,11 @@ namespace SAGM.Controllers
             {
                 using (XLWorkbook wb = new XLWorkbook())
                 {
-                    wb.Worksheets.Add(dt,"Cotizaciones");
+                    wb.Worksheets.Add(dt, "Cotizaciones");
 
                     foreach (IXLWorksheet worksheet in wb.Worksheets)
                     {
-                        worksheet.Style.Alignment.WrapText = false;  
+                        worksheet.Style.Alignment.WrapText = false;
                         Console.WriteLine(worksheet.Name); // outputs the current worksheet name.
                                                            // do the thing you want to do on each individual worksheet.
                     }
@@ -335,7 +340,7 @@ namespace SAGM.Controllers
         // GET: Quotes/Details/5
         [HttpGet]
         public async Task<IActionResult> Details(int? id, int? quoteDetilId)
-            {
+        {
 
 
             ViewBag.Result = "";
@@ -345,7 +350,8 @@ namespace SAGM.Controllers
 
 
 
-            if (TempData != null) {
+            if (TempData != null)
+            {
                 if (TempData["AddOrEditQuoteDetailResult"] != null)
                 {
 
@@ -403,7 +409,7 @@ namespace SAGM.Controllers
             }
 
             List<SelectListItem> quotestatus = (List<SelectListItem>)await _comboHelper.GetComboQuoteStatus(quote.QuoteStatus.QuoteStatusId);
-           
+
 
             User seller = await _userHelper.GetUserAsync(quote.Seller);
 
@@ -413,7 +419,7 @@ namespace SAGM.Controllers
             quotev.QuoteId = quote.QuoteId;
             quotev.Active = quote.Active;
             quotev.BuyerContactId = quote.BuyerContactId;
-            quotev.BuyerName = $"{buyer.Name} {buyer.LastName}"; 
+            quotev.BuyerName = $"{buyer.Name} {buyer.LastName}";
             quotev.Comments = quote.Comments;
             quotev.CreatedBy = quote.CreatedBy;
             quotev.Currency = quote.Currency;
@@ -423,7 +429,7 @@ namespace SAGM.Controllers
             quotev.FinalUserName = $"{finaluser.Name} {finaluser.LastName}";
             quotev.ModifiedBy = quote.ModifiedBy;
             quotev.ModifyDate = quote.ModifyDate;
-            quotev.QuoteComments= quote.QuoteComments;
+            quotev.QuoteComments = quote.QuoteComments;
             quotev.Seller = quote.Seller;
             quotev.SellerName = seller.FullName;
             quotev.QuoteName = quote.QuoteName;
@@ -433,8 +439,8 @@ namespace SAGM.Controllers
             quotev.ExchangeRate = quote.ExchangeRate;
             quotev.Discount = quote.Discount;
 
-            return View(quotev);    
-           
+            return View(quotev);
+
         }
 
         [HttpGet]
@@ -448,7 +454,7 @@ namespace SAGM.Controllers
                 .FirstOrDefaultAsync(m => m.QuoteId == id);
             if (quote == null)
             {
-                return Json(new {  });
+                return Json(new { });
             }
 
             User seller = await _userHelper.GetUserAsync(quote.Seller);
@@ -474,8 +480,9 @@ namespace SAGM.Controllers
                     if (archiveschain != "")
                     {
                         archiveschain = archiveschain.Substring(0, archiveschain.Length - 1);
-                    };
-                   
+                    }
+                    ;
+
 
                     AllQuoteDetails detailsv = new()
                     {
@@ -496,14 +503,14 @@ namespace SAGM.Controllers
 
             }
 
-          
+
             return Json(new { data = details });
         }
 
         public async Task<IActionResult> AddQuote()
-            {
+        {
             String Lastnumber = ""; //Ultimo numero consecutivo de la cotización
-            int Consec = 0; 
+            int Consec = 0;
 
             TimeSpan validuntildate = new TimeSpan(10, 0, 0, 0); //Diez dias de vigencia por defecto
 
@@ -511,23 +518,24 @@ namespace SAGM.Controllers
 
             quotename = "COT-" + quotename + "-XXX";
 
-           // -------------------------
+            // -------------------------
 
             Quote Lastquote = await _context.Quotes.OrderBy(q => q.QuoteId).LastOrDefaultAsync();//Ultima cotizacion
 
             if (Lastquote != null)
             {
-                Lastnumber  = Lastquote.QuoteName.Substring(8, 3);
+                Lastnumber = Lastquote.QuoteName.Substring(8, 3);
                 Consec = Int32.Parse(Lastnumber);
             }
-            else {
+            else
+            {
                 Lastnumber = "000";
                 Consec = Int32.Parse(Lastnumber);
             }
 
             //-----------------------
 
-            List<SelectListItem> sellerlist = (List<SelectListItem>) await _userHelper.GetSellersAsync();
+            List<SelectListItem> sellerlist = (List<SelectListItem>)await _userHelper.GetSellersAsync();
             List<SelectListItem> users = new List<SelectListItem>();
             List<SelectListItem> sellers = new List<SelectListItem>();
 
@@ -546,7 +554,7 @@ namespace SAGM.Controllers
             List<SelectListItem> currencies = (List<SelectListItem>)await _comboHelper.GetComboCurrenciesAsync(1);
 
             AddQuote quote = new AddQuote()
-            { 
+            {
                 QuoteName = quotename,
                 QuoteDate = DateTime.Now,
                 validUntilDate = DateTime.Now.Add(validuntildate),
@@ -563,14 +571,14 @@ namespace SAGM.Controllers
                 CurrencyId = 1,
                 Currency = currencies
             };
- 
+
             return View(quote);
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> AddQuote(AddQuote model)
-                {
+        {
             if (ModelState.IsValid)
             {
                 try
@@ -581,13 +589,13 @@ namespace SAGM.Controllers
                         String Lastnumber = ""; //Ultimo numero consecutivo de la cotización
                         String strnumber = "";
                         int Consec = 0;
-                        
+
 
                         quotename = "COT-" + quotename;
 
                         // -------------------------
 
-                        Quote Lastquote = await _context.Quotes.Where(q => q.QuoteName.Substring(0,12) == quotename).OrderBy(q => q.QuoteId).LastOrDefaultAsync();//Ultima cotizacion
+                        Quote Lastquote = await _context.Quotes.Where(q => q.QuoteName.Substring(0, 12) == quotename).OrderBy(q => q.QuoteId).LastOrDefaultAsync();//Ultima cotizacion
 
                         if (Lastquote != null)
                         {
@@ -604,7 +612,7 @@ namespace SAGM.Controllers
 
                         strnumber = $"000{Lastnumber}";
 
-                        quotename = quotename + "-" + strnumber.Substring(strnumber.Length - 3,3);
+                        quotename = quotename + "-" + strnumber.Substring(strnumber.Length - 3, 3);
 
                         //-----------------------
                         Contact buyer = await _context.Contacts.FindAsync(model.BuyerContactId);
@@ -634,7 +642,7 @@ namespace SAGM.Controllers
                             QuoteStatus = quotestatus,
                             Subtotal = 0
 
-                    };
+                        };
                         _context.Add(quote);
                         await _context.SaveChangesAsync();
                         TempData["AddQuoteResult"] = "true";
@@ -647,7 +655,7 @@ namespace SAGM.Controllers
                 }
                 catch (DbUpdateException dbUpdateException)
                 {
-                  
+
 
                     ModelState.AddModelError(string.Empty, dbUpdateException.Message);
                     return Json(new { isValid = false, html = ModalHelper.RenderRazorViewToString(this, "AddQuote", model) });
@@ -706,7 +714,8 @@ namespace SAGM.Controllers
                         finalcontact.Selected = true;
                     }
                 }
-                else {
+                else
+                {
                     customerbuyerContacts.Insert(0, new SelectListItem { Text = "[Seleccione un contacto...]", Value = "0" });
                     customerfinalContacts.Insert(0, new SelectListItem { Text = "[Seleccione un contacto...]", Value = "0" });
                 }
@@ -727,13 +736,13 @@ namespace SAGM.Controllers
 
         public async Task<IActionResult> EditQuote(int id)
         {
-   
+
 
             Quote quote = await _context.Quotes
                 .Include(q => q.Customer)
                 .Include(q => q.QuoteStatus)
                 .Include(q => q.Currency)
-                .FirstOrDefaultAsync( q => q.QuoteId == id);
+                .FirstOrDefaultAsync(q => q.QuoteId == id);
 
             //-----------------------
 
@@ -741,7 +750,7 @@ namespace SAGM.Controllers
             List<SelectListItem> users = new List<SelectListItem>();
             List<SelectListItem> sellers = new List<SelectListItem>();
             List<SelectListItem> quotestatus = new List<SelectListItem>();
-   
+
             users = _context.Users
                    .Where(u => u.EmailConfirmed == true)
                    .Select(u => new SelectListItem
@@ -753,7 +762,7 @@ namespace SAGM.Controllers
                   .ToList();
 
             sellers = (List<SelectListItem>)(from u in users join s in sellerlist on u.Value equals s.Value select u).ToList();
-            
+
 
             List<SelectListItem> customers = (List<SelectListItem>)await _comboHelper.GetComboCustomersAsync();
             List<SelectListItem> customerbuyercontacts = (List<SelectListItem>)await _comboHelper.GetComboContactCustomersAsync(quote.Customer.CustomerId);
@@ -761,7 +770,8 @@ namespace SAGM.Controllers
             List<SelectListItem> currencies = (List<SelectListItem>)await _comboHelper.GetComboCurrenciesAsync();
 
             quotestatus = _context.QuoteStatus
-                .Select(q => new SelectListItem { 
+                .Select(q => new SelectListItem
+                {
                     Text = q.QuoteStatusName,
                     Value = q.QuoteStatusId.ToString()
                 }).OrderBy(c => c.Value).ToList();
@@ -821,36 +831,36 @@ namespace SAGM.Controllers
 
             if (ModelState.IsValid && validToChangeWin)
             {
-               
+
                 try
                 {
-                        Customer customer = await _context.Customers.FindAsync(model.CustomerId);
-                       
-                        QuoteStatus quotestatus = _context.QuoteStatus.Find(model.QuoteStatusId);//Estatus 2 es en modificación
+                    Customer customer = await _context.Customers.FindAsync(model.CustomerId);
 
-                        quote.Active = model.Active;
-                        quote.BuyerContactId = model.BuyerContactId;
-                        quote.Comments = model.Comments;
-                        quote.Customer = customer;
-                        quote.CustomerPO = model.CustomerPO;
-                        quote.FinalUserId = model.FinalUserId;
-                        quote.ModifiedBy = User.Identity.Name;
-                        quote.ModifyDate = DateTime.Now;
-                        quote.QuoteDate = model.QuoteDate;
-                        quote.Seller = model.SellerId;
-                        quote.QuoteName = model.QuoteName;
-                        quote.Tax = model.Tax;
-                        quote.Discount = model.Discount;
-                        quote.validUntilDate = model.validUntilDate;
-                        quote.Currency = await _context.Currencies.FindAsync(model.CurrencyId);
-                        quote.CreatedBy = await _userHelper.GetUserAsync(model.CreatedBy);
-                        quote.QuoteStatus = quotestatus;
-                        quote.ExchangeRate = model.ExchangeRate;
-                        _context.Update(quote);
-                        await _context.SaveChangesAsync();
-                        TempData["EditQuoteResult"] = "true";
-                        TempData["EditQuoteMessage"] = "La Cotización fué actualizada";
-                        return Json(new { isValid = true, html = ModalHelper.RenderRazorViewToString(this, "_ViewAllQuotes", _context.Quotes.ToList()) });
+                    QuoteStatus quotestatus = _context.QuoteStatus.Find(model.QuoteStatusId);//Estatus 2 es en modificación
+
+                    quote.Active = model.Active;
+                    quote.BuyerContactId = model.BuyerContactId;
+                    quote.Comments = model.Comments;
+                    quote.Customer = customer;
+                    quote.CustomerPO = model.CustomerPO;
+                    quote.FinalUserId = model.FinalUserId;
+                    quote.ModifiedBy = User.Identity.Name;
+                    quote.ModifyDate = DateTime.Now;
+                    quote.QuoteDate = model.QuoteDate;
+                    quote.Seller = model.SellerId;
+                    quote.QuoteName = model.QuoteName;
+                    quote.Tax = model.Tax;
+                    quote.Discount = model.Discount;
+                    quote.validUntilDate = model.validUntilDate;
+                    quote.Currency = await _context.Currencies.FindAsync(model.CurrencyId);
+                    quote.CreatedBy = await _userHelper.GetUserAsync(model.CreatedBy);
+                    quote.QuoteStatus = quotestatus;
+                    quote.ExchangeRate = model.ExchangeRate;
+                    _context.Update(quote);
+                    await _context.SaveChangesAsync();
+                    TempData["EditQuoteResult"] = "true";
+                    TempData["EditQuoteMessage"] = "La Cotización fué actualizada";
+                    return Json(new { isValid = true, html = ModalHelper.RenderRazorViewToString(this, "_ViewAllQuotes", _context.Quotes.ToList()) });
 
                 }
                 catch (DbUpdateException dbUpdateException)
@@ -929,7 +939,7 @@ namespace SAGM.Controllers
                 {
                     ModelState.AddModelError(string.Empty, "La cotización no tiene partidas para poderla dar por ganada");
                 }
-              
+
 
                 return Json(new { isValid = false, html = ModalHelper.RenderRazorViewToString(this, "EditQuote", editquote) });
             }
@@ -937,8 +947,8 @@ namespace SAGM.Controllers
         }
 
 
-        public  ActionResult AddOrEditComment(int id)
-            {
+        public ActionResult AddOrEditComment(int id)
+        {
             List<QuoteCommentView> comments = _context.QuoteComments
                 .Include(c => c.User)
                 .Where(c => c.Quote.QuoteId == id)
@@ -956,7 +966,7 @@ namespace SAGM.Controllers
 
             ViewBag.QuoteId = id;
             var name = User.Identity.Name;
-            User usr =  _context.Users.Where(u => u.UserName == name).FirstOrDefault();
+            User usr = _context.Users.Where(u => u.UserName == name).FirstOrDefault();
             ViewBag.UserName = name;
             ViewBag.Usuario = usr.FullName;
             //ViewBag.UserName = "@" + name.Substring(0, name.IndexOf("@"));
@@ -1057,7 +1067,7 @@ namespace SAGM.Controllers
             User usr = _context.Users.Where(u => u.UserName == name).FirstOrDefault();
             ViewBag.UserName = name;
             ViewBag.Usuario = usr.FullName;
-    
+
             return View(comments);
 
 
@@ -1065,7 +1075,7 @@ namespace SAGM.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> AddOrEditDetailComment( QuoteDetailCommentView model)
+        public async Task<IActionResult> AddOrEditDetailComment(QuoteDetailCommentView model)
         {
             if (ModelState.IsValid)
             {
@@ -1140,7 +1150,7 @@ namespace SAGM.Controllers
 
             List<SelectListItem> Contacts = new List<SelectListItem>();
 
-            Contacts =  _context.Contacts
+            Contacts = _context.Contacts
                    .Where(c => c.Customer.CustomerId == customerId)
                    .Select(c => new SelectListItem
                    {
@@ -1150,7 +1160,7 @@ namespace SAGM.Controllers
                   .OrderBy(c => c.Text)
                   .ToList();
 
-            return Json(Contacts );
+            return Json(Contacts);
 
         }
 
@@ -1163,16 +1173,16 @@ namespace SAGM.Controllers
 
             QuoteDetail qd = new QuoteDetail();
 
-            qd.Quote = await _context.Quotes.FindAsync(id); 
-                
-               
+            qd.Quote = await _context.Quotes.FindAsync(id);
+
+
             //El Detalle siempre traerá un id de cotización ya que sea nuevo el detalle o actualización la Quote ya existe
             QuoteDetailViewModel qdv = new QuoteDetailViewModel();
-         
+
 
             //Pasamos el listado de unidades para que aparezca en un combo despues asignaremos un default si el 
             //movimiento es un Edit si es un nuevo detalle entonces se quedeará como esta sin asignar el id de la unidad
-        
+
 
             if (detailid == 0)
             {
@@ -1192,7 +1202,7 @@ namespace SAGM.Controllers
             }
             else
             {
-                qd =  await _context.QuoteDetails
+                qd = await _context.QuoteDetails
                            .Include(q => q.Quote)
                            .Include(q => q.Material).ThenInclude(m => m.MaterialType).ThenInclude(m => m.Category)
                            .Include(q => q.Unit)
@@ -1202,37 +1212,39 @@ namespace SAGM.Controllers
                 List<SelectListItem> Category = (List<SelectListItem>)await _comboHelper.GetComboCategoriesAsync();
                 List<SelectListItem> MaterialType = (List<SelectListItem>)await _comboHelper.GetComboMaterialTypesAsync(qd.Material.MaterialType.Category.CategoryId);
                 List<SelectListItem> Material = (List<SelectListItem>)await _comboHelper.GetComboMaterialsAsync(qd.Material.MaterialType.MaterialTypeId);
-   
-                    qdv = new()
-                    {
-                        QuoteId = qd.Quote.QuoteId,
-                        QuoteDetailId = qd.QuoteDetailId,
-                        Category = Category,
-                        CategoryId = qd.Material.MaterialType.Category.CategoryId,
-                        MaterialTypeId = qd.Material.MaterialType.MaterialTypeId,
-                        MaterialType = MaterialType,
-                        MaterialId = qd.Material.MaterialId,
-                        Material = Material,
-                        Quantity = qd.Quantity,
-                        Price = qd.Price,
-                        Unit = Unit,
-                        UnitId = qd.Unit.UnitId,
-                        Description = qd.Description
-                    };
+
+                qdv = new()
+                {
+                    QuoteId = qd.Quote.QuoteId,
+                    QuoteDetailId = qd.QuoteDetailId,
+                    Category = Category,
+                    CategoryId = qd.Material.MaterialType.Category.CategoryId,
+                    MaterialTypeId = qd.Material.MaterialType.MaterialTypeId,
+                    MaterialType = MaterialType,
+                    MaterialId = qd.Material.MaterialId,
+                    Material = Material,
+                    Quantity = qd.Quantity,
+                    Price = qd.Price,
+                    Unit = Unit,
+                    UnitId = qd.Unit.UnitId,
+                    Description = qd.Description
+                };
 
 
-            };
-               
-            return View(qdv);
             }
-        
+            ;
+
+            return View(qdv);
+        }
+
 
         [HttpPost]
         public async Task<IActionResult> AddOrEditDetail(QuoteDetailViewModel model)
         {
             if (ModelState.IsValid)
             {
-                if (model.QuoteDetailId == 0) {
+                if (model.QuoteDetailId == 0)
+                {
                     try
                     {
                         QuoteDetail qd = new QuoteDetail();
@@ -1242,7 +1254,7 @@ namespace SAGM.Controllers
                         qd.Price = model.Price;
                         qd.Quantity = model.Quantity;
                         qd.Unit = await _context.Units.FindAsync(model.UnitId);
-  
+
                         _context.Add(qd);
 
                         Quote q = await _context.Quotes.FindAsync(qd.Quote.QuoteId);
@@ -1265,7 +1277,7 @@ namespace SAGM.Controllers
 
                         TempData["AddOrEditQuoteDetailResult"] = "true";
                         TempData["AddOrEditQuoteDetailMessage"] = "La partida fué creada";
-                        return Json(new { isValid = true, html = ModalHelper.RenderRazorViewToString(this, "_ViewAllQuoteDetails", _context.QuoteDetails.Where(q => q.Quote.QuoteId == model.QuoteId).ToList() )});
+                        return Json(new { isValid = true, html = ModalHelper.RenderRazorViewToString(this, "_ViewAllQuoteDetails", _context.QuoteDetails.Where(q => q.Quote.QuoteId == model.QuoteId).ToList()) });
 
                     }
                     catch (Exception)
@@ -1333,11 +1345,12 @@ namespace SAGM.Controllers
                         return View(model);
 
                     }
-                }    
-               
-               
+                }
+
+
             }
-            else {
+            else
+            {
 
                 {
                     List<SelectListItem> Unit = (List<SelectListItem>)await _comboHelper.GetComboUnitAsync();
@@ -1355,45 +1368,45 @@ namespace SAGM.Controllers
                     return Json(new { isValid = false, html = ModalHelper.RenderRazorViewToString(this, "AddOrEditDetail", model) });
                 }
             }
-            
+
         }
 
         [HttpPost]
         public async Task<IActionResult> CopyDetail(int quoteDetailId)
         {
-         
-                try
-                {
-                    QuoteDetail qd = await _context.QuoteDetails
-                    .Include(q => q.Quote)
-                    .Include(q => q.Unit)
-                    .Include(q => q.Material)
-                    .FirstOrDefaultAsync( q => q.QuoteDetailId == quoteDetailId);
+
+            try
+            {
+                QuoteDetail qd = await _context.QuoteDetails
+                .Include(q => q.Quote)
+                .Include(q => q.Unit)
+                .Include(q => q.Material)
+                .FirstOrDefaultAsync(q => q.QuoteDetailId == quoteDetailId);
 
                 QuoteDetail qdn = new QuoteDetail();
                 qdn.Quote = qd.Quote;
                 qdn.Description = qd.Description;
                 qdn.Quantity = qd.Quantity;
                 qdn.Material = qd.Material;
-                qdn.Price = qd.Price;               
+                qdn.Price = qd.Price;
                 qdn.QuoteDetailComments = qd.QuoteDetailComments;
                 qdn.Unit = qd.Unit;
 
                 _context.Add(qdn);
                 await _context.SaveChangesAsync();
 
-                return Json(new {data = "success", isValid = true });
-                }
-                catch (Exception)
-                {
+                return Json(new { data = "success", isValid = true });
+            }
+            catch (Exception)
+            {
 
-                    return View();
+                return View();
 
-                }
- 
+            }
 
 
-           
+
+
 
         }
 
@@ -1424,12 +1437,13 @@ namespace SAGM.Controllers
 
 
 
-        public async Task< FileResult> PrintReport(int QuoteId) {
+        public async Task<FileResult> PrintReport(int QuoteId)
+        {
 
             Quote quote = await _context.Quotes.FindAsync(QuoteId);
 
             Stream stream = new MemoryStream(await _reportHelper.GenerateQuoteReportPDFAsync(QuoteId));
-            
+
             return File(stream, "application/pdf", $"{quote.QuoteName}{".pdf"}");
         }
 
@@ -1450,7 +1464,7 @@ namespace SAGM.Controllers
         public async Task<IActionResult> DeleteQuoteDetail(QuoteDetail model)
         {
 
-         
+
             try
             {
                 //Borrar archivos
@@ -1458,7 +1472,7 @@ namespace SAGM.Controllers
                 int quoteid = model.Quote.QuoteId;
 
 
-                List<QuoteDetailComment> lqdc = new List<QuoteDetailComment>(); 
+                List<QuoteDetailComment> lqdc = new List<QuoteDetailComment>();
 
                 List<Archive> archives = _context.Archives.Where(a => a.Entity == "QuoteDetail" && a.EntityId == model.QuoteDetailId).ToList();
 
@@ -1473,12 +1487,12 @@ namespace SAGM.Controllers
 
                         throw;
                     }
-                  
+
                     _context.Archives.Remove(item);
                 }
 
                 lqdc = _context.QuoteDetailComments.Where(c => c.QuoteDetail.QuoteDetailId == model.QuoteDetailId).ToList();
-                
+
                 foreach (var comment in lqdc)
                 {
                     _context.Remove(comment);
@@ -1527,9 +1541,9 @@ namespace SAGM.Controllers
             try
             {
 
-                quote.QuoteStatus = await  _context.QuoteStatus.FindAsync(statusid);
+                quote.QuoteStatus = await _context.QuoteStatus.FindAsync(statusid);
                 _context.Update(quote);
-                await _context.SaveChangesAsync();  
+                await _context.SaveChangesAsync();
 
                 return Json(new { isValid = true, html = ModalHelper.RenderRazorViewToString(this, "_ViewAllQuoteDetails", _context.QuoteDetails.Where(q => q.Quote.QuoteId == quote.QuoteId).ToList()) });
 
@@ -1558,7 +1572,7 @@ namespace SAGM.Controllers
                 quote.Discount = discount;
                 _context.Update(quote);
                 await _context.SaveChangesAsync();
-                
+
 
                 return Json(new { isValid = true, html = ModalHelper.RenderRazorViewToString(this, "_ViewAllQuoteDetails", _context.QuoteDetails.Where(q => q.Quote.QuoteId == quote.QuoteId).ToList()) });
 
@@ -1625,7 +1639,7 @@ namespace SAGM.Controllers
                 .Include(q => q.Currency)
                 .FirstOrDefaultAsync(q => q.QuoteId == model.QuoteId);
 
-       
+
 
             //Formamos el nombre
             String quotename = DateTime.Now.ToString("yyyyMMdd"); //Variable formadora de nombre de coti
@@ -1654,7 +1668,7 @@ namespace SAGM.Controllers
                 Consec = Int32.Parse(Lastnumber);
             }
 
-            Consec +=  1;
+            Consec += 1;
 
             strnumber = $"000{Consec}";
 
@@ -1688,7 +1702,8 @@ namespace SAGM.Controllers
             _context.Add(quote);
             await _context.SaveChangesAsync();
 
-            foreach (QuoteDetail oqd in oldquote.QuoteDetails) {
+            foreach (QuoteDetail oqd in oldquote.QuoteDetails)
+            {
                 QuoteDetail qd = new QuoteDetail();
                 qd.Quote = quote;
                 qd.Description = oqd.Description;
@@ -1706,7 +1721,7 @@ namespace SAGM.Controllers
 
                     foreach (Archive arch in archives)
                     {
-                        
+
                         Guid archiveguid = Guid.Empty;
 
                         archiveguid = await _blobHelper.CopyBlobAsync(arch.ArchiveGuid, "archives");
@@ -1719,11 +1734,11 @@ namespace SAGM.Controllers
                         _context.Add(archive);
                         await _context.SaveChangesAsync();
                     }
-                   
+
                 }
-               
+
             }
-            
+
 
             //Si se eligio copiar archivos de cabecera los copiamos a la nueva Cotizacion
 
@@ -1744,7 +1759,7 @@ namespace SAGM.Controllers
                     await _context.SaveChangesAsync();
 
                 }
-                
+
             }
 
             TempData["CopyQuoteResult"] = "true";
@@ -1786,12 +1801,12 @@ namespace SAGM.Controllers
 
             // -------------------------
 
-            WorkOrder LastWO = await _context.WorkOrders.Where(q => q.WorkOrderName.Substring(0, 1) == workordername).OrderBy(w => w.WorkOrderId).LastOrDefaultAsync();//Ultima OT
+            WorkOrder LastWO = await _context.WorkOrders.Where(q => q.WorkOrderName.Substring(0, 11) == workordername).OrderBy(w => w.WorkOrderId).LastOrDefaultAsync();//Ultima OT
 
             if (LastWO != null)
             {
                 Lastnumber = LastWO.WorkOrderName.Substring(12, 3);
-                Consec = Int32.Parse(Lastnumber);
+                Consec = Int32.Parse(Lastnumber) + 1;
             }
             else
             {
@@ -1799,7 +1814,8 @@ namespace SAGM.Controllers
                 Consec = Int32.Parse(Lastnumber);
             }
 
-            Lastnumber += Consec.ToString();
+
+            Lastnumber = Consec.ToString();
 
             strnumber = $"000{Lastnumber}";
 
@@ -1829,23 +1845,24 @@ namespace SAGM.Controllers
             workOrder.WorkOrderName = workordername;
             workOrder.ExchangeRate = quote.ExchangeRate;
             workOrder.WorkOrderStatus = await _context.WorkOrderStatus.FindAsync(1);
-            
+
             _context.Add(workOrder);
             await _context.SaveChangesAsync();
 
-            foreach (QuoteDetail qd in quote.QuoteDetails) 
-            { 
+            foreach (QuoteDetail qd in quote.QuoteDetails)
+            {
                 WorkOrderDetail wod = new WorkOrderDetail();
                 wod.Description = qd.Description;
                 wod.Material = qd.Material;
                 wod.Price = qd.Price;
-                wod.Quantity = qd.Quantity; 
+                wod.Quantity = qd.Quantity;
                 wod.Unit = qd.Unit;
                 wod.WorkOrder = workOrder;
                 _context.Add(wod);
-                await _context.SaveChangesAsync();  
+                await _context.SaveChangesAsync();
 
-            };
+            }
+            ;
 
             quote.QuoteStatus = await _context.QuoteStatus.FindAsync(7);
             await _context.SaveChangesAsync();
@@ -1857,7 +1874,130 @@ namespace SAGM.Controllers
         }
         private bool QuoteExists(int id)
         {
-          return _context.Quotes.Any(e => e.QuoteId == id);
+            return _context.Quotes.Any(e => e.QuoteId == id);
+        }
+
+        public IActionResult FindQuote() { 
+            return View();  
+        }
+
+
+
+        public async Task<JsonResult> GetQuotesByCriteria(String criteria)
+        {
+
+            //Detalles que contienen el criterio
+            List<QuoteDetail> quotedetailswithcriteria = await _context.QuoteDetails
+                    .Include(d => d.Quote)
+                    .Where(d => d.Description.Contains(criteria))
+                    .OrderByDescending(q => q.Quote.QuoteId)
+                    .ToListAsync();
+            List<int> quotesidlist = quotedetailswithcriteria.Select(r => r.Quote.QuoteId).Distinct().ToList();
+
+
+            //Cotizaciones que contienen el criterio
+            List<Quote> quoteswithcriteria = await _context.Quotes
+                 .Where(q => q.Comments.Contains(criteria))
+                 .OrderByDescending(q => q.QuoteId)
+                 .ToListAsync();
+
+            ///Juntamos los id de las cotizaciones que cumplen con el criterio ya sea en comentarios o en detalle para despues traer la lista de cotizaciones sin importar el campo donde se encuentre el criterio
+
+            foreach (Quote q in quoteswithcriteria)
+            {
+                quotesidlist.Add(q.QuoteId);
+            }
+
+
+            //Creamos el listado de las cotizaciones ya seleccionadas
+            List<Quote> quotes = await _context.Quotes
+              .Include(q => q.QuoteDetails)
+              .ThenInclude(d => d.Material)
+              .Include(q => q.Customer)
+              .Include(q => q.QuoteStatus)
+              .Include(q => q.Currency)
+              .Include(q => q.CreatedBy)
+              .Where(q => quotesidlist.Contains(q.QuoteId))
+              .OrderByDescending(q => q.QuoteId)
+              .ToListAsync();
+
+
+            //Obtenemos el listado de todas las cotizaciones que cumplen con el criterio ya sea en comentarios o en detalle
+
+            List<QuoteViewIndexModel> lquotes = new List<QuoteViewIndexModel>();
+
+
+            foreach (Quote q in quotes)
+            {
+                string seller = _userHelper.GetUserAsync(q.Seller).Result.FullName.ToString();
+                Contact buyercontact = await _context.Contacts.FindAsync(q.BuyerContactId);
+                Contact finaluser = await _context.Contacts.FindAsync(q.FinalUserId);
+                int archivesnumber = 0;
+
+
+                //Armamos la lista de detalles
+                List<QuoteDetailViewIndexModel> details = new List<QuoteDetailViewIndexModel>();
+                foreach (QuoteDetail qd in q.QuoteDetails)
+                {
+                    List<Archive> archives = _context.Archives.Where(a => a.Entity == "QuoteDetail" && a.EntityId == qd.QuoteDetailId).ToList();
+                    archivesnumber += archives.Count;
+                    QuoteDetailViewIndexModel qdvim = new QuoteDetailViewIndexModel()
+                    {
+                        Quantity = qd.Quantity,
+                        Material = _context.Materials.FindAsync(qd.Material.MaterialId).Result.MaterialName.ToString(),
+                        Description = qd.Description,
+                        Price = qd.Price
+                    };
+                    details.Add(qdvim);
+
+                }
+
+                //
+
+                List<Archive> qarchives = _context.Archives.Where(a => a.Entity == "Quote" && a.EntityId == q.QuoteId).ToList();
+
+                string archiveschain = "";
+
+                foreach (var item in qarchives)
+                {
+                    archiveschain += item.ArchiveGuid.ToString() + "," + item.ArchiveName + "," + item.ArchiveId + "|";
+                }
+                if (archiveschain != "")
+                {
+                    archiveschain = archiveschain.Substring(0, archiveschain.Length - 1);
+                }
+                ;
+
+                QuoteViewIndexModel aqs = new QuoteViewIndexModel()
+                {
+                    QuoteId = q.QuoteId,
+                    QuoteDate = q.QuoteDate,
+                    Active = q.Active,
+                    BuyerContact = $"{buyercontact.Name} {buyercontact.LastName}",
+                    Comments = q.Comments,
+                    CreatedBy = q.CreatedBy.FullName,
+                    Currency = q.Currency.Curr,
+                    CustomerNickName = q.Customer.CustomerNickName,
+                    CustomerPO = q.CustomerPO,
+                    FinalUser = $"{finaluser.Name} {finaluser.LastName}",
+                    ModifiedBy = q.ModifiedBy,
+                    ModifyDate = q.ModifyDate,
+                    QuoteDetails = details,
+                    QuoteName = q.QuoteName,
+                    Seller = seller,
+                    Tax = q.Tax,
+                    Discount = q.Discount,
+                    QuoteStatusName = q.QuoteStatus.QuoteStatusName,
+                    validUntilDate = q.validUntilDate,
+                    ArchivesNumber = archivesnumber,
+                    ArchivesChain = archiveschain
+
+                };
+                lquotes.Add(aqs);
+            }
+
+            return Json(new { data = lquotes });
+
         }
     }
 }
