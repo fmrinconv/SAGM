@@ -13,10 +13,12 @@ internal class Program
     {
         var builder = WebApplication.CreateBuilder(args);
 
-        //Agregamos estas opciones a la Session para extenderla del default que es 20 minuts a 90 minutos
+        // Agregamos estas opciones a la Session y las leemos desde configuración (appsettings.json)
+        var sessionOptions = builder.Configuration.GetSection("Session");
+        var idleHours = sessionOptions.GetValue<int>("IdleTimeoutHours", 24);
         builder.Services.AddSession(options =>
         {
-            options.IdleTimeout = TimeSpan.FromMinutes(90);
+            options.IdleTimeout = TimeSpan.FromHours(idleHours);
             options.Cookie.HttpOnly = true;
             options.Cookie.IsEssential = true;
         });
@@ -24,10 +26,11 @@ internal class Program
         builder.Services.AddControllersWithViews();
         builder.Services.AddDbContext<SAGMContext>(o =>
         {
-            o.UseSqlServer(builder.Configuration.GetConnectionString("AzureConnection"), sqlServerOptionsAction =>sqlServerOptionsAction.CommandTimeout(300));
+            //o.UseSqlServer(builder.Configuration.GetConnectionString("AzureConnection"), sqlServerOptionsAction =>sqlServerOptionsAction.CommandTimeout(300));
             //o.UseSqlServer(builder.Configuration.GetConnectionString("LocalConnection"));
+            o.UseSqlServer(builder.Configuration.GetConnectionString("LocalConnection"), sqlServerOptionsAction => sqlServerOptionsAction.CommandTimeout(300));
             //o.UseSqlServer(builder.Configuration.GetConnectionString("SomeeConnection"));
-            
+
         });
 
         builder.Services.AddIdentity<User, IdentityRole>(cfg =>
@@ -55,6 +58,14 @@ internal class Program
         {
             options.LoginPath = "/Account/NotAuthorized";
             options.AccessDeniedPath = "/Account/NotAuthorized";
+            // Read auth cookie settings from configuration
+            var authSection = builder.Configuration.GetSection("Auth");
+            var cookieHours = authSection.GetValue<int>("CookieExpireHours", 24);
+            var sliding = authSection.GetValue<bool>("SlidingExpiration", true);
+            options.ExpireTimeSpan = TimeSpan.FromHours(cookieHours);
+            options.SlidingExpiration = sliding;
+            options.Cookie.HttpOnly = true;
+            options.Cookie.IsEssential = true;
         });
 
 
@@ -93,6 +104,10 @@ internal class Program
         app.UseHttpsRedirection();
         app.UseStaticFiles();
         app.UseRouting();
+
+        // Enable session middleware so session IdleTimeout is respected
+        app.UseSession();
+
         app.UseAuthentication();
         app.UseAuthorization();
 
