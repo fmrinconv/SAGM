@@ -908,29 +908,31 @@ namespace SAGM.Controllers
                     String strnumber = "";
                     int Consec = 0;
 
-
-                    workordername = "OT-" + workordername;
+                     workordername = "OT-" + workordername;
 
                     // -------------------------
 
-                    WorkOrder LastWO = await _context.WorkOrders.Where(q => q.WorkOrderName.Substring(0, 1) == workordername).OrderBy(w => w.WorkOrderId).LastOrDefaultAsync();//Ultima cotizacion
+                    WorkOrder LastWO = await _context.WorkOrders.Where(q => q.WorkOrderName.Substring(0, 11) == workordername).OrderBy(w => w.WorkOrderId).LastOrDefaultAsync();//Ultima OT
 
                     if (LastWO != null)
                     {
-                        Lastnumber = LastWO.WorkOrderName.Substring(7, 3);
-                        Consec = Int32.Parse(Lastnumber);
+                        Lastnumber = LastWO.WorkOrderName.Substring(12, 3);
+                        Consec = Int32.Parse(Lastnumber) + 1;
                     }
                     else
                     {
-                        Lastnumber = "000";
+                        Lastnumber = "001";
                         Consec = Int32.Parse(Lastnumber);
                     }
 
-                    Lastnumber += 1;
+
+                    Lastnumber = Consec.ToString();
 
                     strnumber = $"000{Lastnumber}";
 
                     workordername = workordername + "-" + strnumber.Substring(strnumber.Length - 3, 3);
+
+
                     WorkOrder workorder = new WorkOrder();
                     Customer customer = await _context.Customers.FindAsync(model.CustomerId);
                     WorkOrderStatus workorderstatus = _context.WorkOrderStatus.Find(1);//Estatus 1 cread

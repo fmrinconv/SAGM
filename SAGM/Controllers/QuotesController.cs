@@ -1889,7 +1889,7 @@ namespace SAGM.Controllers
             //Detalles que contienen el criterio
             List<QuoteDetail> quotedetailswithcriteria = await _context.QuoteDetails
                     .Include(d => d.Quote)
-                    .Where(d => d.Description.Contains(criteria))
+                    .Where(d => d.Description.Contains(criteria) )
                     .OrderByDescending(q => q.Quote.QuoteId)
                     .ToListAsync();
             List<int> quotesidlist = quotedetailswithcriteria.Select(r => r.Quote.QuoteId).Distinct().ToList();
@@ -1897,7 +1897,7 @@ namespace SAGM.Controllers
 
             //Cotizaciones que contienen el criterio
             List<Quote> quoteswithcriteria = await _context.Quotes
-                 .Where(q => q.Comments.Contains(criteria))
+                 .Where(q => q.Comments.Contains(criteria) || q.Customer.CustomerName.Contains(criteria))
                  .OrderByDescending(q => q.QuoteId)
                  .ToListAsync();
 

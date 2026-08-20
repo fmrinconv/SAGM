@@ -90,6 +90,26 @@
             };
             dataTable = $('#TableWorkOrders').DataTable(
                 {
+                    initComplete: function() {
+                        this.api().columns(4).every(function() {
+                            var column = this;
+                            var select = $('<select style="font-weight: bold;"><option value="" class="form-control" selected style="font-weight:bold;">Clientes *</option></select>')
+                                .appendTo($(column.header()).empty())
+                                .on('change', function() {
+                                    var val = $.fn.dataTable.util.escapeRegex(
+                                        $(this).val()
+                                    );
+                                    $(this).className = this.options[this.selectedIndex].className;
+                                    column
+                                        .search(val ? '^' + val + '$' : '', true, false)
+                                        .draw();
+                                });
+
+                            column.data().unique().sort().each(function(d, j) {
+                                select.append('<option class="opheader2" value="' + d + '">' + d + '</option>')
+                            });
+                        });
+                    },
                     "ajax": {
                         "url": '/WorkOrders/GetWorkOrders?onlyactive=' + $('#activeflag').is(':checked') +'&fini=' + $("#Dateini").val() + '&ffin=' + $("#Datefin").val(),
                         "type": "GET",
